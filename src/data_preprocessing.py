@@ -5,10 +5,11 @@ import gzip
 
 import scanpy as sc
 import episcanpy.api as epi
+import pyfaidx
 
 NAME_DATASET = ['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
 
-def preprocess_data(data_path, name_datasets=NAME_DATASET):
+def preprocess_data(data_path, save_path, name_datasets=NAME_DATASET):
 
     #Load the data + basic filtering
     #----------------------------------------------------------------------------------------------------
@@ -52,7 +53,9 @@ def preprocess_data(data_path, name_datasets=NAME_DATASET):
     cell_types.index = cell_types.index.values.tolist()
     adata.obs['cell_type'] = cell_types.cell_type[adata.obs_names]
 
-    adata.write('tmp.h5ad')
+    #Rename batch number to be name dataset
+    adata.obs.batch.rename_categories(NAME_DATASET)
+    adata.write(save_path)
 
     return adata
 
@@ -68,3 +71,14 @@ def pseudo_bulk(adata, col):
         indicator.values.T @ adata.X,
         var=adata.var,
         obs=pd.DataFrame(index=indicator.columns))
+
+def fetch_sequence(adata, path_genome):
+    
+    genome = pyfaidx.Fasta(path_genome)
+
+    #Remove some chromosome
+    adata = adata[np.logical_or(np.logical_or(adata.obs.chr.str.isnumeric(), adata.obs.chr == 'X'), adata.obs.chr == 'Y')]
+
+    #Fetch sequence on reference genome using location of peaks
+    adata.obs['chr'] = 'chr' + adata.obs['chr']
+    adata.obs['sequence'] = adata.obs.apply(lambda x: (genome[x['chr']][x['start']:x['end']]).seq, axis=1)
