@@ -4,7 +4,6 @@ import anndata
 import gzip
 
 import scanpy as sc
-import episcanpy.api as epi
 import pyfaidx
 
 NAME_DATASET = ['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
