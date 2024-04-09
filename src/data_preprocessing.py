@@ -9,7 +9,7 @@ import pyfaidx
 
 NAME_DATASET = ['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
 
-def preprocess_data(data_path, save_path, name_datasets=NAME_DATASET):
+def preprocess_data(data_path, cell_type_path, save_path, name_datasets=NAME_DATASET):
 
     #Load the data + basic filtering
     #----------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ def preprocess_data(data_path, save_path, name_datasets=NAME_DATASET):
     adata = adata.concatenate(adatasets[1:], join="outer", index_unique='-')
 
     #Add cell type info, remove filtered cells
-    cell_types = pd.read_csv('../data/cell_types.csv', index_col=0)
+    cell_types = pd.read_csv(cell_type_path, index_col=0)
 
     barcodes = cell_types.index.values.tolist()
     mask_barcodes = pd.Series(adata.obs_names.values.tolist()).isin(barcodes)
