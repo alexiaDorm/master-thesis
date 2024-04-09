@@ -1,4 +1,5 @@
 
 /data
 .DS_Store
-src/gene_list
+/models
+/results
