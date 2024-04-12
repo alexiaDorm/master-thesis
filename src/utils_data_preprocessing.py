@@ -3,7 +3,6 @@ import numpy as np
 import gzip
 
 import anndata
-import scanpy as sc
 import pyfaidx
 import pyBigWig
 
