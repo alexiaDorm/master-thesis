@@ -22,7 +22,7 @@ for d in NAME_DATASET:
     barcodes.to_csv('../results/bam_cell_type/' + d + '/' + d + '_cell_types.tsv', header=False, sep='\t')
 
     #Split the bam by cell type
-    ATAC_bam = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/' + d[0:-1] + '_REP' + d[-1] + '_run1/outs/atac_possorted_bam.bam'
+    ATAC_bam = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/' + d[0:-1] + 'REP' + d[-1] + '_run1/outs/atac_possorted_bam.bam'
 
     sinto_command = ('sinto filterbarcodes -p 8 -b ' + ATAC_bam + 
                  ' -c ../results/bam_cell_type/' + d +
