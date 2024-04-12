@@ -43,6 +43,6 @@ for d in NAME_DATASET:
         subprocess.run(samtools_command, shell=True)
 
         bamCoverage_command = ('bamCoverage -p 8 -b ' + f  + 
-                            ' -o ' + f[:-3] + 'bw')
+                            ' -o ' + f[:-3] + 'bw -- binSize 1' )
             
         subprocess.run(bamCoverage_command, shell=True)
