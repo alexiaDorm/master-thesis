@@ -77,6 +77,10 @@ def pseudo_bulk(adata, col):
         var=adata.var,
         obs=pd.DataFrame(index=indicator.columns))
 
+def normalize_bulk(adata):
+    total_reads = adata.X.sum(axis=0)
+    adata.X.div(total_reads, axis=1) * 10000
+
 """ Fetch the sequence on the reference genome at ATAC peaks. """
 def fetch_sequence(adata, path_genome, len_seq = 2114):
     
@@ -86,6 +90,7 @@ def fetch_sequence(adata, path_genome, len_seq = 2114):
     adata.var['middle_peak'] = round((adata.var.end - adata.var.start)/2 + adata.var.start).astype('uint32')
     adata.var['sequence'] = adata.var.apply(lambda x: 
                                             (genome[('chr' + x['chr'])][(x['middle_peak']-len_seq/2):(x['middle_peak']+len_seq/2)]).seq, axis=1)
+    adata.var.sequence = adata.var.sequence.str.upper()
 
 
 def one_hot_encode(seq):
@@ -94,9 +99,6 @@ def one_hot_encode(seq):
     return np.eye(4)[seq2]
 
 def encode_sequence(adata):
-    
-    #Capitalize all sequence
-    adata.var.sequence = adata.var.sequence.str.upper()
     
     #One hot encode the the sequence
     return [one_hot_encode(seq) for seq in adata.var.sequence]
