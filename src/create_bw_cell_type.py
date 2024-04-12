@@ -28,8 +28,6 @@ for d in NAME_DATASET:
                  ' -c ../results/bam_cell_type/' + d +
                  '/' + d + '_cell_types.tsv --outdir ../results/bam_cell_type/' +
                  d + '/')
-    print(sinto_command)
-    break
     
     subprocess.run(sinto_command, shell=True)
 
