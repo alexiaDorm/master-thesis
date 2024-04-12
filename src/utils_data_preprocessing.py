@@ -88,7 +88,7 @@ def fetch_sequence(adata, path_genome, len_seq = 2114):
     #Fetch sequence on reference genome using location of peaks
     adata.var['middle_peak'] = round((adata.var.end - adata.var.start)/2 + adata.var.start).astype('uint32')
     adata.var['sequence'] = adata.var.apply(lambda x: 
-                                            (genome[('chr' + x['chr'])][(x['middle_peak']-len_seq/2):(x['middle_peak']+len_seq/2)]).seq, axis=1)
+                                            (genome[('chr' + x['chr'])][(x['middle_peak']-int(len_seq/2)):(x['middle_peak']+int(len_seq/2))]).seq, axis=1)
     adata.var.sequence = adata.var.sequence.str.upper()
 
 
