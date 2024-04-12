@@ -76,9 +76,9 @@ def pseudo_bulk(adata, col):
         var=adata.var,
         obs=pd.DataFrame(index=indicator.columns))
 
-def normalize_bulk(adata):
-    total_reads = adata.X.sum(axis=0)
-    adata.X.div(total_reads, axis=1) * 10000
+def normalize_bulk(adata, multiply_by=100000):
+    total_reads = adata.X.sum(axis=1)
+    adata.X = (adata.X.T/total_reads * multiply_by).T
 
 """ Fetch the sequence on the reference genome at ATAC peaks. """
 def fetch_sequence(adata, path_genome, len_seq = 2114):
