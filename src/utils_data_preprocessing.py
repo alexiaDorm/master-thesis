@@ -12,11 +12,11 @@ from torch.utils.data import Dataset, DataLoader
 
 NAME_DATASET = ['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
 
-def preprocess_data(data_path, cell_type_path, save_path, name_datasets=NAME_DATASET):
+""" Concatenate all time points into a single anndata. Save it at provided save path. """
+def concat_data(data_path, cell_type_path, save_path, name_datasets=NAME_DATASET):
 
     #Load the data + basic filtering
     #----------------------------------------------------------------------------------------------------
-
     adatasets = []
     for name in name_datasets:
 
@@ -63,9 +63,10 @@ def preprocess_data(data_path, cell_type_path, save_path, name_datasets=NAME_DAT
 
     return adata
 
+""" Create pseudo-bulk ATAC data. Pseudo bulk are defined by groupping the data by time point and cell types.  """
 def pseudo_bulk(adata, col):
     
-    #Agggregate the ATAC countmatrix by cell type -> pseudo bulk
+    #Agggregate the ATAC count matrix by cell type -> pseudo bulk
     adata.strings_to_categoricals()
     assert pd.api.types.is_categorical_dtype(adata.obs[col])
 
@@ -76,27 +77,16 @@ def pseudo_bulk(adata, col):
         var=adata.var,
         obs=pd.DataFrame(index=indicator.columns))
 
-def fetch_sequence(adata, path_genome, bp_around=0):
+""" Fetch the sequence on the reference genome at ATAC peaks. """
+def fetch_sequence(adata, path_genome, len_seq = 2114):
     
     genome = pyfaidx.Fasta(path_genome)
 
-    adata.var['chr'] = adata.var_names.to_series().str.split(':', n=1).str.get(0)
-    adata.var['start'] = adata.var_names.to_series().apply(lambda st: st[st.find(":")+1:st.find("-")]).astype('int')
-    adata.var['end'] = adata.var_names.to_series().str.split('-', n=1).str.get(1).astype('int')
-
-    #Remove scaffold chromosomes
-    adata = adata[:,np.logical_or(np.logical_or(adata.var.chr.str.isnumeric(), adata.var.chr == 'X'), adata.var.chr == 'Y')]
-
     #Fetch sequence on reference genome using location of peaks
-    adata.var.chr = 'chr' + adata.var.chr
-    
-    adata.var['region_start'] = adata.var.start - bp_around
-    adata.var.loc[adata.var.region_start < 0,'region_start'] = 0
-    adata.var['region_end'] = adata.var.end + bp_around
-    
-    adata.var['sequence'] = adata.var.apply(lambda x: (genome[x['chr']][x['region_start']:x['region_end']]).seq, axis=1)
+    adata.var['middle_peak'] = round((adata.var.end - adata.var.start)/2 + adata.var.start).astype('uint32')
+    adata.var['sequence'] = adata.var.apply(lambda x: 
+                                            (genome[('chr' + x['chr'])][(x['middle_peak']-len_seq/2):(x['middle_peak']+len_seq/2)]).seq, axis=1)
 
-    return adata
 
 def one_hot_encode(seq):
     mapping = dict(zip("ACGT", range(4)))    
@@ -111,53 +101,68 @@ def encode_sequence(adata):
     #One hot encode the the sequence
     return [one_hot_encode(seq) for seq in adata.var.sequence]
 
-def get_continous_track(peak_metadata):
-
+def get_continous_track(peak_metadata, window_size=0):
+    
+    ATAC_tracks = []
     for name, group in peak_metadata.groupby(['cell_type', 'dataset']):
-        print(name)
-        bw_file = '../results/bam_cell_type/' + name[0]
-        
-        bw = pyBigWig.open('../results/bam_cell_type/D8_1/Somite.bw')
-        bw.values("10", 100004794, 100005512)
+        bw_file = '../results/bam_cell_type/' + name[1] + '/' + name[0] + '.bw'
+        bw = pyBigWig.open(bw_file)
 
+        ATAC_track = group.apply(lambda x: bw.values(x.chr, x.start - window_size, x.end + window_size), axis=1)
+        ATAC_track.index = group.peakID
+        ATAC_tracks.append(ATAC_track)
+    
+    return pd.concat(ATAC_tracks)
+
+""" Create a sequence ATAC matrix. For each sequence extracts ATAC signal (track or discrete) at pseudo bulk level (cell_type + time point) """
+def get_sequence_ATAC_dicrete(adata):
+    
+    #Format matrix
+    sequence_ATAC = pd.DataFrame(anndata.X, index = anndata.obs_names, 
+                            columns = anndata.var_names)
+
+    sequence_ATAC = sequence_ATAC.transpose()
+    sequence_ATAC["peakID"] = sequence_ATAC.index
+
+    #wide_to_long need same name of columns name 
+    batch_dict = dict(zip(sequence_ATAC.columns.values, ['batch' + str(x) for x in np.arange(len(sequence_ATAC.columns.values))]))
+    convert_back = dict(zip(np.arange(len(sequence_ATAC.columns.values)), sequence_ATAC.columns.values))
+    sequence_ATAC = sequence_ATAC.rename(columns=batch_dict)
+
+    sequence_ATAC = pd.wide_to_long(sequence_ATAC, stubnames='batch', i='peakID', j='ATAC')
+
+    sequence_ATAC = sequence_ATAC.reset_index()
+    sequence_ATAC.ATAC = [convert_back[x] for x in sequence_ATAC.ATAC]
+
+    sequence_ATAC['cell_type'] = [x.split('D')[0] for x in sequence_ATAC.ATAC]
+    sequence_ATAC['dataset'] = ['D' + x.split('D')[1] for x in sequence_ATAC.ATAC]
+
+    sequence_ATAC = sequence_ATAC.drop(columns=['ATAC'])
+    sequence_ATAC = sequence_ATAC.rename(columns={'batch':'ATAC'})
+
+    #Add sequence for each peak
+    ...
+
+    return sequence_ATAC
 
 
 
 class SequenceDataset(Dataset):
-    """Genomic sequence pytorch dataset with discrete ATAC signal"""
+    """Genomic sequence pytorch dataset with ATAC signal"""
 
-    def __init__(self, h5ad_file, path_ref_genome):
+    def __init__(self, h5ad_file, discrete = True):
         """
         Arguments:
-            h5ad_file (string): Path to the ATAC Anndata object 
-            path_ref_genome (string): Path to the reference genome used to fetch sequence
+            h5ad_file (string): Path to the ATAC Anndata object
+            discrete (bool): Whether to get ATAC signal as dicrete or continous values 
         """
         self.ATAC_count_matrix = anndata.read_h5ad(h5ad_file)
-        self.path_ref_genome = path_ref_genome
 
-        #Create pseudo bulk  by cell types + time point
-        self.ATAC_count_matrix.obs['cell_type_batch'] = self.ATAC_count_matrix.obs.cell_type.astype('str') + self.ATAC_count_matrix.obs.batch.astype('str')
-        self.ATAC_count_matrix = pseudo_bulk(self.ATAC_count_matrix,'cell_type_batch')
-
-        #Normalize the aggregated count matrix
-
-
-        #Get sequence for each of the peaks in count matrix and one-hot encode it
-        self.ATAC_count_matrix = fetch_sequence(self.ATAC_count_matrix, path_genome=self.path_ref_genome)
-        #self.ATAC_count_matrix.var.encoded_seq = encode_sequence(self.ATAC_count_matrix)
-
-        #Each data point is peak with time, cell type, and aggregated ATAC signal
-        self.sequence_ATAC = pd.DataFrame(self.ATAC_count_matrix.X, index=self.ATAC_count_matrix.obs_names, 
-                            columns=self.ATAC_count_matrix.var_names)
-
-        self.sequence_ATAC = self.sequence_ATAC.transpose()
-
-        #Change cell type + time id so that we can use pandas wide_to_long function
-        batch_dict = dict(zip(self.sequence_ATAC.columns.values, ['batch' + str(x) for x in np.arange(len(self.sequence_ATAC.columns.values))]))
-        convert_back = dict(zip(np.arange(len(self.sequence_ATAC.columns.values)), self.sequence_ATAC.columns.values))
-
-        self.sequence_ATAC = self.sequence_ATAC.rename(columns=batch_dict)
-        self.sequence_ATAC["peakID"] = self.sequence_ATAC.index
+        if discrete:
+            self.sequence_ATAC = get_sequence_ATAC_dicrete(self.ATAC_count_matrix)
+        else:
+            self.sequence_ATAC = get_sequence_ATAC_dicrete(self.ATAC_count_matrix)
+            #ADD CONTINOUS SIGNAL HERE
 
         self.sequence_ATAC = pd.wide_to_long(self.sequence_ATAC, stubnames='batch', i='peakID', j='ATAC')
 
@@ -171,6 +176,9 @@ class SequenceDataset(Dataset):
         self.sequence_ATAC = self.sequence_ATAC.rename(columns={'batch':'ATAC'})
 
         #Add sequence for each peak
+
+
+        
 
     def __len__(self):
         return len(self.sequence_ATAC.shape[0])

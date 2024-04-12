@@ -5,11 +5,9 @@ import os
 
 from data_preprocessing import preprocess_data
 
-#NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
-NAME_DATASET = ['D20_1']
+NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
 
 #Load concatenated data
-#adata = preprocess_data('../data/initial_10x_outputs/filtered_features/', '../results/cell_types.csv','../results/concat.h5ad')
 adata = anndata.read_h5ad('../results/concat.h5ad')
 
 for d in NAME_DATASET:
@@ -26,12 +24,13 @@ for d in NAME_DATASET:
     barcodes.to_csv('../results/bam_cell_type/' + d + '/' + d + '_cell_types.tsv', header=False, sep='\t')
 
     #Split the bam by cell type
+    ATAC_bam = '../../..'
     sinto_command = ('sinto filterbarcodes -p 8 -b ../data/initial_10x_outputs/atac_peaks/' + 
                  d +'_ATAC.bam -c ../results/bam_cell_type/' + d +
                  '/' + d + '_cell_types.tsv --outdir ../results/bam_cell_type/' +
                  d + '/')
     
-    #subprocess.run(sinto_command, shell=True)
+    subprocess.run(sinto_command, shell=True)
 
     #Create ATAC tracks using splitted files
     splitted_files = glob.glob('../results/bam_cell_type/' + d +'/*.bam')
