@@ -10,7 +10,7 @@ for d in NAME_DATASET:
     splitted_files = glob.glob('../results/bam_cell_type/' + d +'/*.bam')
     
     for f in splitted_files:
-        samtools_command = "!samtools depth -a f  |  awk '{sum+=$3} END { print 'Average = ',sum/NR}'"
+        samtools_command = "samtools depth -a f  |  awk '{sum+=$3} END { print 'Average = ',sum/NR}'"
         
         print(f)
         subprocess.run(samtools_command, shell=True)
