@@ -119,6 +119,10 @@ def get_continous_track(peak_metadata, window_size=0):
     
     return pd.concat(ATAC_tracks)
 
+def compute_GC_content(seq):
+
+    return [sum(x.count(n) for n in ("G", "C"))/len(x) for x in seq]
+
 """ Create a sequence ATAC matrix. For each sequence extracts ATAC signal (track or discrete) at pseudo bulk level (cell_type + time point) """
 def get_sequence_ATAC_dicrete(adata):
     

@@ -1,6 +1,8 @@
 import os
+import pickle 
 import anndata
 import numpy as np
+import pandas as pd
 
 from utils_data_preprocessing import concat_data, pseudo_bulk, normalize_bulk, fetch_sequence, encode_sequence
 
@@ -22,6 +24,9 @@ adata = pseudo_bulk(adata=adata,col='cell_type_batch')
 #Normalize the aggregated count matrix
 adata.X = normalize_bulk(adata)
 
+#Split the object, when all at once does not save
+#adata = adata[:,1000001:1499999].copy()
+
 #Get sequence for each of the peaks in count matrix and one-hot encode it
 #--------------------------------------------
 #Get chromosomal location for each peak
@@ -36,7 +41,11 @@ adata = adata[:,np.logical_or(np.logical_or(adata.var.chr.str.isnumeric(), adata
 adata.var['sequence'] = fetch_sequence(adata, path_genome='../data/hg38.fa')
 adata = adata[:, np.logical_not(adata.var.sequence.str.contains("N"))]
 
-adata.var['encoded_seq'] = encode_sequence(adata)
+encoded_sequences = encode_sequence(adata)
+encoded_sequences = pd.Series(encoded_sequences, index=adata.var_names)
 
-adata.write('../results/processed_data.h5ad')
+with open('../results/encoded_seq.pkl', 'wb') as file:
+    pickle.dump(encoded_sequences, file)
+
+adata.write('../results/pre_processed_3.h5ad')
 
