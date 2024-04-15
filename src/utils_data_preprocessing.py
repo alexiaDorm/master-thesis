@@ -78,7 +78,9 @@ def pseudo_bulk(adata, col):
 
 def normalize_bulk(adata, multiply_by=100000):
     total_reads = adata.X.sum(axis=1)
-    adata.X = (adata.X.T/total_reads * multiply_by).T
+    normalized = (adata.X.T/total_reads * multiply_by).T
+
+    return normalized
 
 """ Fetch the sequence on the reference genome at ATAC peaks. """
 def fetch_sequence(adata, path_genome, len_seq = 2114):
@@ -87,9 +89,11 @@ def fetch_sequence(adata, path_genome, len_seq = 2114):
 
     #Fetch sequence on reference genome using location of peaks
     adata.var['middle_peak'] = round((adata.var.end - adata.var.start)/2 + adata.var.start).astype('uint32')
-    adata.var['sequence'] = adata.var.apply(lambda x: 
+    sequences = adata.var.apply(lambda x: 
                                             (genome[('chr' + x['chr'])][(x['middle_peak']-int(len_seq/2)):(x['middle_peak']+int(len_seq/2))]).seq, axis=1)
-    adata.var.sequence = adata.var.sequence.str.upper()
+    sequences = sequences.str.upper()
+
+    return sequences
 
 
 def one_hot_encode(seq):

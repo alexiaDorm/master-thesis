@@ -20,7 +20,7 @@ adata.obs['cell_type_batch'] = adata.obs.cell_type.astype('str') + adata.obs.bat
 adata = pseudo_bulk(adata=adata,col='cell_type_batch')
 
 #Normalize the aggregated count matrix
-normalize_bulk(adata)
+adata.X = normalize_bulk(adata)
 
 #Get sequence for each of the peaks in count matrix and one-hot encode it
 #--------------------------------------------
@@ -33,7 +33,7 @@ adata.var['end'] = adata.var_names.to_series().str.split('-', n=1).str.get(1).as
 adata = adata[:,np.logical_or(np.logical_or(adata.var.chr.str.isnumeric(), adata.var.chr == 'X'), adata.var.chr == 'Y')]
 
 #Fetch sequence and remove sequences with N nucleotides
-fetch_sequence(adata, path_genome='../data/hg38.fa')
+adata.var['sequence'] = fetch_sequence(adata, path_genome='../data/hg38.fa')
 adata = adata[:, np.logical_not(adata.var.sequence.str.contains("N"))]
 
 adata.var['encoded_seq'] = encode_sequence(adata)
