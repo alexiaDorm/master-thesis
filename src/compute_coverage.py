@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 import itertools
+import os
 
 NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
 chrom = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y']
@@ -40,6 +41,9 @@ for d in NAME_DATASET:
         ax = fig.add_subplot(5, 5, i+2)
         ax.hist(all_cov, bins=50)
         ax.set_title('all chromosomes')
+
+        if not os.path.exists('../results/coverage/' + d):
+            os.makedirs('../results/coverage/' + d)
 
         fig.savefig("../results/coverage/" + f.removeprefix("../results/bam_cell_type/").removesuffix(".bw") + "_cov.pdf")
  
