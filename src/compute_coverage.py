@@ -32,12 +32,12 @@ for d in NAME_DATASET:
             coverage = [compute_cov(i*10000, bw) for i in range(0,math.floor(bw.chroms(c)/10000))]
             all_cov.append(coverage)
 
-            ax = fig.add_subplot(6, 4, i+1)
+            ax = fig.add_subplot(5, 5, i+1)
             ax.hist(coverage, bins=50)
             ax.set_title(('chr ' + c))
 
         all_cov = list(itertools.chain(*all_cov))
-        ax = fig.add_subplot(6, 4, i+2)
+        ax = fig.add_subplot(5, 5, i+2)
         ax.hist(all_cov, bins=50)
         ax.set_title('all chromosomes')
 
