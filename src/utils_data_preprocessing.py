@@ -106,24 +106,20 @@ def encode_sequence(adata):
     #One hot encode the the sequence
     return [one_hot_encode(seq) for seq in adata.var.sequence]
 
-def get_continous_track(peak_metadata, window_size=0):
-    
-    ATAC_tracks = []
-    for name, group in peak_metadata.groupby(['cell_type', 'dataset']):
-        bw_file = '../results/bam_cell_type/' + name[1] + '/' + name[0] + '.bw'
-        bw = pyBigWig.open(bw_file)
+def get_continuous_ATAC(bw, seq_loc, seq_len=1000, window_size=200):
+    bp_around = int(window_size/2 + seq_len/2)
+    val = bw.values(seq_loc.chr, seq_loc.middle - bp_around, 
+                    seq_loc.middle + bp_around)
+    ATAC = [sum(val[i:(i+window_size+1)]) for i in range(0,seq_len+1)]
 
-        ATAC_track = group.apply(lambda x: bw.values(x.chr, x.start - window_size, x.end + window_size), axis=1)
-        ATAC_track.index = group.peakID
-        ATAC_tracks.append(ATAC_track)
-    
-    return pd.concat(ATAC_tracks)
+    return ATAC
 
 def compute_GC_content(seq):
 
     return [sum(x.count(n) for n in ("G", "C"))/len(x) for x in seq]
 
-""" Create a sequence ATAC matrix. For each sequence extracts ATAC signal (track or discrete) at pseudo bulk level (cell_type + time point) """
+
+""" Create a sequence ATAC matrix. For each sequence extracts ATAC signal (discrete) at pseudo bulk level (cell_type + time point) """
 def get_sequence_ATAC_dicrete(adata):
     
     #Format matrix
