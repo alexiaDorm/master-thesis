@@ -7,7 +7,7 @@ import pyfaidx
 
 from utils_data_preprocessing import concat_data, pseudo_bulk, compute_GC_content, fetch_sequence, encode_sequence
 
-#Concatenate all dataset into single anndata
+""" #Concatenate all dataset into single anndata
 #--------------------------------------------
 if (not os.path.isfile('../results/concat.h5ad')):
     adata = concat_data('../data/initial_10x_outputs/filtered_features', 
@@ -46,7 +46,7 @@ adata = adata[:, np.logical_not(adata.var.sequence.str.contains("N"))]
 with open('../results/peaks_location.pkl', 'wb') as file:
     pickle.dump(adata.var[['chr','start','end', 'sequence']], file)
 
-del adata
+del adata """
 
 #Get matched GC content background sequence
 #--------------------------------------------
@@ -65,7 +65,7 @@ size_chrom = size_chrom.loc[['chr' + c for c in np.unique(peaks.chr)]]
 
 #Generate random start location on chromosome
 p_chrom = (size_chrom/np.sum(size_chrom)).iloc[:,0].tolist()
-rand_chr = np.random.choice(size_chrom.index, p=p_chrom, size=peaks.shape[0]*5)
+rand_chr = np.random.choice(size_chrom.index, p=p_chrom, size=peaks.shape[0])
 rand_start = [np.random.randint(low=1, high=size_chrom.loc[x]-len_seq) for x in rand_chr]
 rand_start = [int(x) for x in rand_start]
 
