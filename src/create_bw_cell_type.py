@@ -4,6 +4,7 @@ import glob
 import os 
 
 NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
+NAME_DATASET =['D22_1', 'D22_2']
 
 #Load concatenated data
 adata = anndata.read_h5ad('../results/concat.h5ad')
@@ -40,7 +41,7 @@ for d in NAME_DATASET:
         samtools_command = ('samtools index ' + f + 
                             ' ' + f + '.bai')
             
-        #subprocess.run(samtools_command, shell=True)
+        subprocess.run(samtools_command, shell=True)
 
         bamCoverage_command = ('bamCoverage -p 8 -b ' + f  + 
                             ' -o ' + f[:-3] + 'bw --binSize 1' )
