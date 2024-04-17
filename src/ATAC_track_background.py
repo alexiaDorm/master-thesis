@@ -8,17 +8,21 @@ import pandas as pd
 from utils_data_preprocessing import get_continuous_ATAC_background
 
 NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
+NAME_DATASET =['D8_1']
 
 with open('../results/match_GC.pkl', 'rb') as file:
     background = pickle.load(file)
 
 for d in NAME_DATASET:
 
+    total_reads = pd.read_csv('../results/bam_cell_type/' + d + '/total_reads.csv', header=None, index_col=[0])
+    
     bw_files = glob.glob('../results/bam_cell_type/' + d +'/*.bw')
     for f in bw_files:
         bw = pyBigWig.open(f)
-    
-        ATAC = background.apply(lambda x: get_continuous_ATAC_background(bw, x), axis=1)
+
+        tot = int(total_reads.loc[f.removeprefix('../results/bam_cell_type/').removesuffix('.bw')].values[0][2:-3])
+        ATAC = background.apply(lambda x: get_continuous_ATAC_background(bw, x, tot), axis=1)
 
         if not os.path.exists('../results/background/' + d):
             os.makedirs('../results/background/' + d)

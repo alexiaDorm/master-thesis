@@ -1,3 +1,12 @@
+import os
+import pickle 
+import anndata
+import numpy as np
+import pandas as pd
+import pyfaidx
+
+from utils_data_preprocessing import concat_data, pseudo_bulk, compute_GC_content, fetch_sequence, encode_sequence
+
 #Get matched GC content background sequence
 #--------------------------------------------
 with open('../results/peaks_location.pkl', 'rb') as file:
