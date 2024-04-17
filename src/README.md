@@ -16,9 +16,11 @@ get_sequence_peaks.py: Fetch genomic sequence for peaks
 GC_match_background.py: Create background sequences GC-matched to peaks and fetch their sequences
 
 ATAC_track_peaks.py: Fetch continuous ATAC tracks for each pseudo-bulk and peak 
+
 ATAC_track_background.py: Fetch continuous ATAC tracks for each pseudo_bulk and background regions
 
 model.py: Pytorch bias and final model class and training loop
+
 datasets.py: Pytorch Dataset/Dataloader class 
 
 Description data processing pipeline
