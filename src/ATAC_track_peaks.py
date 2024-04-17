@@ -5,7 +5,7 @@ import pyBigWig
 import os
 import pandas as pd
 
-from utils_data_preprocessing import get_continuous_ATAC
+from utils_data_preprocessing import get_continuous_ATAC_peaks
 
 NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
 
@@ -20,7 +20,7 @@ for d in NAME_DATASET:
     for f in bw_files:
         bw = pyBigWig.open(f)
     
-        ATAC = peaks.apply(lambda x: get_continuous_ATAC(bw, x), axis=1)
+        ATAC = peaks.apply(lambda x: get_continuous_ATAC_peaks(bw, x), axis=1)
 
         if not os.path.exists('../results/ATAC/' + d):
             os.makedirs('../results/ATAC/' + d)
