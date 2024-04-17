@@ -14,7 +14,7 @@ for d in NAME_DATASET:
         samtools_command = 'samtools view -c ' + f
         tot = subprocess.check_output(samtools_command, shell=True)
         
-        tot.append(total_reads)
+        total_reads.append(tot)
         names.append(f.removeprefix('../results/bam_cell_type/').removesuffix('.bam'))
 
     total_reads = pd.DataFrame({'batch': names, 'total': total_reads})
