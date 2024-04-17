@@ -5,22 +5,22 @@ import numpy as np
 import pandas as pd
 import pyfaidx
 
-from utils_data_preprocessing import concat_data, pseudo_bulk, compute_GC_content, fetch_sequence, encode_sequence
+from utils_data_preprocessing import compute_GC_content
+
+len_seq = 2114
+path_genome = '../data/hg38.fa' 
 
 #Get matched GC content background sequence
 #--------------------------------------------
-with open('../results/peaks_location.pkl', 'rb') as file:
+with open('../results/peaks_seq.pkl', 'rb') as file:
     peaks = pickle.load(file)
 
-peaks = peaks.sample(n=20000, random_state=1)
+peaks = peaks[:10000]
 
 #Compute GC content
 peaks['GC_cont'] = compute_GC_content(peaks.sequence)
 
-len_seq = 2114
-path_genome = '../data/hg38.fa'
-
-#Get size of each chromosome, so that truly random
+#Get size of each chromosome, to compute probability of selecting given chromosome, so that truly random
 size_chrom = pd.read_csv('../data/size_genome.txt', sep='\t', header=None, index_col=0)
 size_chrom = size_chrom.loc[['chr' + c for c in np.unique(peaks.chr)]]
 

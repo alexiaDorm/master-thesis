@@ -76,21 +76,15 @@ def pseudo_bulk(adata, col):
         var=adata.var,
         obs=pd.DataFrame(index=indicator.columns))
 
-def normalize_bulk(adata, multiply_by=100000):
-    total_reads = adata.X.sum(axis=1)
-    normalized = (adata.X.T/total_reads * multiply_by).T
-
-    return normalized
-
 """ Fetch the sequence on the reference genome at ATAC peaks. """
-def fetch_sequence(adata, path_genome, len_seq = 2114):
+def fetch_sequence(peaks, path_genome, len_seq = 2114):
     
     genome = pyfaidx.Fasta(path_genome)
 
     #Fetch sequence on reference genome using location of peaks
-    adata.var['middle_peak'] = round((adata.var.end - adata.var.start)/2 + adata.var.start).astype('uint32')
-    sequences = adata.var.apply(lambda x: 
-                                            (genome[('chr' + x['chr'])][(x['middle_peak']-int(len_seq/2)):(x['middle_peak']+int(len_seq/2))]).seq, axis=1)
+    peaks['middle_peak'] = round((peaks.end - peaks.start)/2 + peaks.start).astype('uint32')
+    sequences = peaks.apply(lambda x: 
+                            (genome[('chr' + x['chr'])][(x['middle_peak']-int(len_seq/2)):(x['middle_peak']+int(len_seq/2))]).seq, axis=1)
     sequences = sequences.str.upper()
 
     return sequences
@@ -100,11 +94,6 @@ def one_hot_encode(seq):
     mapping = dict(zip("ACGT", range(4)))    
     seq2 = [mapping[i] for i in seq]
     return np.eye(4)[seq2]
-
-def encode_sequence(adata):
-    
-    #One hot encode the the sequence
-    return [one_hot_encode(seq) for seq in adata.var.sequence]
 
 def encode_sequence(sequences):
     
@@ -164,50 +153,3 @@ def get_sequence_ATAC_dicrete(adata):
     ...
 
     return sequence_ATAC
-
-
-
-class SequenceDataset(Dataset):
-    """Genomic sequence pytorch dataset with ATAC signal"""
-
-    def __init__(self, h5ad_file, discrete = True):
-        """
-        Arguments:
-            h5ad_file (string): Path to the ATAC Anndata object
-            discrete (bool): Whether to get ATAC signal as dicrete or continous values 
-        """
-        self.ATAC_count_matrix = anndata.read_h5ad(h5ad_file)
-
-        if discrete:
-            self.sequence_ATAC = get_sequence_ATAC_dicrete(self.ATAC_count_matrix)
-        else:
-            self.sequence_ATAC = get_sequence_ATAC_dicrete(self.ATAC_count_matrix)
-            #ADD CONTINOUS SIGNAL HERE
-
-        self.sequence_ATAC = pd.wide_to_long(self.sequence_ATAC, stubnames='batch', i='peakID', j='ATAC')
-
-        self.sequence_ATAC = self.sequence_ATAC.reset_index()
-        self.sequence_ATAC.ATAC = [convert_back[x] for x in self.sequence_ATAC.ATAC]
-
-        self.sequence_ATAC['cell_type'] = [x.split('D')[0] for x in self.sequence_ATAC.ATAC]
-        self.sequence_ATAC['dataset'] = ['D' + x.split('D')[1] for x in self.sequence_ATAC.ATAC]
-
-        self.sequence_ATAC = self.sequence_ATAC.drop(columns=['ATAC'])
-        self.sequence_ATAC = self.sequence_ATAC.rename(columns={'batch':'ATAC'})
-
-        #Add sequence for each peak
-
-
-        
-
-    def __len__(self):
-        return len(self.sequence_ATAC.shape[0])
-
-    def __getitem__(self, idx):
-
-        return self.sequence_ATAC[idx]
-
-
-
-
-    

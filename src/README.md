@@ -11,6 +11,8 @@ create_total_reads.py: Compute total of reads per pseudo-bulk for normalization
 
 compute_coverage.py: Plot coverage in 10000 bins distribution by chromosomes
 
+create_peak_set.py: Take all called peaks in datasets and merge overlapping peaks
+
 get_sequence_peaks.py: Fetch genomic sequence for peaks
 
 GC_match_background.py: Create background sequences GC-matched to peaks and fetch their sequences
@@ -27,10 +29,17 @@ Description data processing pipeline
 --------------------------------------------------------------
 
 1. Define cell types using gene expression data
+
 2. Create BigWigs files of ATAC signal for each pseudo-bulk
+
 3. Compute the total number of reads per pseudo-bulk for normalization purpose
 4. Compute coverage by pseudo bulk to determine for which one we have sufficient cells
-5. Get the sequences for each peaks
-6. Sample background regions from genome with same GC content distribution as peaks
-7. Get the sequences of the background regions
-8. Get ATAC continuous track using sliding window for peaks and background regions
+
+5. Create common peaks by merging all overlapping peaks 
+
+6. Get the sequences for each peaks
+
+7. Sample background regions from genome with same GC content distribution as peaks
+8. Get the sequences of the background regions
+
+9. Get ATAC continuous track using sliding window for peaks and background regions
