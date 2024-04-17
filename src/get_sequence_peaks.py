@@ -15,7 +15,7 @@ peaks['peakID'] = peaks.chr.astype(str) + ":" + peaks.start.astype(str) + "-" + 
 peaks = peaks.set_index('peakID')
 
 #Fetch sequence and remove sequences with N nucleotides
-peaks['sequence'] = fetch_sequence(peaks, path_genome='path_genome', len_seq=len_seq)
+peaks['sequence'] = fetch_sequence(peaks, path_genome=path_genome, len_seq=len_seq)
 peaks = peaks[np.logical_not(peaks.sequence.str.contains("N"))]
 
 with open('../results/peaks_seq.pkl', 'wb') as file:
