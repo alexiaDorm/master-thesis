@@ -8,13 +8,11 @@ import pandas as pd
 from utils_data_preprocessing import get_continuous_ATAC_peaks
 
 NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
-NAME_DATASET =['D8_1']
 
-with open('../results/peaks_location.pkl', 'rb') as file:
+with open('../results/peaks_seq.pkl', 'rb') as file:
     peaks = pickle.load(file)
 
 peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('uint32')
-#peaks = peaks.sample(n=20000, random_state=1)
 
 for d in NAME_DATASET:
 
