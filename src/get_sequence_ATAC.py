@@ -7,7 +7,7 @@ import pyfaidx
 
 from utils_data_preprocessing import concat_data, pseudo_bulk, compute_GC_content, fetch_sequence, encode_sequence
 
-""" #Concatenate all dataset into single anndata
+#Concatenate all dataset into single anndata
 #--------------------------------------------
 if (not os.path.isfile('../results/concat.h5ad')):
     adata = concat_data('../data/initial_10x_outputs/filtered_features', 
@@ -21,14 +21,12 @@ else:
 adata.obs['cell_type_batch'] = adata.obs.cell_type.astype('str') + adata.obs.batch.astype('str')
 adata = pseudo_bulk(adata=adata,col='cell_type_batch')
 
-#adata = adata[:,:500000].copy()
-
 #Get sequence for each of the peaks in count matrix and one-hot encode it
 #--------------------------------------------
 #Get chromosomal location for each peak
-adata.var['chr'] = adata.var_names.to_series().str.split(':', n=1).str.get(0)
-adata.var['start'] = adata.var_names.to_series().apply(lambda st: st[st.find(":")+1:st.find("-")]).astype('int')
-adata.var['end'] = adata.var_names.to_series().str.split('-', n=1).str.get(1).astype('int')
+adata.var['chr'] = adata.var_names.to_series().str.split(':', n=1).str.get(0).astype("category")
+adata.var['start'] = adata.var_names.to_series().apply(lambda st: st[st.find(":")+1:st.find("-")]).astype('uint32')
+adata.var['end'] = adata.var_names.to_series().str.split('-', n=1).str.get(1).astype('uint32')
 
 #Remove scaffold chromosomes
 adata = adata[:,np.logical_or(np.logical_or(adata.var.chr.str.isnumeric(), adata.var.chr == 'X'), adata.var.chr == 'Y')]
@@ -37,21 +35,17 @@ adata = adata[:,np.logical_or(np.logical_or(adata.var.chr.str.isnumeric(), adata
 adata.var['sequence'] = fetch_sequence(adata, path_genome='../data/hg38.fa')
 adata = adata[:, np.logical_not(adata.var.sequence.str.contains("N"))]
 
-#encoded_sequences = encode_sequence(adata)
-#encoded_sequences = pd.Series(encoded_sequences, index=adata.var_names)
-
-#with open('../results/encoded_seq_ATAC.pkl', 'wb') as file:
-    #pickle.dump(encoded_sequences, file)
-
 with open('../results/peaks_location.pkl', 'wb') as file:
     pickle.dump(adata.var[['chr','start','end', 'sequence']], file)
 
-del adata """
+del adata
 
 #Get matched GC content background sequence
 #--------------------------------------------
 with open('../results/peaks_location.pkl', 'rb') as file:
     peaks = pickle.load(file)
+
+peaks = peaks.sample(n=20000, random_state=1)
 
 #Compute GC content
 peaks['GC_cont'] = compute_GC_content(peaks.sequence)
@@ -98,10 +92,12 @@ random_seq['GC_cont'] = compute_GC_content(random_seq.sequence)
 peaks = peaks.sort_values('GC_cont')
 random_seq = random_seq.sort_values('GC_cont')
 
-merged_df = pd.merge_asof(random_seq, peaks.reset_index(), on='GC_cont', direction='nearest', suffixes=('','_peak'), tolerance=3e-2)
-merged_df = peaks.merge(merged_df[['peakID','start','sequence']], how='left', left_index=True, right_on='peakID').set_index('peakID')
+merged_df = pd.merge_asof(random_seq, peaks.reset_index(), on='GC_cont', direction='nearest', suffixes=('','_peak'), tolerance=5e-2)
+merged_df = peaks.merge(merged_df[['peakID','chr', 'start','sequence']], how='left', left_index=True, right_on='peakID', suffixes=('_x','')).set_index('peakID')
 merged_df = merged_df[~merged_df.index.duplicated(keep='first')]
-merged_df['GC_cont_y'] = [sum(x.count(n) for n in ("G", "C"))/len(x) if isinstance(x, str) else 0 for x in merged_df.sequence_y]
+
+merged_df = merged_df.dropna()
+merged_df = merged_df.reset_index()[['chr', 'start', 'sequence']]
 
 with open('../results/match_GC.pkl', 'wb') as file:
     pickle.dump(merged_df, file)
