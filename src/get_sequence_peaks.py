@@ -32,7 +32,7 @@ size_chrom = size_chrom.loc[['chr' + c for c in np.unique(peaks.chr)]]
 
 #Generate random start location on chromosome
 p_chrom = (size_chrom/np.sum(size_chrom)).iloc[:,0].tolist()
-rand_chr = np.random.choice(size_chrom.index, p=p_chrom, size=peaks.shape[0])
+rand_chr = np.random.choice(size_chrom.index, p=p_chrom, size=peaks.shape[0]*5)
 rand_start = [np.random.randint(low=1, high=size_chrom.loc[x]-len_seq) for x in rand_chr]
 rand_start = [int(x) for x in rand_start]
 
