@@ -47,8 +47,8 @@ for f in pkl_files[1:]:
     with open(f, 'rb') as file:
         tmp = pd.DataFrame(pickle.load(file))
     
-    tmp['time'] = [f.split('/')[3]] * ATAC.shape[0]
-    tmp['cell_type'] = [f.split('/')[4].removesuffix('.pkl')] * ATAC.shape[0]
+    tmp['time'] = [f.split('/')[3]] * tmp.shape[0]
+    tmp['cell_type'] = [f.split('/')[4].removesuffix('.pkl')] * tmp.shape[0]
 
     ATAC = pd.concat([ATAC, tmp])
 

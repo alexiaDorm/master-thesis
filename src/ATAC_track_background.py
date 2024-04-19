@@ -30,3 +30,24 @@ for d in NAME_DATASET:
             pickle.dump(ATAC, file)
 
         del ATAC
+
+#Merge all datasets into one adding columns: time + cell type 
+pkl_files = glob.glob('../results/background/*/*.pkl')
+
+with open(pkl_files[0], 'rb') as file:
+    ATAC = pd.DataFrame(pickle.load(file))
+
+ATAC['time'] = [pkl_files[0].split('/')[3]] * ATAC.shape[0]
+ATAC['cell_type'] = [pkl_files[0].split('/')[4].removesuffix('.pkl')] * ATAC.shape[0]
+
+for f in pkl_files[1:]:
+    with open(f, 'rb') as file:
+        tmp = pd.DataFrame(pickle.load(file))
+    
+    tmp['time'] = [f.split('/')[3]] * tmp.shape[0]
+    tmp['cell_type'] = [f.split('/')[4].removesuffix('.pkl')] * tmp.shape[0]
+
+    ATAC = pd.concat([ATAC, tmp])
+
+with open('../results/ATAC_background.pkl', 'wb') as file:
+            pickle.dump(ATAC, file)
