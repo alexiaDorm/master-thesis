@@ -40,15 +40,15 @@ pkl_files = glob.glob('../results/ATAC/*/*.pkl')
 with open(pkl_files[0], 'rb') as file:
     ATAC = pd.DataFrame(pickle.load(file))
 
-ATAC['time'] = [pkl_files[0].split('/')[3]] * ATAC.shape[0]
-ATAC['cell_type'] = [pkl_files[0].split('/')[4].removesuffix('.pkl')] * ATAC.shape[0]
+ATAC['time'] = ([pkl_files[0].split('/')[3]] * ATAC.shape[0]).astype('category')
+ATAC['cell_type'] = ([pkl_files[0].split('/')[4].removesuffix('.pkl')] * ATAC.shape[0]).astype('category')
 
 for f in pkl_files[1:]:
     with open(f, 'rb') as file:
         tmp = pd.DataFrame(pickle.load(file))
     
-    tmp['time'] = [f.split('/')[3]] * tmp.shape[0]
-    tmp['cell_type'] = [f.split('/')[4].removesuffix('.pkl')] * tmp.shape[0]
+    tmp['time'] = ([f.split('/')[3]] * tmp.shape[0]).astype('category')
+    tmp['cell_type'] = ([f.split('/')[4].removesuffix('.pkl')] * tmp.shape[0]).astype('category')
 
     ATAC = pd.concat([ATAC, tmp])
 
