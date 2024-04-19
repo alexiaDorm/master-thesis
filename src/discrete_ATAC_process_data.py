@@ -49,3 +49,35 @@ with open('../results/encoded_seq.pkl', 'wb') as file:
 
 adata.write('../results/pre_processed_3.h5ad')
 
+
+""" Create a sequence ATAC matrix. For each sequence extracts ATAC signal (discrete) at pseudo bulk level (cell_type + time point) """
+def get_sequence_ATAC_dicrete(adata):
+    
+    #Format matrix
+    sequence_ATAC = pd.DataFrame(anndata.X, index = anndata.obs_names, 
+                            columns = anndata.var_names)
+
+    sequence_ATAC = sequence_ATAC.transpose()
+    sequence_ATAC["peakID"] = sequence_ATAC.index
+
+    #wide_to_long need same name of columns name 
+    batch_dict = dict(zip(sequence_ATAC.columns.values, ['batch' + str(x) for x in np.arange(len(sequence_ATAC.columns.values))]))
+    convert_back = dict(zip(np.arange(len(sequence_ATAC.columns.values)), sequence_ATAC.columns.values))
+    sequence_ATAC = sequence_ATAC.rename(columns=batch_dict)
+
+    sequence_ATAC = pd.wide_to_long(sequence_ATAC, stubnames='batch', i='peakID', j='ATAC')
+
+    sequence_ATAC = sequence_ATAC.reset_index()
+    sequence_ATAC.ATAC = [convert_back[x] for x in sequence_ATAC.ATAC]
+
+    sequence_ATAC['cell_type'] = [x.split('D')[0] for x in sequence_ATAC.ATAC]
+    sequence_ATAC['dataset'] = ['D' + x.split('D')[1] for x in sequence_ATAC.ATAC]
+
+    sequence_ATAC = sequence_ATAC.drop(columns=['ATAC'])
+    sequence_ATAC = sequence_ATAC.rename(columns={'batch':'ATAC'})
+
+    #Add sequence for each peak
+    ...
+
+    return sequence_ATAC
+
