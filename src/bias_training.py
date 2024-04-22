@@ -51,4 +51,4 @@ optimizer = torch.optim.Adam(biasModel.parameters(), lr=1e-4)
 loss = train(biasModel, criterion, optimizer, 1, dataloader)
 
 with open('../results/loss_test.pkl', 'wb') as file:
-            pickle.dump(loss, file)
+    pickle.dump(loss, file)
