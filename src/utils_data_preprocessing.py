@@ -112,7 +112,7 @@ def get_continuous_ATAC_background(bw, seq_loc, total_reads, norm_mult = 100000,
     
     seq_start = int(seq_loc.start + (len(seq_loc.sequence)- seq_len)/2)
 
-    val = bw.values(seq_loc.chr[3:], seq_start, 
+    val = bw.values(seq_loc.chr, seq_start, 
                     seq_start + seq_len)
     ATAC = [sum(val[i:(i+window_size+1)])/total_reads * norm_mult for i in range(0,seq_len+1)]
 
