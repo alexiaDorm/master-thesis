@@ -48,7 +48,7 @@ biasModel = BPNet().to(device)
 criterion = ATACloss(weight_MSE=1)
 optimizer = torch.optim.Adam(biasModel.parameters(), lr=1e-4)
 
-loss = train(biasModel, criterion, optimizer, 1, dataloader)
+loss = train(biasModel, criterion, optimizer, 3, dataloader)
 
 with open('../results/loss_test.pkl', 'wb') as file:
     pickle.dump(loss, file)
