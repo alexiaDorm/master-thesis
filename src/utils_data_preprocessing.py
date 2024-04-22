@@ -89,11 +89,10 @@ def fetch_sequence(peaks, path_genome, len_seq = 2114):
 
     return sequences
 
-
 def one_hot_encode(seq):
     mapping = dict(zip("ACGT", range(4)))    
     seq2 = [mapping[i] for i in seq]
-    return np.eye(4, dtype=np.int8)[seq2]
+    return np.eye(4, dtype=np.float32)[seq2]
 
 def encode_sequence(sequences):
     
