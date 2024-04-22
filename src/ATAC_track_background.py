@@ -31,7 +31,7 @@ for d in NAME_DATASET:
 
         del ATAC
 
-#Merge all datasets into one adding columns: time + cell type 
+""" #Merge all datasets into one adding columns: time + cell type 
 pkl_files = glob.glob('../results/background/*/*.pkl')
 
 with open(pkl_files[0], 'rb') as file:
@@ -50,4 +50,4 @@ for f in pkl_files[1:]:
     ATAC = pd.concat([ATAC, tmp])
 
 with open('../results/ATAC_background.pkl', 'wb') as file:
-            pickle.dump(ATAC, file)
+            pickle.dump(ATAC, file) """
