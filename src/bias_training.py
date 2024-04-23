@@ -51,7 +51,7 @@ def train(config):
 
         print(f'Epoch [{epoch + 1}/{config["nb_epoch"]}], Loss: {epoch_loss:.4f}')
 
-        #TODO Compute loss on validation set here + evaluate model
+        """ #TODO Compute loss on validation set here + evaluate model
         val_loss = 0.0
         for i, data in enumerate(valloader, 0):
             with torch.no_grad():
@@ -76,7 +76,7 @@ def train(config):
                  read profile for the 1000bp region.
 
 
-        val_losses.append(val_loss)
+        val_losses.append(val_loss) """
 
     print('Finished Training')
 
