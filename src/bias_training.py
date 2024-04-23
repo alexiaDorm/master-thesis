@@ -44,7 +44,6 @@ def train(config):
             optimizer.step()
 
             running_loss += loss.item()
-            break
 
         epoch_loss = running_loss / len(dataloader)
         train_loss.append(epoch_loss)
@@ -91,7 +90,7 @@ def train(config):
 
 config = {
     "weight_MSE": 1,
-    "nb_epoch": 1,
+    "nb_epoch": 5,
     "lr": 0.004,
     "batch_size": 32
 }
