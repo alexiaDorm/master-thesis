@@ -7,7 +7,7 @@ from models import BiasDataset, BPNet, ATACloss
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-def train(config, dataloader):
+def train(config):
 
     #Load the data
     #TODO load training + validation
