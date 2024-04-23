@@ -6,6 +6,7 @@ import pickle
 from models import BiasDataset, BPNet, ATACloss
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
 
 def train(config):
 
@@ -40,6 +41,7 @@ def train(config):
             optimizer.step()
 
             running_loss += loss.item()
+            break
 
         epoch_loss = running_loss / len(dataloader)
         train_loss.append(epoch_loss)
@@ -84,7 +86,7 @@ def train(config):
 
 config = {
     "weight_MSE": 1,
-    "nb_epoch": 5,
+    "nb_epoch": 1,
     "lr": 0.004,
     "batch_size": 32
 }
