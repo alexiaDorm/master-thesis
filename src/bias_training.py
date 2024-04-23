@@ -2,6 +2,7 @@ from tqdm import tqdm
 import torch
 from torch.utils.data import DataLoader
 import pickle
+import scipy
 
 from models import BiasDataset, BPNet, ATACloss
 
@@ -14,10 +15,12 @@ def train(config):
     #TODO load training + validation
     dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background.pkl')
     dataloader = DataLoader(dataset, batch_size=config["batch_size"],
-                        shuffle=True, num_workers=4)
+                        shuffle=True, num_workers=2)
 
     #Initialize model, loss, and optimizer
-    biasModel = BPNet().to(device)
+    biasModel = BPNet()
+    biasModel.to(device)
+
     criterion = ATACloss(weight_MSE=config["weight_MSE"])
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=config["lr"])
     
@@ -50,7 +53,7 @@ def train(config):
 
         #TODO Compute loss on validation set here + evaluate model
         val_loss = 0.0
-        """ for i, data in enumerate(valloader, 0):
+        for i, data in enumerate(valloader, 0):
             with torch.no_grad():
                 inputs, _, _, tracks = data 
                 inputs = torch.reshape(inputs, (-1,4,2114)).to(device)
@@ -62,16 +65,18 @@ def train(config):
                 loss = criterion(tracks, profile, count)
                 val_loss += loss.cpu().numpy()
 
-                #TODO Compute evaluation metrics
-                For the total counts predicted for the 1000 bp region, the model’s performance is 
-                computed with the Spearman correlation of predicted counts to actual counts. 
+                #Compute evaluation metrics: pearson correlation
+                counts_per_item = torch.sum(tracks, dim=1)
+                corr_tot = [scipy.stats.pearsonr(x.item(), counts_per_item[i].item())[0] for i,x in enumerate(count)] 
+
+
                 The per-base read count track is evaluated using the Jensen-Shannon divergence distance,
                  which computes the divergence between two probability distributions; in this case 
                  the actual per base read profile for the 1000bp region and the predicted per base 
                  read profile for the 1000bp region.
-                ...
 
-        val_losses.append(val_loss) """
+
+        val_losses.append(val_loss)
 
     print('Finished Training')
 
@@ -92,6 +97,9 @@ config = {
 }
 
 biasModel, train_loss, val_losses = train(config)
+
+##TODO setup hyperparametrs tuning ray tune
+...
 
 with open('../results/loss_train_bias.pkl', 'wb') as file:
     pickle.dump(train_loss, file)
