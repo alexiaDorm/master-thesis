@@ -8,7 +8,7 @@ import pandas as pd
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 data_path = '../../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/'
-print(cwd = os.getcwd())
+print(os.getcwd())
 
 #Load peaks per time point, only keep the one that were in both replicates
 peaks_per_rep = []
