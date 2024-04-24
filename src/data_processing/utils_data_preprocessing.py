@@ -62,6 +62,11 @@ def concat_data(data_path, cell_type_path, save_path, name_datasets=NAME_DATASET
 
     return adata
 
+""" if (not os.path.isfile('../../results/concat.h5ad')):
+    adata = concat_data('../../data/initial_10x_outputs/filtered_features', 
+                        '../../results/cell_types.csv', 
+                        '../../results/concat.h5ad') """
+
 """ Create pseudo-bulk ATAC data. Pseudo bulk are defined by groupping the data by time point and cell types.  """
 def pseudo_bulk(adata, col):
     

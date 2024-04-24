@@ -1,8 +1,6 @@
 Quick description of scripts
 --------------------------------------------------------------
 
-Exploration/initial-exploration_scvi.ipynb: Integration using scvi of all datasets, cell types definition using scvi latent space 
-
 utils_data_processing.py: Utils function for data processing
 
 create_bw_cell_type.py: Script to generate the ATAC track bigWigs files by pseudo-bulk 
@@ -27,15 +25,18 @@ datasets.py: Pytorch Dataset/Dataloader class
 
 Description data processing pipeline
 --------------------------------------------------------------
+1. Create BigWigs files of ATAC signal for each pseudo-bulk
 
-1. Define cell types using gene expression data
+2. Compute coverage by pseudo bulk to determine for which one we have sufficient cells
+
+
+1. Create common peaks by merging all overlapping peaks 
 
 2. Create BigWigs files of ATAC signal for each pseudo-bulk
 
 3. Compute the total number of reads per pseudo-bulk for normalization purpose
-4. Compute coverage by pseudo bulk to determine for which one we have sufficient cells
 
-5. Create common peaks by merging all overlapping peaks 
+4. Compute coverage by pseudo bulk to determine for which one we have sufficient cells
 
 6. Get the sequences for each peaks
 
