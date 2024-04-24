@@ -18,7 +18,7 @@ for t in TIME_POINT:
 
     #Create cell type file for time point
     #Get cell barcodes for each replicates
-    barcode_rep1 = data_path +  t + "_REP1_run1/outs/filreted_feature_bc_matrix/barcodes.tsv.gz"
+    barcode_rep1 = data_path +  t + "_REP1_run1/outs/filtered_feature_bc_matrix/barcodes.tsv.gz"
     barcode_rep1 = pd.read_csv(gzip.open(barcode_rep1), header=None)[0]
     barcode_rep1 = [b + "-" + str(i) for b in barcode_rep1]
     i = i + 1
