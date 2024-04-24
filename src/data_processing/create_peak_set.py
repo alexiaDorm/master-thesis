@@ -50,4 +50,4 @@ merge_bedtools = "bedtools merge -i ../results/tmp/all_peaks_sorted.bed > ../res
 subprocess.run(merge_bedtools, shell=True)
 
 #Remove temporary files
-subprocess.run("rmdir -r ../results/tmp", shell=True)
+subprocess.run("rm -r ../results/tmp", shell=True)
