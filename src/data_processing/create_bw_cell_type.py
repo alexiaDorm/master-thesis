@@ -23,7 +23,7 @@ for t in TIME_POINT:
     barcode_rep1 = [b + "-" + str(i) for b in barcode_rep1]
     i = i + 1
 
-    barcode_rep2 = data_path +  t + "_REP2_run1/outs/filreted_feature_bc_matrix/barcodes.tsv.gz"
+    barcode_rep2 = data_path +  t + "_REP2_run1/outs/filtered_feature_bc_matrix/barcodes.tsv.gz"
     barcode_rep2 = pd.read_csv(gzip.open(barcode_rep2), header=None)[0]
     barcode_rep2 = [b + "-" + str(i) for b in barcode_rep2]
     i = i + 1
