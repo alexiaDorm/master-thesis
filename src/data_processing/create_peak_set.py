@@ -46,8 +46,11 @@ peaks.to_csv("../results/tmp/all_peaks.bed", header=False, index=False, sep='\t'
 sort_bed = "sortBed -i ../results/tmp/all_peaks.bed > ../results/tmp/all_peaks_sorted.bed"
 subprocess.run(sort_bed, shell=True)
 
-merge_bedtools = "bedtools merge -i ../results/tmp/all_peaks_sorted.bed > ../results/common_peaks.bed"
+merge_bedtools = "bedtools merge -i ../results/tmp/all_peaks_sorted.bed > ../results/tmp/common_peaks.bed"
 subprocess.run(merge_bedtools, shell=True)
+
+#Check bins are not inside peaks or blacklisted regions
+subprocess.run("bedtools intersect -a ../results/tmp/common_peaks.bed -b ../data/h38_blacklist.bed -v > ../results/common_peaks.bed")
 
 #Remove temporary files
 subprocess.run("rm -r ../results/tmp", shell=True)
