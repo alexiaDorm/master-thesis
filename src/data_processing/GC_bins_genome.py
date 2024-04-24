@@ -15,7 +15,7 @@ chrom = ['chr' + x for x in chrom]
 
 #Bin genome and compute GC content
 #--------------------------------------------
-""" genome = pyfaidx.Fasta(path_genome)
+genome = pyfaidx.Fasta(path_genome)
 
 locations, GC_content = [], []
 for c in tqdm(chrom):
@@ -39,11 +39,11 @@ locations = locations.set_index('ID')
 locations.drop('GC_cont', axis=1).to_csv("../results/background_regions.bed", sep='\t', header=None, index=False)
 
 with open('../results/background_GC.pkl', 'wb') as file:
-    pickle.dump(locations, file)  """
+    pickle.dump(locations, file)
 
 #Check bins are not inside peaks or blacklisted regions
-#subprocess.run("bedtools intersect -a ../results/background_regions.bed -b ../results/common_peaks.bed -v > ..results/background_regions2.bed")
-#subprocess.run("bedtools intersect -a ../results/background_regions2.bed -b ../data/h38_blacklist.bed -v > ..results/background_regions.bed")
+subprocess.run("bedtools intersect -a ../results/background_regions.bed -b ../results/common_peaks.bed -v > ..results/background_regions2.bed")
+subprocess.run("bedtools intersect -a ../results/background_regions2.bed -b ../data/h38_blacklist.bed -v > ..results/background_regions.bed")
 
 back_regions = pd.read_csv("../results/background_regions.bed", sep='\t', header=None)
 back_regions = back_regions.iloc[:,0].astype('str') +  ":" + back_regions.iloc[:,1].astype('str') + "-" + back_regions.iloc[:,2].astype('str')
