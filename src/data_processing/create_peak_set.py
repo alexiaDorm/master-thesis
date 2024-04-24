@@ -50,7 +50,7 @@ merge_bedtools = "bedtools merge -i ../results/tmp/all_peaks_sorted.bed > ../res
 subprocess.run(merge_bedtools, shell=True)
 
 #Check bins are not inside peaks or blacklisted regions
-subprocess.run("bedtools intersect -a ../results/tmp/common_peaks.bed -b ../data/h38_blacklist.bed -v > ../results/common_peaks.bed", shell=True)
+subprocess.run("bedtools intersect -a ../results/tmp/common_peaks.bed -b ../data/hg38_blacklist.bed -v > ../results/common_peaks.bed", shell=True)
 
 #Remove temporary files
 subprocess.run("rm -r ../results/tmp", shell=True)
