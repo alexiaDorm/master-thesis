@@ -29,8 +29,8 @@ for t in TIME_POINT:
     i = i + 1
 
     barcodes = barcode_rep1 + barcode_rep2
-    print(len(barcodes), len(cell_type.intersection(barcodes)))
-    barcodes = cell_type.loc[barcodes]
+    print(len(barcodes), len(cell_type.index.intersection(barcodes)))
+    barcodes = cell_type.loc[cell_type.index.intersection(barcodes)]
 
     barcodes.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t')
     
