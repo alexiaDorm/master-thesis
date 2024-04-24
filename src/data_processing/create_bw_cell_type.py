@@ -8,7 +8,6 @@ TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 data_path = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/'
 
 cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
-print(cell_type)
 
 #Keep track of dataset number to make barcodes unique
 i = 0
@@ -30,6 +29,7 @@ for t in TIME_POINT:
     i = i + 1
 
     barcodes = barcode_rep1 + barcode_rep2
+    print(len(barcodes), len(cell_type.intersection(barcodes)))
     barcodes = cell_type.loc[barcodes]
 
     barcodes.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t')
