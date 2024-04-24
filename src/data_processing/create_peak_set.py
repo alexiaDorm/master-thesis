@@ -48,3 +48,6 @@ subprocess.run(sort_bed, shell=True)
 
 merge_bedtools = "bedtools merge -i ../results/tmp/all_peaks_sorted.bed > ../results/common_peaks.bed"
 subprocess.run(merge_bedtools, shell=True)
+
+#Remove temporary files
+subprocess.run("rmdir -r ../results/tmp", shell=True)
