@@ -1,3 +1,5 @@
+#Paths assume run from src folder
+
 #Create common peak set across time point and replicates
 #Assume that peak in each replicate are non-overlapping
 #--------------------------------------------

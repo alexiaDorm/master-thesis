@@ -1,3 +1,8 @@
+#Paths assume run from src folder
+
+#Create the bigwig files per time point and cell type, replicates are used together to generate the .bw files
+#--------------------------------------------
+
 import subprocess
 import glob
 import os 
@@ -29,7 +34,6 @@ for t in TIME_POINT:
     i = i + 1
 
     barcodes = barcode_rep1 + barcode_rep2
-    print(len(barcodes), len(cell_type.index.intersection(barcodes)))
     barcodes = cell_type.loc[cell_type.index.intersection(barcodes)]
 
     barcodes.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t')
@@ -70,3 +74,7 @@ for t in TIME_POINT:
                             ' -o ' + f[:-3] + 'bw --binSize 1' )
             
         subprocess.run(bamCoverage_command, shell=True)
+
+
+#Remove temporary files
+subprocess.run("rm -r ../results/tmp", shell=True)
