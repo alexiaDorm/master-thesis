@@ -10,6 +10,7 @@ import pandas as pd
 import gzip
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
+TIME_POINT = ["D8"]
 data_path = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/'
 
 cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
@@ -21,7 +22,7 @@ for t in TIME_POINT:
     if not os.path.exists('../results/bam_cell_type/' + t):
         os.makedirs('../results/bam_cell_type/' + t)
 
-    #Create cell type file for time point
+    """ #Create cell type file for time point
     #Get cell barcodes for each replicates
     barcode_rep1 = data_path +  t + "_REP1_run1/outs/filtered_feature_bc_matrix/barcodes.tsv.gz"
     barcode_rep1 = pd.read_csv(gzip.open(barcode_rep1), header=None)[0]
@@ -46,7 +47,7 @@ for t in TIME_POINT:
         os.makedirs('../results/tmp/')
 
     samtools_merge = "samtools merge -o ../results/tmp/merged.bam " + ATAC_bam_rep1 + " " + ATAC_bam_rep2
-    subprocess.run(samtools_merge, shell=True)
+    subprocess.run(samtools_merge, shell=True) """
 
     #Create index of merged file 
     samtools_index =  'samtools index ../results/tmp/merged.bam  ../results/tmp/merged.bam.bai'
