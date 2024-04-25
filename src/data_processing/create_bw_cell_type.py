@@ -38,7 +38,10 @@ for t in TIME_POINT:
     barcodes = cell_type.loc[cell_type.index.intersection(barcodes)]
 
     barcodes.index = [x[:-2] for x in barcodes.index]
-    barcodes.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t')
+    barcodes = barcodes.reset_index()
+    
+    barcodes.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t', index=False)
+    
     break
     
     #Merge bam file of replicates
