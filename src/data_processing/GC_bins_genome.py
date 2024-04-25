@@ -5,6 +5,7 @@ import numpy as np
 import math
 import subprocess
 from tqdm import tqdm
+import os
 
 len_seq = 4096
 stride = 2000
