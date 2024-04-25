@@ -10,13 +10,13 @@ import pandas as pd
 import gzip
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
-TIME_POINT = ["D12"]
+TIME_POINT = ["D8"]
 data_path = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/'
 
 cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
 
 #Keep track of dataset number to make barcodes unique
-i = 2
+i = 0
 for t in TIME_POINT:
  
     if not os.path.exists('../results/bam_cell_type/' + t):
@@ -40,8 +40,6 @@ for t in TIME_POINT:
     barcodes_type.index = barcodes_type.index.str[:-2]
     
     barcodes_type.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t')
-
-    break
     
     
     #Merge bam file of replicates
