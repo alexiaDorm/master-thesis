@@ -50,7 +50,7 @@ for t in TIME_POINT:
 
     #Create index of merged file 
     samtools_index =  'samtools index ../results/tmp/merged.bam  ../results/tmp/merged.bam.bai'
-    subprocess.run(samtools_index)
+    subprocess.run(samtools_index, shell=True)
     
     #Split the bam by cell type
     sinto_command = ('sinto filterbarcodes -p 8 -b ../results/tmp/merged.bam -c ../results/bam_cell_type/' + t +
