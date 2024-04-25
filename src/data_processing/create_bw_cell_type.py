@@ -10,6 +10,7 @@ import pandas as pd
 import gzip
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
+TIME_POINT = ["D8"]
 data_path = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/'
 
 cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
@@ -18,7 +19,7 @@ cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
 i = 0
 for t in TIME_POINT:
  
-    if not os.path.exists('../results/bam_cell_type/' + t):
+    """ if not os.path.exists('../results/bam_cell_type/' + t):
         os.makedirs('../results/bam_cell_type/' + t)
 
     #Create cell type file for time point
@@ -40,12 +41,12 @@ for t in TIME_POINT:
     
     #Merge bam file of replicates
     ATAC_bam_rep1 = data_path + t + '_REP1_run1/outs/atac_possorted_bam.bam'
-    ATAC_bam_rep2 = data_path + t + '_REP2_run1/outs/atac_possorted_bam.bam'
+    ATAC_bam_rep2 = data_path + t + '_REP2_run1/outs/atac_possorted_bam.bam' """
 
     if not os.path.exists('../results/tmp/'):
         os.makedirs('../results/tmp/')
 
-    samtools_merge = "samtools merge -o ../results/tmp/" + t + "_merged.bam " + ATAC_bam_rep1 + " " + ATAC_bam_rep2
+    """ samtools_merge = "samtools merge -o ../results/tmp/" + t + "_merged.bam " + ATAC_bam_rep1 + " " + ATAC_bam_rep2
     subprocess.run(samtools_merge, shell=True)
 
     #Create index of merged file 
@@ -57,7 +58,7 @@ for t in TIME_POINT:
                  '/' + t + '_cell_types.tsv --outdir ../results/bam_cell_type/' +
                  t + '/')
 
-    subprocess.run(sinto_command, shell=True)
+    subprocess.run(sinto_command, shell=True) """
 
     #Create ATAC tracks using splitted files
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')

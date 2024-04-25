@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from utils_data_preprocessing import compute_GC_content
 
-len_seq = 2114
+len_seq = 4096
 path_genome = '../data/hg38.fa' 
 
 #Get matched GC content background sequence

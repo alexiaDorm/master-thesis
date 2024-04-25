@@ -47,7 +47,7 @@ with open('../results/background_GC.pkl', 'wb') as file:
 
 #Check bins are not inside peaks or blacklisted regions
 subprocess.run("bedtools intersect -a ../results/tmp/background_regions.bed -b ../results/common_peaks.bed -v > ../results/tmp/background_regions2.bed", shell=True)
-subprocess.run("bedtools intersect -a ../results/tmp/background_regions2.bed -b ../data/h38_blacklist.bed -v > ../results/tmp/back_regions.bed", shell=True)
+subprocess.run("bedtools intersect -a ../results/tmp/background_regions2.bed -b ../data/hg38_blacklist.bed -v > ../results/tmp/back_regions.bed", shell=True)
 
 back_regions = pd.read_csv("../results/tmp/back_regions.bed", sep='\t', header=None)
 back_regions = back_regions.iloc[:,0].astype('str') +  ":" + back_regions.iloc[:,1].astype('str') + "-" + back_regions.iloc[:,2].astype('str')
