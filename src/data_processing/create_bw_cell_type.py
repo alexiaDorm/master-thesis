@@ -37,11 +37,10 @@ for t in TIME_POINT:
     barcodes = barcode_rep1 + barcode_rep2
     barcodes = cell_type.loc[cell_type.index.intersection(barcodes)]
 
-    barcodes.index = barcodes.index.str[:-2]
     barcodes = barcodes.reset_index()
-    barcodes2 = barcodes.copy()
+    barcodes['index'] = barcodes['index'].str[:-2]
     
-    barcodes2.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t', index=False)
+    barcodes.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t', index=False)
     
     break
     
