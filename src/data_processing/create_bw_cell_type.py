@@ -46,11 +46,11 @@ for t in TIME_POINT:
     if not os.path.exists('../results/tmp/'):
         os.makedirs('../results/tmp/')
 
-    samtools_merge = "samtools merge -o ../results/tmp/merged.bam " + ATAC_bam_rep1 + " " + ATAC_bam_rep2
+    samtools_merge = "samtools merge -o ../results/tmp/" + t + "_merged.bam " + ATAC_bam_rep1 + " " + ATAC_bam_rep2
     subprocess.run(samtools_merge, shell=True)
 
     #Create index of merged file 
-    samtools_index =  'samtools index ../results/tmp/merged.bam  ../results/tmp/merged.bam.bai'
+    samtools_index =  'samtools index ../results/tmp/' + t + '_merged.bam  ../results/tmp/merged.bam.bai'
     subprocess.run(samtools_index, shell=True)
     
     #Split the bam by cell type
