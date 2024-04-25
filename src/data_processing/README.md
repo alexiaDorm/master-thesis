@@ -25,22 +25,18 @@ datasets.py: Pytorch Dataset/Dataloader class
 
 Description data processing pipeline
 --------------------------------------------------------------
-1. Create BigWigs files of ATAC signal for each pseudo-bulk
-
-2. Compute coverage by pseudo bulk to determine for which one we have sufficient cells
-
-
 1. Create common peaks by merging all overlapping peaks 
 
-2. Create BigWigs files of ATAC signal for each pseudo-bulk
+2. Create BigWigs files of ATAC signal for each pseudo-bulk (cell_type + time)
 
-3. Compute the total number of reads per pseudo-bulk for normalization purpose
+3. Compute coverage by pseudo bulk to determine for which one we have sufficient cells
 
-4. Compute coverage by pseudo bulk to determine for which one we have sufficient cells
+4. Get the sequences for each peaks
 
-6. Get the sequences for each peaks
+5. Sample background regions from genome with same GC content distribution as peaks
 
-7. Sample background regions from genome with same GC content distribution as peaks
-8. Get the sequences of the background regions
+6. Get the sequences of the background regions
 
-9. Get ATAC continuous track using sliding window for peaks and background regions
+7. Compute the total number of reads per pseudo-bulk for normalization purpose 
+
+8. Get ATAC continuous track using sliding window for peaks and background regions

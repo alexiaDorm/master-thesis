@@ -6,8 +6,8 @@ import math
 import subprocess
 from tqdm import tqdm
 
-len_seq = 2114
-stride = 1000
+len_seq = 4096
+stride = 2000
 path_genome = '../data/hg38.fa' 
 
 chrom = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y']
