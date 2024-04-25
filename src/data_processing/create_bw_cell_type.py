@@ -16,7 +16,7 @@ data_path = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_a
 cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
 
 #Keep track of dataset number to make barcodes unique
-i = 0
+i = 2
 for t in TIME_POINT:
  
     if not os.path.exists('../results/bam_cell_type/' + t):
