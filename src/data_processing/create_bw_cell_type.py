@@ -10,13 +10,13 @@ import pandas as pd
 import gzip
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
-TIME_POINT = ["D20"]
+TIME_POINT = ["D8"]
 data_path = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/'
 
 cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
 
 #Keep track of dataset number to make barcodes unique
-i = 4
+i = 0
 for t in TIME_POINT:
  
     if not os.path.exists('../results/bam_cell_type/' + t):
@@ -53,11 +53,11 @@ for t in TIME_POINT:
     subprocess.run(samtools_merge, shell=True)
 
     #Create index of merged file 
-    samtools_index =  'samtools index ../results/tmp/' + t + '_merged.bam  ../results/tmp/merged.bam.bai'
+    samtools_index =  'samtools index ../results/tmp/' + t + '_merged.bam  ../results/tmp/' + t + '_merged.bam.bai'
     subprocess.run(samtools_index, shell=True)
     
     #Split the bam by cell type
-    sinto_command = ('sinto filterbarcodes -p 8 -b ../results/tmp/merged.bam -c ../results/bam_cell_type/' + t +
+    sinto_command = ('sinto filterbarcodes -p 8 -b ../results/tmp/' + t + '_merged.bam -c ../results/bam_cell_type/' + t +
                  '/' + t + '_cell_types.tsv --outdir ../results/bam_cell_type/' +
                  t + '/')
 
