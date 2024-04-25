@@ -19,7 +19,7 @@ cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
 i = 0
 for t in TIME_POINT:
  
-    """ if not os.path.exists('../results/bam_cell_type/' + t):
+    if not os.path.exists('../results/bam_cell_type/' + t):
         os.makedirs('../results/bam_cell_type/' + t)
 
     #Create cell type file for time point
@@ -37,16 +37,18 @@ for t in TIME_POINT:
     barcodes = barcode_rep1 + barcode_rep2
     barcodes = cell_type.loc[cell_type.index.intersection(barcodes)]
 
+    barcodes.index = [x[:-2] for x in barcodes.index]
+
     barcodes.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t')
     
     #Merge bam file of replicates
     ATAC_bam_rep1 = data_path + t + '_REP1_run1/outs/atac_possorted_bam.bam'
-    ATAC_bam_rep2 = data_path + t + '_REP2_run1/outs/atac_possorted_bam.bam' """
+    ATAC_bam_rep2 = data_path + t + '_REP2_run1/outs/atac_possorted_bam.bam'
 
     if not os.path.exists('../results/tmp/'):
         os.makedirs('../results/tmp/')
 
-    """ samtools_merge = "samtools merge -o ../results/tmp/" + t + "_merged.bam " + ATAC_bam_rep1 + " " + ATAC_bam_rep2
+    samtools_merge = "samtools merge -o ../results/tmp/" + t + "_merged.bam " + ATAC_bam_rep1 + " " + ATAC_bam_rep2
     subprocess.run(samtools_merge, shell=True)
 
     #Create index of merged file 
@@ -58,7 +60,7 @@ for t in TIME_POINT:
                  '/' + t + '_cell_types.tsv --outdir ../results/bam_cell_type/' +
                  t + '/')
 
-    subprocess.run(sinto_command, shell=True) """
+    subprocess.run(sinto_command, shell=True)
 
     #Create ATAC tracks using splitted files
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
@@ -75,7 +77,3 @@ for t in TIME_POINT:
                             ' -o ' + f[:-3] + 'bw --binSize 1' )
             
         subprocess.run(bamCoverage_command, shell=True)
-
-
-#Remove temporary files
-#subprocess.run("rm -r ../results/tmp", shell=True)
