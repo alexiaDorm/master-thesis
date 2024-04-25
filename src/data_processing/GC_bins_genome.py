@@ -40,7 +40,7 @@ locations = locations.set_index('ID')
 if not os.path.exists('../results/tmp/'):
         os.makedirs('../results/tmp/')
 
-locations.drop('GC_cont', axis=1).to_csv("../results/tmp/background_regions.bed", sep='\t', header=None, index=False)
+locations.drop(['GC_cont','sequence'], axis=1).to_csv("../results/tmp/background_regions.bed", sep='\t', header=None, index=False)
 
 with open('../results/background_GC.pkl', 'wb') as file:
     pickle.dump(locations, file)
