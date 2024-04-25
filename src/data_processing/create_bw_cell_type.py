@@ -10,7 +10,7 @@ import pandas as pd
 import gzip
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
-TIME_POINT = ["D8"]
+TIME_POINT = ["D12"]
 data_path = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/'
 
 cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
@@ -38,7 +38,6 @@ for t in TIME_POINT:
     
     barcodes_type = cell_type.loc[cell_type.index.intersection(barcodes)]
     barcodes_type.index = barcodes_type.index.str[:-2]
-    print(barcodes_type)
     
     barcodes_type.to_csv('../results/bam_cell_type/' + t + '/' + t + '_cell_types.tsv', header=False, sep='\t')
 
