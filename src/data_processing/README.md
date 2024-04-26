@@ -13,7 +13,9 @@ create_peak_set.py: Take all called peaks in datasets and merge overlapping peak
 
 get_sequence_peaks.py: Fetch genomic sequence for peaks
 
-GC_match_background.py: Create background sequences GC-matched to peaks and fetch their sequences
+GC_bins_genome.py: Create potential background regions by binning genome and computing the GC content of each sequence
+
+GC_match_background.py: GC match genomic regions to peaks
 
 ATAC_track_peaks.py: Fetch continuous ATAC tracks for each pseudo-bulk and peak 
 
@@ -33,9 +35,9 @@ Description data processing pipeline
 
 4. Get the sequences for each peaks
 
-5. Sample background regions from genome with same GC content distribution as peaks
+5. Create potential background regions by binning genome and computing the GC content of each sequence
 
-6. Get the sequences of the background regions
+6. GC match each peak to background region 
 
 7. Compute the total number of reads per pseudo-bulk for normalization purpose 
 

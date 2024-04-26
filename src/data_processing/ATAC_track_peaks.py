@@ -7,7 +7,7 @@ import pandas as pd
 
 from utils_data_preprocessing import get_continuous_ATAC_peaks
 
-NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
+TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 
 with open('../results/peaks_seq.pkl', 'rb') as file:
     peaks = pickle.load(file)
@@ -15,7 +15,7 @@ with open('../results/peaks_seq.pkl', 'rb') as file:
 peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('uint32')
 
 #Per cell type + dataset createa dataframe with continous track for each peaks
-for d in NAME_DATASET:
+for d in TIME_POINT:
 
     total_reads = pd.read_csv('../results/bam_cell_type/' + d + '/total_reads.csv', header=None, index_col=[0])
 

@@ -2,19 +2,25 @@ from tqdm import tqdm
 import torch
 from torch.utils.data import DataLoader
 import pickle
-import scipy
+import numpy as np
+import copy
 
-from models import BiasDataset, BPNet, ATACloss
+from pytorch_datasets import BiasDataset
+from models import BPNet
+from eval_metrics import ATACloss, counts_metrics, profile_metrics
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
-def train(config):
+def train(config, chr_train, chr_test):
 
     #Load the data
-    #TODO load training + validation
-    dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background.pkl')
-    dataloader = DataLoader(dataset, batch_size=config["batch_size"],
+    train_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background.pkl', chr_train)
+    train_dataloader = DataLoader(train_dataset, batch_size=config["batch_size"],
+                        shuffle=True, num_workers=2)
+    
+    test_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background.pkl', chr_test)
+    test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=2)
 
     #Initialize model, loss, and optimizer
@@ -23,14 +29,17 @@ def train(config):
 
     criterion = ATACloss(weight_MSE=config["weight_MSE"])
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=config["lr"])
+
+    best_loss, best_model_weight, patience = float('inf'), None, 5
     
-    train_loss, val_losses = [], []
+    train_loss, test_loss = [], []
+    corr_test, jsd_test = [], []
     for epoch in range(config["nb_epoch"]):
         
         biasModel.train() 
         running_loss = 0
 
-        for data in tqdm(dataloader):
+        for data in tqdm(train_dataloader):
             inputs, _, _, tracks = data 
             inputs = torch.reshape(inputs, (-1,4,2114)).to(device)
             tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
@@ -45,37 +54,52 @@ def train(config):
 
             running_loss += loss.item()
 
-        epoch_loss = running_loss / len(dataloader)
+        epoch_loss = running_loss / len(train_dataloader)
         train_loss.append(epoch_loss)
 
         print(f'Epoch [{epoch + 1}/{config["nb_epoch"]}], Loss: {epoch_loss:.4f}')
 
-        """ #TODO Compute loss on validation set here + evaluate model
-        val_loss = 0.0
-        for i, data in enumerate(valloader, 0):
+        #Evaluate the model after each epoch on the 
+        val_loss, spear_corr, jsd = 0.0, 0.0, 0.0
+        for i, data in enumerate(test_dataloader, 0):
             with torch.no_grad():
-                inputs, _, _, tracks = data 
+                inputs, tracks = data 
                 inputs = torch.reshape(inputs, (-1,4,2114)).to(device)
                 tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
 
-                x, profile, count = biasModel(inputs)
+                _, profile, count = biasModel(inputs)
 
                 #Compute loss
                 loss = criterion(tracks, profile, count)
-                val_loss += loss.cpu().numpy()
+                val_loss += loss.cpu().item()
 
                 #Compute evaluation metrics: pearson correlation
-                counts_per_item = torch.sum(tracks, dim=1)
-                corr_tot = [scipy.stats.pearsonr(x.item(), counts_per_item[i].item())[0] for i,x in enumerate(count)] 
+                corr = counts_metrics(tracks, count)
+                spear_corr += corr
+
+                #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
+                j = profile_metrics(tracks, profile)
+                jsd += j
 
 
-                The per-base read count track is evaluated using the Jensen-Shannon divergence distance,
-                 which computes the divergence between two probability distributions; in this case 
-                 the actual per base read profile for the 1000bp region and the predicted per base 
-                 read profile for the 1000bp region.
+        test_loss.append(val_loss /len(test_dataloader))
+        corr_test.append(np.sum(spear_corr)/len(test_dataloader))
+        jsd_test.append(np.sum(jsd)/len(test_dataloader))
 
-
-        val_losses.append(val_loss) """
+        #Early stopping
+        if val_loss < best_loss:
+            best_loss = val_loss
+            best_model_weight = copy.deepcopy(biasModel.state_dict())
+            patience = 5
+        
+        else:
+            patience -= 1
+        
+        if patience == 0
+            break
+    
+    #Load best model weights
+    biasModel.load_state_dict(best_model_weight)
 
     print('Finished Training')
 
@@ -94,8 +118,11 @@ config = {
     "lr": 0.004,
     "batch_size": 32
 }
+#Define chromosome split 
+chrom_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
+chrom_test = ['6','13''22']
 
-biasModel, train_loss, val_losses = train(config)
+biasModel, train_loss, val_losses = train(config, chrom_train, chrom_test)
 
 ##TODO setup hyperparametrs tuning ray tune
 ...

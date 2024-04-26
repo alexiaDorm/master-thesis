@@ -2,7 +2,7 @@ import glob
 import  subprocess
 import pandas as pd
 
-NAME_DATASET =['D8''D12''D20''D22-15']
+NAME_DATASET =['D8','D12','D20','D22-15']
 
 for d in NAME_DATASET:
 
