@@ -6,6 +6,7 @@ import numpy as np
 import copy
 from functools import partial
 import torcheck
+import time
 
 from ray import tune
 from ray.air import Checkpoint, session
@@ -172,7 +173,8 @@ scheduler = ASHAScheduler(
 chrom_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
 chrom_test = ['6','13''22']
 
-biasModel, train_loss, val_losses = train(config, chrom_train, chrom_test)
+time.sleep(10800) 
+train(config, chrom_train, chrom_test)
 
 result = tune.run(
     partial(train, chr_train=chrom_train, chr_test=chrom_test),
