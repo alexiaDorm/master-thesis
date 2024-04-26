@@ -5,12 +5,12 @@ import pickle
 import numpy as np
 import copy
 from functools import partial
-import torcheck
+#import torcheck
 import time
 
-from ray import tune
+""" from ray import tune
 from ray.air import Checkpoint, session
-from ray.tune.schedulers import ASHAScheduler
+from ray.tune.schedulers import ASHAScheduler """
 
 from pytorch_datasets import BiasDataset
 from models import BPNet
@@ -38,12 +38,12 @@ def train(config, chr_train, chr_test):
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=config["lr"])
 
     #Torcheck is used to catched common issues in model class definition: weights not training or become nan or inf
-    torcheck.register(optimizer)
+    """ torcheck.register(optimizer)
     torcheck.add_module_changing_check(biasModel, module_name="my_model")
     torcheck.add_module_nan_check(biasModel)
-    torcheck.add_module_inf_check(biasModel)
+    torcheck.add_module_inf_check(biasModel) """
 
-    checkpoint = session.get_checkpoint()
+    """ checkpoint = session.get_checkpoint()
 
     if checkpoint:
         checkpoint_state = checkpoint.to_dict()
@@ -51,13 +51,13 @@ def train(config, chr_train, chr_test):
         biasModel.load_state_dict(checkpoint_state["net_state_dict"])
         optimizer.load_state_dict(checkpoint_state["optimizer_state_dict"])
     else:
-        start_epoch = 0
+        start_epoch = 0 """
 
     best_loss, best_model_weight, patience = float('inf'), None, 5
     
     train_loss, test_loss = [], []
     corr_test, jsd_test = [], []
-    for epoch in range(start_epoch, config["nb_epoch"]):
+    for epoch in range(0, config["nb_epoch"]):
         
         biasModel.train() 
         running_loss, epoch_steps = 0.0, 0
@@ -116,7 +116,7 @@ def train(config, chr_train, chr_test):
         corr_test.append(spear_corr/len(test_dataloader))
         jsd_test.append(jsd/len(test_dataloader))
 
-        checkpoint_data = {
+        """ checkpoint_data = {
             "epoch": epoch,
             "net_state_dict": biasModel.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
@@ -128,7 +128,7 @@ def train(config, chr_train, chr_test):
              "count_correlation": spear_corr/len(test_dataloader), 
              "profile_jsd": jsd/len(test_dataloader)},
             checkpoint=checkpoint,
-        )
+        ) """
 
         #Early stopping
         if val_loss < best_loss:
@@ -161,13 +161,13 @@ config = {
     "batch_size": 32
 }
 
-scheduler = ASHAScheduler(
+""" scheduler = ASHAScheduler(
         metric="loss",
         mode="min",
         max_t=20,
         grace_period=1,
         reduction_factor=2,
-    )
+    ) """
 
 #Define chromosome split 
 chrom_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
@@ -176,7 +176,7 @@ chrom_test = ['6','13''22']
 time.sleep(10800) 
 train(config, chrom_train, chrom_test)
 
-result = tune.run(
+""" result = tune.run(
     partial(train, chr_train=chrom_train, chr_test=chrom_test),
     resources_per_trial={"cpu": 2, "gpu": 1},
     config=config,
@@ -188,4 +188,4 @@ best_trial = result.get_best_trial("loss", "min", "last")
 print(f"Best trial config: {best_trial.config}")
 print(f"Best trial final validation loss: {best_trial.last_result['loss']}")
 print(f"Best trial final validation correlation for count head: {best_trial.last_result['count_correlation']}")
-print(f"Best trial final validation jsd for profile head: {best_trial.last_result['profile_jsd']}")
+print(f"Best trial final validation jsd for profile head: {best_trial.last_result['profile_jsd']}") """
