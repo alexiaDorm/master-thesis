@@ -119,7 +119,7 @@ class BPNet(nn.Module):
 
 
 class CATAC(nn.Module):
-    def __init__(self, nb_conv=8, nb_filters=64, first_kernel=21, rest_kernel=3, profile_kernel_size=75, out_pred_len=1024, nb_pred=1):
+    def __init__(self, nb_conv=8, nb_filters=64, first_kernel=21, rest_kernel=3, profile_kernel_size=75, out_pred_len=1024, nb_pred=1, nb_cell_type_CN = 0):
 
         super().__init__()
         """ Model taking genomic sequences and predicting cell type specific ATAC track
@@ -147,11 +147,17 @@ class CATAC(nn.Module):
         nb_pred: int (default 1)
             number of ATAC tracks to predict
 
+        nb_cell_type_CN: int (default 0)
+            number of cell type specific convolutional layers
+
         Model Architecture 
         ------------------------
 
         - Body: sequence of convolutional layers with residual skip connections, dilated convolutions, 
         and  ReLU activation functions
+
+        - Cell-specific conv layers :
+            > 
 
         - # pseudo_bulk x Head : 
             > Profile prediction head: a multinomial probability of Tn5 insertion counts at each position 
@@ -174,6 +180,7 @@ class CATAC(nn.Module):
         self.profile_kernel = profile_kernel_size
         self.out_pred_len = out_pred_len
         self.nb_pred = nb_pred
+        self.nb_cell_type_CN = nb_cell_type_CN
 
         #Convolutional layers
         self.convlayers = nn.ModuleList()
@@ -186,18 +193,32 @@ class CATAC(nn.Module):
                                          out_channels=self.nb_filters,
                                          kernel_size=self.rest_kernel,
                                          dilation=2**i))
+        
+        #Pseudo bulk specific conv layers
+        self.pb_convlayers = [] 
+
+        for i in range(self.nb_pred):
+            
+            convs = nn.ModuleList()
+
+            for j in range(self.nb_cell_type_CN):
+                convs.append(nn.Conv1d(in_channels=self.nb_filters, 
+                                         out_channels=self.nb_filters,
+                                         kernel_size=self.rest_kernel))
+
+            self.pb_convlayers.append(convs)
+        
         #Profile prediction heads
         self.profile_heads = nn.ModuleList() 
-
         for i in range(self.nb_pred):
             self.profile_heads.append(nn.Conv1d(self.nb_filters, 1, kernel_size=self.profile_kernel))
         
         self.flatten = nn.Flatten()
 
-        #Total count prediction head
-        self.count_heads = nn.ModuleList()
-        
+        #Total count prediction heads
         self.global_pool = nn.AdaptiveAvgPool1d(1)
+        
+        self.count_heads = nn.ModuleList()
         for i in range(self.nb_pred):
             self.count_heads.append(nn.Linear(self.nb_filters,1))
 
@@ -217,14 +238,31 @@ class CATAC(nn.Module):
             x = x[:, :, cropsize:-cropsize] 
 
             #Skipped connection
-            x = conv_x + x    
+            x = conv_x + x   
+
+        #Pseudo-bulk specific convolutional layers 
+        #-----------------------------------------------
+        tmp_x, pred_x = [x]*self.nb_pred, []
+        for i in range(self.nb_pred):
+            for layer in self.pb_convlayers[i]:
+                conv_x = F.relu(layer(x))
+
+                #Crop output previous layer to size of current 
+                x_len = tmp_x[i].size(2); conv_x_len = conv_x.size(2)
+                cropsize = (x_len - conv_x_len) // 2
+                tmp_x[i] = tmp_x[i][:, :, cropsize:-cropsize]
+
+                #Skipped connection
+                tmp_x[i] = conv_x + tmp_x[i] 
+
+            pred_x.append(tmp_x[i])
 
         #Profile head
         #-----------------------------------------------
         pred_profiles = []
-        for p in self.profile_head():
+        for i, p in enumerate(self.profile_head()):
             #Apply conv layer
-            profile = p(x)
+            profile = p(pred_x[i])
 
             #Crop and flatten the representation
             cropsize = int((profile.size(2)/2) - (self.out_pred_len/2))
@@ -236,15 +274,15 @@ class CATAC(nn.Module):
         #Total count head
         #-----------------------------------------------
         pred_counts = []
-        for c in self.count_heads():
+        for i, c in enumerate(self.count_heads()):
             #Apply global average poolling
-            count = self.global_pool(x)  
+            count = self.global_pool(pred_x)  
             count = count.squeeze()
             
             #Aplly linear layer
             count = self.linear(count)
 
-        return x, profile, count
+        return pred_x, pred_profiles, pred_counts
 
 
 

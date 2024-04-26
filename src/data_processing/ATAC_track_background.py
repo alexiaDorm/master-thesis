@@ -9,7 +9,7 @@ from utils_data_preprocessing import get_continuous_ATAC_background
 
 NAME_DATASET = ["D8", "D12", "D20", "D22-15"]
 
-with open('../results/background_GC_matched.pkl', 'rb') as file:
+""" with open('../results/background_GC_matched.pkl', 'rb') as file:
     background = pickle.load(file)
 
 for d in NAME_DATASET:
@@ -29,7 +29,7 @@ for d in NAME_DATASET:
         with open(('../results/background/' + f.removeprefix("../results/bam_cell_type/").removesuffix(".bw") + ".pkl"), 'wb') as file:
             pickle.dump(ATAC, file)
 
-        del ATAC
+        del ATAC """
 
 #Merge all datasets into one adding columns: time + cell type 
 pkl_files = glob.glob('../results/background/*/*.pkl')
@@ -40,7 +40,7 @@ with open(pkl_files[0], 'rb') as file:
 ATAC['time'] = [pkl_files[0].split('/')[3]] * ATAC.shape[0]
 ATAC['cell_type'] = [pkl_files[0].split('/')[4].removesuffix('.pkl')] * ATAC.shape[0]
 
-for f in pkl_files[1:3]:
+for f in pkl_files[1:]:
     with open(f, 'rb') as file:
         tmp = pd.DataFrame(pickle.load(file))
     
