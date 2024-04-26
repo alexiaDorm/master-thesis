@@ -7,7 +7,7 @@ import pandas as pd
 
 from utils_data_preprocessing import get_continuous_ATAC_background
 
-NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
+NAME_DATASET = ["D8", "D12", "D20", "D22-15"]
 
 with open('../results/background_GC_matched.pkl', 'rb') as file:
     background = pickle.load(file)
