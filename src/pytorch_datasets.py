@@ -44,9 +44,9 @@ class BiasDataset(Dataset):
         return input, track
 
 class PeaksDataset(Dataset):
-    """Peaks and background sequences for model training"""
+    """Peaks and background sequences for main model training"""
 
-    def __init__(self, path_sequences_peaks, path_sequences_back, path_ATAC_peaks, path_ATAC_back, chr_include, pseudo_bulk_order):
+    def __init__(self, path_sequences_peaks, path_sequences_back, path_ATAC_peaks, path_ATAC_back, chr_include, pseudo_bulk_order, nb_back):
         """
         Arguments:
             path_sequences_peaks (string): Path to the pickle file with peaks regions sequences
@@ -55,6 +55,7 @@ class PeaksDataset(Dataset):
             path_ATAC_back (string): Path to the pickle file with ATAC tracks per datasets and time points for background regions
             chr_include (list of string): only keep the sequences on the provided chromosome, used to define train/split
             pseudo_bulk_order (list of string): define order in which the pseudo_bulk should be returned 
+            nb_back (int): number of background regions to include in training set
 
         """
         self.pseudo_bulk_order = pseudo_bulk_order
@@ -64,7 +65,7 @@ class PeaksDataset(Dataset):
             self.sequences = pickle.load(file)
 
         with open(path_sequences_back, 'rb') as file:
-            self.sequences = pd.concat([self.sequences, pickle.load(file)])
+            self.sequences = pd.concat([self.sequences, pickle.load(file).sample(nb_back)])
 
         #Only keep sequences from provided chromosomes
         self.chr = '|'.join(chr_include)
@@ -83,7 +84,7 @@ class PeaksDataset(Dataset):
             self.ATAC_track = pd.concat([self.ATAC_track, pickle.load(file)])
 
         self.ATAC_track.pseudo_bulk = (self.ATAC_track.time.str + self.ATAC_track.cell_type.str).astype('category')
-        self.pseudo_bulk = pd.get_dummies(self.ATAC_track.time, dtype=float)
+        self.pseudo_bulk = self.ATAC_track.pseudo_bulk
 
         self.ATAC_track = self.ATAC_track.iloc[:,0]
 
