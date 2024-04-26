@@ -9,7 +9,7 @@ from utils_data_preprocessing import get_continuous_ATAC_peaks
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 
-with open('../results/peaks_seq.pkl', 'rb') as file:
+""" with open('../results/peaks_seq.pkl', 'rb') as file:
     peaks = pickle.load(file)
 
 peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('uint32')
@@ -32,7 +32,7 @@ for d in TIME_POINT:
         with open(("../results/ATAC/" + f.removeprefix("../results/bam_cell_type/").removesuffix(".bw") + ".pkl"), 'wb') as file:
             pickle.dump(ATAC, file)
 
-        del ATAC
+        del ATAC """
 
 #Merge all datasets into one adding columns: time + cell type 
 pkl_files = glob.glob('../results/ATAC/*/*.pkl')
@@ -40,7 +40,7 @@ pkl_files = glob.glob('../results/ATAC/*/*.pkl')
 with open(pkl_files[0], 'rb') as file:
     ATAC = pd.DataFrame(pickle.load(file))
 
-ATAC['time'] = ([pkl_files[0].split('/')[3]] * ATAC.shape[0]).astype('category')
+ATAC['time'] = [pkl_files[0].split('/')[3]] * ATAC.shape[0]
 ATAC['cell_type'] = ([pkl_files[0].split('/')[4].removesuffix('.pkl')] * ATAC.shape[0]).astype('category')
 
 for f in pkl_files[1:]:
