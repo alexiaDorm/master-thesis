@@ -21,11 +21,11 @@ print(device)
 def train(config, chr_train, chr_test):
 
     #Load the data
-    train_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background.pkl', chr_train)
+    train_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background1.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=config["batch_size"],
                         shuffle=True, num_workers=2)
     
-    test_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background.pkl', chr_test)
+    test_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background1.pkl', chr_test)
     test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=2)
 
