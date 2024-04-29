@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 import pandas as pd
 
-from utils_data_preprocessing.py import one_hot_encode
+from data_processing.utils_data_preprocessing import one_hot_encode
 
 class BiasDataset(Dataset):
     """Background sequences for bias model training"""
