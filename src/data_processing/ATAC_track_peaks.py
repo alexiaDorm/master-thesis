@@ -53,10 +53,10 @@ pkl_files = glob.glob('../results/ATAC/*/*.pkl')
     del tmp """
 
 ATAC = pd.concat(pd.read_pickle(f) for f in pkl_files[:13])
-with open('../results/ATAC_peaks.pkl', 'wb') as file:
+with open('../results/ATAC_peaks1.pkl', 'wb') as file:
             pickle.dump(ATAC, file)
 del ATAC
 
 ATAC = pd.concat(pd.read_pickle(f) for f in pkl_files[13:])
-with open('../results/ATAC_peaks.pkl', 'wb') as file:
+with open('../results/ATAC_peaks2.pkl', 'wb') as file:
             pickle.dump(ATAC, file)
