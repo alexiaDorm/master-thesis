@@ -180,7 +180,7 @@ result = tune.run(
     config=config,
     num_samples=10,
     scheduler=scheduler,
-    checkpoint_at_end=True)
+    checkpoint_at_end=False)
 
 best_trial = result.get_best_trial("loss", "min", "last")
 print(f"Best trial config: {best_trial.config}")
