@@ -141,7 +141,7 @@ class CATAC(nn.Module):
         profile_kernel_size: int (default 75)
             size of the kernel in the profile convolution
 
-        out_pred_len: int (default 1000)
+        out_pred_len: int (default 1024)
             number of bp for which ATAC signal is predicted
         
         nb_pred: int (default 1)
@@ -221,7 +221,7 @@ class CATAC(nn.Module):
         self.count_heads = nn.ModuleList()
         for i in range(self.nb_pred):
             self.count_heads.append(nn.Linear(self.nb_filters,1))
-
+        
     def forward(self,x):
         
         #Residual + Dilated convolution layers
@@ -245,7 +245,7 @@ class CATAC(nn.Module):
         tmp_x, pred_x = [x]*self.nb_pred, []
         for i in range(self.nb_pred):
             for layer in self.pb_convlayers[i]:
-                conv_x = F.relu(layer(x))
+                conv_x = F.relu(layer(tmp_x[i]))
 
                 #Crop output previous layer to size of current 
                 x_len = tmp_x[i].size(2); conv_x_len = conv_x.size(2)
@@ -256,11 +256,12 @@ class CATAC(nn.Module):
                 tmp_x[i] = conv_x + tmp_x[i] 
 
             pred_x.append(tmp_x[i])
-
+        
         #Profile head
         #-----------------------------------------------
         pred_profiles = []
-        for i, p in enumerate(self.profile_head()):
+        for i, p in enumerate(self.profile_heads):
+            
             #Apply conv layer
             profile = p(pred_x[i])
 
@@ -270,17 +271,17 @@ class CATAC(nn.Module):
             profile = self.flatten(profile)
 
             pred_profiles.append(profile)
-
+        
         #Total count head
         #-----------------------------------------------
         pred_counts = []
-        for i, c in enumerate(self.count_heads()):
+        for i, c in enumerate(self.count_heads):
             #Apply global average poolling
-            count = self.global_pool(pred_x)  
+            count = self.global_pool(pred_x[i])  
             count = count.squeeze()
             
             #Aplly linear layer
-            count = self.linear(count)
+            count = c(count)
 
         return pred_x, pred_profiles, pred_counts
 

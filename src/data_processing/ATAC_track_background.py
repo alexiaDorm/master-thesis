@@ -3,7 +3,7 @@ import numpy as np
 import glob
 import os
 import pandas as pd
-#import pyBigWig
+import pyBigWig
 
 
 from utils_data_preprocessing import get_continuous_ATAC_background
@@ -50,6 +50,12 @@ pkl_files = glob.glob('../results/background/*/*.pkl')
 
     del tmp """
 
-ATAC = pd.concat(pd.read_pickle(f) for f in pkl_files[:15])
-with open('../results/ATAC_background.pkl', 'wb') as file:
+ATAC = pd.concat(pd.read_pickle(f) for f in pkl_files[:13])
+with open('../results/ATAC_background1.pkl', 'wb') as file:
+            pickle.dump(ATAC, file)
+
+del ATAC
+
+ATAC = pd.concat(pd.read_pickle(f) for f in pkl_files[13:])
+with open('../results/ATAC_background2.pkl', 'wb') as file:
             pickle.dump(ATAC, file)
