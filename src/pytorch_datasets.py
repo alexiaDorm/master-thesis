@@ -23,7 +23,7 @@ class BiasDataset(Dataset):
 
         #Only keep sequences from provided chromosomes
         self.chr = '|'.join(chr_include)
-        self.sequences = self.sequences[self.sequeneces.chr.str.contains(self.chr)]
+        self.sequences = self.sequences[self.sequences.chr.str.contains(self.chr)]
         self.sequences = self.sequences.sequence
 
         #Encode sequences
