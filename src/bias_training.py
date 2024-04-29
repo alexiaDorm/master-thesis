@@ -29,9 +29,14 @@ def train(config, chr_train, chr_test):
     train_dataloader = DataLoader(train_dataset, batch_size=config["batch_size"],
                         shuffle=True, num_workers=2)
     
+    print('ok')
+    
     test_dataset = BiasDataset( data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_background1.pkl', chr_test)
     test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=2)
+    
+    print('ok')
+
 
     #Initialize model, loss, and optimizer
     biasModel = BPNet()
