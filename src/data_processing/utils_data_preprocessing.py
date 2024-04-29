@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import gzip
 
-import anndata
+#import anndata
 import pyfaidx
 import pyBigWig
 
@@ -12,7 +12,7 @@ from torch.utils.data import Dataset, DataLoader
 NAME_DATASET = ['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
 
 """ Concatenate all time points into a single anndata. Save it at provided save path. """
-def concat_data(data_path, cell_type_path, save_path, name_datasets=NAME_DATASET):
+""" def concat_data(data_path, cell_type_path, save_path, name_datasets=NAME_DATASET):
 
     #Load the data + basic filtering
     #----------------------------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ def pseudo_bulk(adata, col):
     return anndata.AnnData(
         indicator.values.T @ adata.X,
         var=adata.var,
-        obs=pd.DataFrame(index=indicator.columns))
+        obs=pd.DataFrame(index=indicator.columns)) """
 
 """ Fetch the sequence on the reference genome at ATAC peaks. """
 def fetch_sequence(peaks, path_genome, len_seq = 2114):
