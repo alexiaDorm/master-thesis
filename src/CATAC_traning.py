@@ -11,7 +11,7 @@ from ray import tune
 from ray.train import Checkpoint, session
 from ray.tune.schedulers import ASHAScheduler
 
-from pytorch_datasets import BiasDataset
+from pytorch_datasets import PeaksDataset
 from models import CATAC
 from eval_metrics import ATACloss, counts_metrics, profile_metrics
 
@@ -21,20 +21,27 @@ print(device)
 def train(config, chr_train, chr_test):
 
     #Load the data
-    train_dataset = BiasDataset('../results/peaks_seq1.pkl', '../results/ATAC_peaks1.pkl', chr_train)
+    train_dataset = PeaksDataset('../results/peaks_seq1.pkl', '../results/background_GC_matched.pkl',
+                                 '../results/ATAC_peaks1.pkl', '../results/ATAC_background1.pkl', 
+                                 chr_train, pseudo_bulk_order, nb_back)
     train_dataloader = DataLoader(train_dataset, batch_size=config["batch_size"],
                         shuffle=True, num_workers=2)
     
-    test_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background1.pkl', chr_test)
+    test_dataset = PeaksDataset('../results/peaks_seq1.pkl', '../results/background_GC_matched.pkl',
+                                 '../results/ATAC_peaks1.pkl', '../results/ATAC_background1.pkl', 
+                                 chr_test, pseudo_bulk_order, nb_back)    
     test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=2)
 
     #Initialize model, loss, and optimizer
-    biasModel = BPNet()    
-    biasModel.to(device)
+    model = CATAC(nb_conv=8, nb_filters=64, first_kernel=21, 
+                      rest_kernel=3, profile_kernel_size=75, out_pred_len=1024, 
+                      nb_pred=1, nb_cell_type_CN = 0):
+)    
+    model.to(device)
 
     criterion = ATACloss(weight_MSE=config["weight_MSE"])
-    optimizer = torch.optim.Adam(biasModel.parameters(), lr=config["lr"])
+    optimizer = torch.optim.Adam(model.parameters(), lr=config["lr"])
 
     """ #Torcheck is used to catched common issues in model class definition: weights not training or become nan or inf
     torcheck.register(optimizer)
@@ -47,7 +54,7 @@ def train(config, chr_train, chr_test):
     if checkpoint:
         checkpoint_state = checkpoint.to_dict()
         start_epoch = checkpoint_state["epoch"]
-        biasModel.load_state_dict(checkpoint_state["net_state_dict"])
+        model.load_state_dict(checkpoint_state["net_state_dict"])
         optimizer.load_state_dict(checkpoint_state["optimizer_state_dict"])
     else:
         start_epoch = 0
@@ -58,7 +65,7 @@ def train(config, chr_train, chr_test):
     corr_test, jsd_test = [], []
     for epoch in range(start_epoch, config["nb_epoch"]):
         
-        biasModel.train() 
+        model.train() 
         running_loss, epoch_steps = 0.0, 0
 
         for i, data in tqdm(enumerate(train_dataloader)):
@@ -68,7 +75,7 @@ def train(config, chr_train, chr_test):
 
             optimizer.zero_grad()
 
-            _, profile, count = biasModel(inputs)
+            _, profile, count = model(inputs)
             
             loss = criterion(tracks, profile, count)
             loss.backward()
@@ -97,7 +104,7 @@ def train(config, chr_train, chr_test):
                 inputs = torch.reshape(inputs, (-1,4,2114)).to(device)
                 tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
 
-                _, profile, count = biasModel(inputs)
+                _, profile, count = model(inputs)
 
                 #Compute loss
                 loss = criterion(tracks, profile, count)
@@ -117,7 +124,7 @@ def train(config, chr_train, chr_test):
 
         checkpoint_data = {
             "epoch": epoch,
-            "net_state_dict": biasModel.state_dict(),
+            "net_state_dict": model.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
         }
         checkpoint = Checkpoint.from_dict(checkpoint_data)
@@ -132,7 +139,7 @@ def train(config, chr_train, chr_test):
         #Early stopping
         if val_loss < best_loss:
             best_loss = val_loss
-            best_model_weight = copy.deepcopy(biasModel.state_dict())
+            best_model_weight = copy.deepcopy(model.state_dict())
             patience = 5
         
         else:
@@ -142,7 +149,7 @@ def train(config, chr_train, chr_test):
             break
     
     #Load best model weights
-    biasModel.load_state_dict(best_model_weight)
+    model.load_state_dict(best_model_weight)
 
     print('Finished Training')
 
@@ -151,7 +158,7 @@ def train(config, chr_train, chr_test):
     "nb_epoch": tune.choice([2 ** i for i in range(9)]),
     "lr": tune.loguniform(1e-4, 1e-1),
     "batch_size": tune.choice([8,16,32,64])
-} """
+}  """
 
 config = {
     "weight_MSE": 1,
@@ -172,6 +179,9 @@ scheduler = ASHAScheduler(
 chrom_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
 chrom_test = ['6','13''22']
 
+pseudo_bulk_order = []
+nb_back = 0
+
 #train(config, chrom_train, chrom_test)
 
 result = tune.run(
@@ -180,7 +190,7 @@ result = tune.run(
     config=config,
     num_samples=10,
     scheduler=scheduler,
-    checkpoint_at_end=True)
+    checkpoint_at_end=False)
 
 best_trial = result.get_best_trial("loss", "min", "last")
 print(f"Best trial config: {best_trial.config}")
