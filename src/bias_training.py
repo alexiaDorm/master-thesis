@@ -8,7 +8,7 @@ from functools import partial
 import time
 
 from ray import tune
-from ray.air import Checkpoint, session
+from ray.train import Checkpoint, session
 from ray.tune.schedulers import ASHAScheduler
 
 from pytorch_datasets import BiasDataset
