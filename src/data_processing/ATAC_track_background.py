@@ -1,9 +1,10 @@
 import pickle
 import numpy as np
 import glob
-#import pyBigWig
 import os
 import pandas as pd
+#import pyBigWig
+
 
 from utils_data_preprocessing import get_continuous_ATAC_background
 
