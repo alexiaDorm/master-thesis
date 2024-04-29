@@ -6,6 +6,7 @@ import numpy as np
 import copy
 from functools import partial
 import time
+import os
 
 import ray
 from ray import tune
@@ -21,7 +22,8 @@ print(device)
 
 def train(config, chr_train, chr_test):
 
-    !pwd
+    print(os.getcwd())
+
 
     #Load the data
     train_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background1.pkl', chr_train)

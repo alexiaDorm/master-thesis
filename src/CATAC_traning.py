@@ -6,6 +6,7 @@ import numpy as np
 import copy
 from functools import partial
 import time
+import os
 
 from ray import tune
 from ray.train import Checkpoint, session
@@ -19,6 +20,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
 def train(config, chr_train, chr_test):
+
+    print(os.getcwd())
 
     #Load the data
     train_dataset = PeaksDataset('../results/peaks_seq1.pkl', '../results/background_GC_matched.pkl',
