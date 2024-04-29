@@ -7,6 +7,7 @@ import copy
 from functools import partial
 import time
 
+import ray
 from ray import tune
 from ray.train import Checkpoint, session
 from ray.tune.schedulers import ASHAScheduler
@@ -174,11 +175,12 @@ chrom_test = ['6','13''22']
 
 #train(config, chrom_train, chrom_test)
 
+ray.init()
 result = tune.run(
     partial(train, chr_train=chrom_train, chr_test=chrom_test),
     resources_per_trial={"cpu": 2, "gpu": 1},
     config=config,
-    num_samples=10,
+    num_samples=1,
     scheduler=scheduler,
     checkpoint_at_end=False)
 
@@ -187,3 +189,5 @@ print(f"Best trial config: {best_trial.config}")
 print(f"Best trial final validation loss: {best_trial.last_result['loss']}")
 print(f"Best trial final validation correlation for count head: {best_trial.last_result['count_correlation']}")
 print(f"Best trial final validation jsd for profile head: {best_trial.last_result['profile_jsd']}")
+
+ray.shutdown()
