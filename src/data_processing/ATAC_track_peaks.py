@@ -37,7 +37,7 @@ for d in TIME_POINT:
 #Merge all datasets into one adding columns: time + cell type 
 pkl_files = glob.glob('../results/ATAC/*/*.pkl')
 
-for f in pkl_files[1:]:
+for f in pkl_files:
     with open(f, 'rb') as file:
         tmp = pd.DataFrame(pickle.load(file))
 
