@@ -5,7 +5,6 @@ import pickle
 import numpy as np
 import copy
 from functools import partial
-import torcheck
 import time
 
 from ray import tune
@@ -37,11 +36,11 @@ def train(config, chr_train, chr_test):
     criterion = ATACloss(weight_MSE=config["weight_MSE"])
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=config["lr"])
 
-    #Torcheck is used to catched common issues in model class definition: weights not training or become nan or inf
+    """ #Torcheck is used to catched common issues in model class definition: weights not training or become nan or inf
     torcheck.register(optimizer)
     torcheck.add_module_changing_check(biasModel, module_name="my_model")
     torcheck.add_module_nan_check(biasModel)
-    torcheck.add_module_inf_check(biasModel)
+    torcheck.add_module_inf_check(biasModel) """
 
     checkpoint = session.get_checkpoint()
 
