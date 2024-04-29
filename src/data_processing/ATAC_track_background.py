@@ -1,7 +1,7 @@
 import pickle
 import numpy as np
 import glob
-import pyBigWig
+#import pyBigWig
 import os
 import pandas as pd
 
