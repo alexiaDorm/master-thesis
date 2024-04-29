@@ -83,6 +83,7 @@ def pseudo_bulk(adata, col):
         obs=pd.DataFrame(index=indicator.columns)) """
 
 #Fetch the sequence on the reference genome at ATAC peaks
+#yo
 def fetch_sequence(peaks, path_genome, len_seq = 2114):
     
     genome = pyfaidx.Fasta(path_genome)
