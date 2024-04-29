@@ -12,7 +12,7 @@ from ray.train import Checkpoint, session
 from ray.tune.schedulers import ASHAScheduler
 
 from pytorch_datasets import BiasDataset
-from models import BPNet
+from models import CATAC
 from eval_metrics import ATACloss, counts_metrics, profile_metrics
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -21,7 +21,7 @@ print(device)
 def train(config, chr_train, chr_test):
 
     #Load the data
-    train_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background1.pkl', chr_train)
+    train_dataset = BiasDataset('../results/peaks_seq1.pkl', '../results/ATAC_peaks1.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=config["batch_size"],
                         shuffle=True, num_workers=2)
     
@@ -30,7 +30,7 @@ def train(config, chr_train, chr_test):
                         shuffle=True, num_workers=2)
 
     #Initialize model, loss, and optimizer
-    biasModel = BPNet()
+    biasModel = BPNet()    
     biasModel.to(device)
 
     criterion = ATACloss(weight_MSE=config["weight_MSE"])

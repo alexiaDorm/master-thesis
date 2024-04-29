@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 class BPNet(nn.Module):
-    def __init__(self, nb_conv=8, nb_filters=64, first_kernel=21, rest_kernel=3, profile_kernel_size=75, out_pred_len=1000):
+    def __init__(self, nb_conv=8, nb_filters=64, first_kernel=21, rest_kernel=3, profile_kernel_size=75, out_pred_len=1024):
         super().__init__()
         """ BPNet architechture as in paper 
         
@@ -17,7 +17,7 @@ class BPNet(nn.Module):
             number of convolutional layers
 
         nb_filters: int (default 64)
-            number of filters in the convolutional layers
+            number of filters in the convolusqueuetional layers
 
         first_kernel: int (default 25)
             size of the kernel in the first convolutional layer
@@ -28,7 +28,7 @@ class BPNet(nn.Module):
         profile_kernel_size: int (default 75)
             size of the kernel in the profile convolution
 
-        out_pred_len: int (default 1000)
+        out_pred_len: int (default 1024)
             number of bp for which ATAC signal is predicted
 
         Model Architecture 
