@@ -20,20 +20,16 @@ from eval_metrics import ATACloss, counts_metrics, profile_metrics
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
+data_dir = "/data/gpfs-1/users/adorman_m/work/master-thesis/results/"
+
 def train(config, chr_train, chr_test):
 
-    print("-----------------------------------------------------------------------")
-    print(os.getcwd())
-    print("------------------------------------------------------------------------")
-
-
-
     #Load the data
-    train_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background1.pkl', chr_train)
+    train_dataset = BiasDataset(data_dir + '../results/background_GC_matched.pkl', data_dir + 'ATAC_background1.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=config["batch_size"],
                         shuffle=True, num_workers=2)
     
-    test_dataset = BiasDataset('../results/background_GC_matched.pkl', '../results/ATAC_background1.pkl', chr_test)
+    test_dataset = BiasDataset('background_GC_matched.pkl', '../results/ATAC_background1.pkl', chr_test)
     test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=2)
 
