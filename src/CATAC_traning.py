@@ -75,7 +75,7 @@ def train(config, chr_train, chr_test):
         running_loss, epoch_steps = 0.0, 0
 
         for i, data in tqdm(enumerate(train_dataloader)):
-            inputs, _, _, tracks = data 
+            inputs, tracks = data 
             inputs = torch.reshape(inputs, (-1,4,2114)).to(device)
             tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
 

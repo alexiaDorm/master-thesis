@@ -67,7 +67,7 @@ def train(config, chr_train, chr_test):
         running_loss, epoch_steps = 0.0, 0
 
         for i, data in tqdm(enumerate(train_dataloader)):
-            inputs, _, _, tracks = data 
+            inputs, tracks = data 
             inputs = torch.reshape(inputs, (-1,4,2114)).to(device)
             tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
 
@@ -186,7 +186,7 @@ train(config, chrom_train, chrom_test)
 """ ray.init()
 result = tune.run(
     partial(train, chr_train=chrom_train, chr_test=chrom_test),
-    resources_per_trial={"cpu": 4, "gpu": 0},
+    resources_per_trial={"cpu": 4, "gpu": 1},
     config=config,
     num_samples=1,
     scheduler=scheduler,

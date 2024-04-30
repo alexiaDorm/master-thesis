@@ -72,18 +72,22 @@ class PeaksDataset(Dataset):
         self.sequences = self.sequences[self.sequences.chr.str.contains(self.chr)]
         self.sequences = self.sequences.sequence
 
+        #here
+        self.sequences = self.sequences[:1000]
+        print(self.sequences)
+
+        #Load the ATAC track
+        with open(path_ATAC_peaks, 'rb') as file:
+            self.ATAC_track = pickle.load(file).loc[self.sequences.index] #here
+
+        with open(path_ATAC_back, 'rb') as file:
+            self.ATAC_track = pd.concat([self.ATAC_track, pickle.load(file).loc[self.sequences.index]]) #here
+
         #Encode sequences
         self.len_seq = len(self.sequences.iloc[0])
         self.sequences = self.sequences.apply(lambda x: one_hot_encode(x))
 
-        #Load the ATAC track
-        with open(path_ATAC_peaks, 'rb') as file:
-            self.ATAC_track = pickle.load(file)
-
-        with open(path_ATAC_back, 'rb') as file:
-            self.ATAC_track = pd.concat([self.ATAC_track, pickle.load(file)])
-
-        self.ATAC_track.pseudo_bulk = (self.ATAC_track.time.str + self.ATAC_track.cell_type.str).astype('category')
+        self.ATAC_track['pseudo_bulk'] = (self.ATAC_track.time.astype(str) + self.ATAC_track.cell_type.astype(str)).astype('category')
         self.pseudo_bulk = self.ATAC_track.pseudo_bulk
 
         self.ATAC_track = self.ATAC_track.iloc[:,0]
