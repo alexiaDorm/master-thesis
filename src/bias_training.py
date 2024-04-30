@@ -184,7 +184,7 @@ chrom_test = ['6','13''22']
 ray.init()
 result = tune.run(
     partial(train, chr_train=chrom_train, chr_test=chrom_test),
-    resources_per_trial={"cpu": 2, "gpu": 1},
+    resources_per_trial={"cpu": 4, "gpu": 0},
     config=config,
     num_samples=1,
     scheduler=scheduler,
