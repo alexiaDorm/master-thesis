@@ -7,6 +7,7 @@ import copy
 from functools import partial
 import time
 import os
+import torcheck
 
 import ray
 from ray import tune
@@ -28,15 +29,10 @@ def train(config, chr_train, chr_test):
     train_dataset = BiasDataset(data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_background1.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=config["batch_size"],
                         shuffle=True, num_workers=2)
-    
-    print('ok')
-    
+        
     test_dataset = BiasDataset( data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_background1.pkl', chr_test)
     test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=2)
-    
-    print('ok')
-
 
     #Initialize model, loss, and optimizer
     biasModel = BPNet()
@@ -45,11 +41,11 @@ def train(config, chr_train, chr_test):
     criterion = ATACloss(weight_MSE=config["weight_MSE"])
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=config["lr"])
 
-    """ #Torcheck is used to catched common issues in model class definition: weights not training or become nan or inf
+    #Torcheck is used to catched common issues in model class definition: weights not training or become nan or inf
     torcheck.register(optimizer)
     torcheck.add_module_changing_check(biasModel, module_name="my_model")
     torcheck.add_module_nan_check(biasModel)
-    torcheck.add_module_inf_check(biasModel) """
+    torcheck.add_module_inf_check(biasModel)
 
     checkpoint = session.get_checkpoint()
 
@@ -93,6 +89,8 @@ def train(config, chr_train, chr_test):
                     % (epoch + 1, i + 1, running_loss / epoch_steps)
                 )
 
+            break
+        break
         epoch_loss = running_loss / len(train_dataloader)
         train_loss.append(epoch_loss)
 
