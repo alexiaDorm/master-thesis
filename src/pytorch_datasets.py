@@ -93,7 +93,7 @@ class PeaksDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        input = self.sequences[idx]
+        input = self.sequences.iloc[idx]
         tracks = self.ATAC_track[self.sequences.index[idx]]
 
         #Order tracks so that always returned in same order
