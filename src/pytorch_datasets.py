@@ -72,16 +72,12 @@ class PeaksDataset(Dataset):
         self.sequences = self.sequences[self.sequences.chr.str.contains(self.chr)]
         self.sequences = self.sequences.sequence
 
-        #here
-        self.sequences = self.sequences[:1000]
-        print(self.sequences)
-
         #Load the ATAC track
         with open(path_ATAC_peaks, 'rb') as file:
-            self.ATAC_track = pickle.load(file).loc[self.sequences.index] #here
+            self.ATAC_track = pickle.load(file)
 
         with open(path_ATAC_back, 'rb') as file:
-            self.ATAC_track = pd.concat([self.ATAC_track, pickle.load(file).loc[self.sequences.index]]) #here
+            self.ATAC_track = pd.concat([self.ATAC_track, pickle.load(file)]) 
 
         #Encode sequences
         self.len_seq = len(self.sequences.iloc[0])

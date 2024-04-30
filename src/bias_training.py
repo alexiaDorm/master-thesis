@@ -47,21 +47,21 @@ def train(config, chr_train, chr_test):
     torcheck.add_module_nan_check(biasModel)
     torcheck.add_module_inf_check(biasModel)
 
-    checkpoint = session.get_checkpoint()
+    #checkpoint = session.get_checkpoint()
 
-    if checkpoint:
+    """ if checkpoint:
         checkpoint_state = checkpoint.to_dict()
         start_epoch = checkpoint_state["epoch"]
         biasModel.load_state_dict(checkpoint_state["net_state_dict"])
         optimizer.load_state_dict(checkpoint_state["optimizer_state_dict"])
     else:
-        start_epoch = 0
+        start_epoch = 0 """
 
     best_loss, best_model_weight, patience = float('inf'), None, 5
     
     train_loss, test_loss = [], []
     corr_test, jsd_test = [], []
-    for epoch in range(start_epoch, config["nb_epoch"]):
+    for epoch in range(0, config["nb_epoch"]):
         
         biasModel.train() 
         running_loss, epoch_steps = 0.0, 0
@@ -88,8 +88,6 @@ def train(config, chr_train, chr_test):
                     "[%d, %5d] loss: %.3f"
                     % (epoch + 1, i + 1, running_loss / epoch_steps)
                 )
-
-            break
 
         epoch_loss = running_loss / len(train_dataloader)
         train_loss.append(epoch_loss)
@@ -122,7 +120,7 @@ def train(config, chr_train, chr_test):
         corr_test.append(spear_corr/len(test_dataloader))
         jsd_test.append(jsd/len(test_dataloader))
 
-        checkpoint_data = {
+        """ checkpoint_data = {
             "epoch": epoch,
             "net_state_dict": biasModel.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
@@ -134,7 +132,7 @@ def train(config, chr_train, chr_test):
              "count_correlation": spear_corr/len(test_dataloader), 
              "profile_jsd": jsd/len(test_dataloader)},
             checkpoint=checkpoint,
-        )
+        ) """
 
         #Early stopping
         if val_loss < best_loss:
@@ -148,12 +146,15 @@ def train(config, chr_train, chr_test):
         if patience == 0:
             break
 
-        break
     
     #Load best model weights
     biasModel.load_state_dict(best_model_weight)
 
     print('Finished Training')
+
+    return best_model_weight, train_loss, test_loss, corr_test, jsd_test
+
+    
 
 """ config = {
     "weight_MSE": tune.choice([2 ** i for i in range(9)]),
@@ -164,7 +165,7 @@ def train(config, chr_train, chr_test):
 
 config = {
     "weight_MSE": 1,
-    "nb_epoch": 10,
+    "nb_epoch": 20,
     "lr": 0.005,
     "batch_size": 32
 }
@@ -181,7 +182,18 @@ scheduler = ASHAScheduler(
 chrom_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
 chrom_test = ['6','13''22']
 
-train(config, chrom_train, chrom_test)
+best_model_weight, train_loss, test_loss, corr_test, jsd_test = train(config, chrom_train, chrom_test)
+
+with open('../results/best_model_weight.pkl', 'wb') as file:
+    pickle.dump(best_model_weight, file)
+with open('../results/train_loss.pkl', 'wb') as file:
+    pickle.dump(train_loss, file)
+with open('../results/test_loss.pkl', 'wb') as file:
+    pickle.dump(test_loss, file)
+with open('../results/corr_test.pkl', 'wb') as file:
+    pickle.dump(corr_test, file)
+with open('../results/jsd_test.pkl', 'wb') as file:
+    pickle.dump(jsd_test, file)
 
 """ ray.init()
 result = tune.run(
