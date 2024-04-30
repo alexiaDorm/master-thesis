@@ -179,9 +179,9 @@ scheduler = ASHAScheduler(
 chrom_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
 chrom_test = ['6','13''22']
 
-#train(config, chrom_train, chrom_test)
+train(config, chrom_train, chrom_test)
 
-ray.init()
+""" ray.init()
 result = tune.run(
     partial(train, chr_train=chrom_train, chr_test=chrom_test),
     resources_per_trial={"cpu": 4, "gpu": 0},
@@ -197,3 +197,4 @@ print(f"Best trial final validation correlation for count head: {best_trial.last
 print(f"Best trial final validation jsd for profile head: {best_trial.last_result['profile_jsd']}")
 
 ray.shutdown()
+ """
