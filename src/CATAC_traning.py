@@ -7,6 +7,7 @@ import copy
 from functools import partial
 import time
 import os
+import torcheck
 
 from ray import tune
 from ray.train import Checkpoint, session
@@ -19,38 +20,40 @@ from eval_metrics import ATACloss, counts_metrics, profile_metrics
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
+data_dir = "/data/gpfs-1/users/adorman_m/work/master-thesis/results/"
+
 def train(config, chr_train, chr_test):
 
     print(os.getcwd())
 
     #Load the data
-    train_dataset = PeaksDataset('../results/peaks_seq1.pkl', '../results/background_GC_matched.pkl',
-                                 '../results/ATAC_peaks1.pkl', '../results/ATAC_background1.pkl', 
+    train_dataset = PeaksDataset(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched.pkl',
+                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_background.pkl', 
                                  chr_train, pseudo_bulk_order, nb_back)
     train_dataloader = DataLoader(train_dataset, batch_size=config["batch_size"],
                         shuffle=True, num_workers=2)
     
-    test_dataset = PeaksDataset('../results/peaks_seq1.pkl', '../results/background_GC_matched.pkl',
-                                 '../results/ATAC_peaks1.pkl', '../results/ATAC_background1.pkl', 
-                                 chr_test, pseudo_bulk_order, nb_back)    
+    test_dataset = PeaksDataset(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched.pkl',
+                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_background.pkl', 
+                                 chr_test, pseudo_bulk_order, nb_back)   
     test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=2)
 
     #Initialize model, loss, and optimizer
     model = CATAC(nb_conv=8, nb_filters=64, first_kernel=21, 
                       rest_kernel=3, profile_kernel_size=75, out_pred_len=1024, 
-                      nb_pred=1, nb_cell_type_CN = 0):
-)    
+                      nb_pred=25, nb_cell_type_CN = 0)
+        
     model.to(device)
 
     criterion = ATACloss(weight_MSE=config["weight_MSE"])
     optimizer = torch.optim.Adam(model.parameters(), lr=config["lr"])
 
-    """ #Torcheck is used to catched common issues in model class definition: weights not training or become nan or inf
+    #Torcheck is used to catched common issues in model class definition: weights not training or become nan or inf
     torcheck.register(optimizer)
-    torcheck.add_module_changing_check(biasModel, module_name="my_model")
-    torcheck.add_module_nan_check(biasModel)
-    torcheck.add_module_inf_check(biasModel) """
+    torcheck.add_module_changing_check(model, module_name="my_model")
+    torcheck.add_module_nan_check(model)
+    torcheck.add_module_inf_check(model)
 
     checkpoint = session.get_checkpoint()
 
@@ -80,7 +83,7 @@ def train(config, chr_train, chr_test):
 
             _, profile, count = model(inputs)
             
-            loss = criterion(tracks, profile, count)
+            loss = np.sum((criterion(tracks[j], profile[j], count[j]) for j in len(profile)))
             loss.backward()
             optimizer.step()
 
@@ -110,15 +113,15 @@ def train(config, chr_train, chr_test):
                 _, profile, count = model(inputs)
 
                 #Compute loss
-                loss = criterion(tracks, profile, count)
+                loss = np.sum((criterion(tracks[j], profile[j], count[j]) for j in len(profile)))
                 val_loss += loss.cpu().item()
 
                 #Compute evaluation metrics: pearson correlation
-                corr = counts_metrics(tracks, count)
+                corr = np.sum((counts_metrics(tracks[j], count[j])) for j in len(tracks))
                 spear_corr += corr
 
                 #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
-                j = profile_metrics(tracks, profile)
+                j = np.sum((profile_metrics(tracks[j], profile[j]) for j in len(tracks)))
                 jsd += j
 
         test_loss.append(val_loss /len(test_dataloader))
