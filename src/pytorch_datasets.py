@@ -87,35 +87,25 @@ class PeaksDataset(Dataset):
         #Encode sequences
         self.len_seq = len(self.sequences.iloc[0])
         self.sequences = self.sequences.apply(lambda x: one_hot_encode(x))
-        print('yo')
 
         self.pseudo_bulk = self.ATAC_track.pseudo_bulk.astype('category')
-        print('genau')
 
         self.ATAC_track = self.ATAC_track.iloc[:,0]
-        print('genau2x')
 
     def __len__(self):
         return self.sequences.shape[0]
 
     def __getitem__(self, idx):
         
-        print('a')
         input = torch.from_numpy(self.sequences.iloc[idx])
-        print('b')
         tracks = self.ATAC_track.loc[self.sequences.index[idx]]
-        print('c')
 
         #Order tracks so that always returned in same order
         pseudo_bulk = self.pseudo_bulk[self.sequences.index[idx]]
-        print('d')
         tracks.index = pseudo_bulk
-        print(tracks.index)
         
-        print(tracks.shape)
         tracks = tracks.loc[self.pseudo_bulk_order]
         tracks = np.stack(tracks.values)
-        print(tracks.shape)
         tracks = torch.from_numpy(tracks)
 
         return input, tracks
