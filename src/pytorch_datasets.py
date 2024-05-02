@@ -93,6 +93,7 @@ class PeaksDataset(Dataset):
         print('genau')
 
         self.ATAC_track = self.ATAC_track.iloc[:,0]
+        print('genau2x')
 
     def __len__(self):
         return self.sequences.shape[0]
