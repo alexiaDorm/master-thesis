@@ -7,12 +7,11 @@ import copy
 from functools import partial
 import time
 import os
-import torcheck
 
-import ray
+""" import ray
 from ray import tune
 from ray.train import Checkpoint, session
-from ray.tune.schedulers import ASHAScheduler
+from ray.tune.schedulers import ASHAScheduler """
 
 from pytorch_datasets import BiasDataset
 from models import BPNet
@@ -40,12 +39,6 @@ def train(config, chr_train, chr_test):
 
     criterion = ATACloss(weight_MSE=config["weight_MSE"])
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=config["lr"])
-
-    #Torcheck is used to catched common issues in model class definition: weights not training or become nan or inf
-    torcheck.register(optimizer)
-    torcheck.add_module_changing_check(biasModel, module_name="my_model")
-    torcheck.add_module_nan_check(biasModel)
-    torcheck.add_module_inf_check(biasModel)
 
     #checkpoint = session.get_checkpoint()
 
@@ -146,6 +139,8 @@ def train(config, chr_train, chr_test):
         if patience == 0:
             break
 
+        break
+
     
     #Load best model weights
     biasModel.load_state_dict(best_model_weight)
@@ -170,13 +165,13 @@ config = {
     "batch_size": 32
 }
 
-scheduler = ASHAScheduler(
+""" scheduler = ASHAScheduler(
         metric="loss",
         mode="min",
         max_t=20,
         grace_period=1,
         reduction_factor=2,
-    )
+    ) """
 
 #Define chromosome split 
 chrom_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
