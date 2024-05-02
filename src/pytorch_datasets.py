@@ -35,14 +35,10 @@ class BiasDataset(Dataset):
         #Only keep track for sequences in chrom test
         self.ATAC_track =  self.ATAC_track.loc[self.sequences.index]
 
-        print('okay')
-
     def __len__(self):
         return self.ATAC_track.shape[0]
 
     def __getitem__(self, idx):
-        print('-----------------')
-        print(idx)
         track = self.ATAC_track.iloc[idx,0]
         input = torch.from_numpy(self.sequences[self.ATAC_track.index[idx]])
 

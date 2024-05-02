@@ -82,8 +82,8 @@ def train(config, chr_train, chr_test):
                     "[%d, %5d] loss: %.3f"
                     % (epoch + 1, i + 1, running_loss / epoch_steps)
                 )
-            break
-        break
+            
+        
         epoch_loss = running_loss / len(train_dataloader)
         train_loss.append(epoch_loss)
 
