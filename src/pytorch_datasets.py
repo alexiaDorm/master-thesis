@@ -22,8 +22,7 @@ class BiasDataset(Dataset):
             self.sequences = pickle.load(file)
 
         #Only keep sequences from provided chromosomes
-        self.chr = '|'.join(chr_include)
-        self.sequences = self.sequences[self.sequences.chr.str.contains(self.chr)]
+        self.sequences = self.sequences[self.sequences.chr.isin(chr_include)]
         self.sequences = self.sequences.sequence
 
         #Encode sequences
@@ -75,8 +74,7 @@ class PeaksDataset(Dataset):
             self.sequences = pd.concat([self.sequences, pickle.load(file).sample(nb_back)])
 
         #Only keep sequences from provided chromosomes
-        self.chr = '|'.join(chr_include)
-        self.sequences = self.sequences[self.sequences.chr.str.contains(self.chr)]
+        self.sequences = self.sequences[self.sequences.chr.isin(chr_include)]
         print(np.unique(self.sequences.chr))
         self.sequences = self.sequences.sequence
 
@@ -107,7 +105,7 @@ class PeaksDataset(Dataset):
         #Order tracks so that always returned in same order
         pseudo_bulk = self.pseudo_bulk[self.sequences.index[idx]]
         tracks.index = pseudo_bulk
-        print(pseudo_bulk)
+        print(tracks.index)
         
         print(tracks.shape)
         tracks = tracks.loc[self.pseudo_bulk_order]
