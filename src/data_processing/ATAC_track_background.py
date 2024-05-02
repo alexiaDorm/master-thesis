@@ -35,7 +35,7 @@ for d in NAME_DATASET:
 #Merge all datasets into one adding columns: time + cell type 
 pkl_files = glob.glob('../results/background/*/*.pkl')
 
-""" for f in pkl_files:
+for f in pkl_files:
     with open(f, 'rb') as file:
         tmp = pd.DataFrame(pickle.load(file))
 
@@ -45,10 +45,14 @@ pkl_files = glob.glob('../results/background/*/*.pkl')
     tmp['cell_type'] = ([f.split('/')[4].removesuffix('.pkl')] * tmp.shape[0])
     tmp.cell_type = tmp.cell_type.astype('category')
 
-    with open(f, 'wb') as file:
-            pickle.dump(tmp, file)
+    tmp['pseudo_bulk'] = tmp.time + tmp.cell_type
 
-    del tmp """
+    tmp = tmp.drop(['time', 'cell_type'])
+
+    with open(f, 'wb') as file:
+        pickle.dump(tmp, file)
+
+    del tmp 
 
 """ ATAC = pd.concat(pd.read_pickle(f) for f in pkl_files[:13])
 with open('../results/ATAC_background1.pkl', 'wb') as file:
@@ -60,6 +64,7 @@ ATAC = pd.concat(pd.read_pickle(f) for f in pkl_files[13:])
 with open('../results/ATAC_background2.pkl', 'wb') as file:
             pickle.dump(ATAC, file) """
 
-ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/ATAC_background1.pkl', '../results/ATAC_background2.pkl'])
+""" ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/ATAC_background1.pkl', '../results/ATAC_background2.pkl'])
 with open('../results/ATAC_background.pkl', 'wb') as file:
             pickle.dump(ATAC, file)
+ """
