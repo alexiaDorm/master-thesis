@@ -75,7 +75,6 @@ class PeaksDataset(Dataset):
 
         #Only keep sequences from provided chromosomes
         self.sequences = self.sequences[self.sequences.chr.isin(chr_include)]
-        print(np.unique(self.sequences.chr))
         self.sequences = self.sequences.sequence
 
         #Load the ATAC track
@@ -90,7 +89,6 @@ class PeaksDataset(Dataset):
         self.sequences = self.sequences.apply(lambda x: one_hot_encode(x))
 
         self.pseudo_bulk = self.ATAC_track.pseudo_bulk.astype('category')
-        print(self.pseudo_bulk)
 
         self.ATAC_track = self.ATAC_track.iloc[:,0]
 
@@ -98,12 +96,16 @@ class PeaksDataset(Dataset):
         return self.sequences.shape[0]
 
     def __getitem__(self, idx):
-
+        
+        print('a')
         input = torch.from_numpy(self.sequences.iloc[idx])
+        print('b')
         tracks = self.ATAC_track.loc[self.sequences.index[idx]]
+        print('c')
 
         #Order tracks so that always returned in same order
         pseudo_bulk = self.pseudo_bulk[self.sequences.index[idx]]
+        print('d')
         tracks.index = pseudo_bulk
         print(tracks.index)
         
