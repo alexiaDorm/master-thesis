@@ -63,6 +63,7 @@ def train(config, chr_train, chr_test):
             inputs, tracks = data 
             inputs = torch.reshape(inputs, (-1,4,train_dataset.len_seq)).to(device)
             tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
+            print(inputs.shape, tracks.shape)
 
             optimizer.zero_grad()
 
@@ -81,7 +82,8 @@ def train(config, chr_train, chr_test):
                     "[%d, %5d] loss: %.3f"
                     % (epoch + 1, i + 1, running_loss / epoch_steps)
                 )
-
+            break
+        break
         epoch_loss = running_loss / len(train_dataloader)
         train_loss.append(epoch_loss)
 
