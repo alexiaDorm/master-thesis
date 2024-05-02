@@ -87,8 +87,10 @@ class PeaksDataset(Dataset):
         #Encode sequences
         self.len_seq = len(self.sequences.iloc[0])
         self.sequences = self.sequences.apply(lambda x: one_hot_encode(x))
+        print('yo')
 
         self.pseudo_bulk = self.ATAC_track.pseudo_bulk.astype('category')
+        print('genau')
 
         self.ATAC_track = self.ATAC_track.iloc[:,0]
 
