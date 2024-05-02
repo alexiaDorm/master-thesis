@@ -1,4 +1,4 @@
-""" import pandas as pd
+import pandas as pd
 import pickle
 
 #Create test dataset
@@ -10,7 +10,7 @@ ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/background/D8/Somite.pk
 with open('../results/ATAC_backgroundt.pkl', 'wb') as file:
             pickle.dump(ATAC, file)
 
-del ATAC """
+del ATAC
 
 from pytorch_datasets import PeaksDataset
 from torch.utils.data import DataLoader
@@ -30,5 +30,6 @@ train_dataloader = DataLoader(train_dataset, batch_size=32,
 import tqdm
 for i, data in enumerate(train_dataloader):
     inputs, tracks = data 
+    print(inputs.shape, tracks.shape)
     
     break
