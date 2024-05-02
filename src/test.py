@@ -30,9 +30,9 @@ train_dataloader = DataLoader(train_dataset, batch_size=32,
 import tqdm
 for i, data in enumerate(train_dataloader):
     inputs, tracks = data 
-    """ print(inputs)
-    print(tracks)
-    print(len(input), len(tracks))
-    print(inputs[0].shape, tracks[0].shape) """
+    print(inputs.shape)
+    print(tracks.shape)
+    #print(len(input), len(tracks))
+    #print(inputs[0].shape, tracks[0].shape)
     
     break
