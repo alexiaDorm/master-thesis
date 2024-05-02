@@ -49,7 +49,7 @@ for f in pkl_files:
 
     tmp['pseudo_bulk'] = tmp.time.astype('str') + tmp.cell_type.astype('str')
 
-    tmp = tmp.drop(['time', 'cell_type'], axis=1)
+    tmp = tmp.drop(['time', 'cell_type'],axis=1)
 
     with open(f, 'wb') as file:
             pickle.dump(tmp, file)

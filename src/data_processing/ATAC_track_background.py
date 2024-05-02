@@ -39,11 +39,8 @@ for f in pkl_files:
     with open(f, 'rb') as file:
         tmp = pd.DataFrame(pickle.load(file))
 
-    tmp['time'] = [f.split('/')[3]] * tmp.shape[0]
-    tmp.time = tmp.time.astype('category')
-        
+    tmp['time'] = [f.split('/')[3]] * tmp.shape[0]        
     tmp['cell_type'] = ([f.split('/')[4].removesuffix('.pkl')] * tmp.shape[0])
-    tmp.cell_type = tmp.cell_type.astype('category')
 
     tmp['pseudo_bulk'] = tmp.time.astype('str') + tmp.cell_type.astype('str')
 
