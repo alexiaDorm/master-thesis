@@ -61,6 +61,7 @@ def train(config, chr_train, chr_test):
 
         for i, data in tqdm(enumerate(train_dataloader)):
             inputs, tracks = data 
+            print(inputs.shape, tracks.shape)
             inputs = torch.reshape(inputs, (-1,4,2114)).to(device)
             tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
 

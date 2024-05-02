@@ -20,7 +20,6 @@ class BiasDataset(Dataset):
         """
         with open(path_sequences, 'rb') as file:
             self.sequences = pickle.load(file)
-        print(self.sequences.shape)
 
         #Only keep sequences from provided chromosomes
         self.chr = '|'.join(chr_include)
@@ -33,9 +32,6 @@ class BiasDataset(Dataset):
 
         with open(path_ATAC_signal, 'rb') as file:
             self.ATAC_track = pickle.load(file)
-
-        print(self.ATAC_track.shape)
-        print(self.sequences.shape)
 
         #Only keep track for sequences in chrom test
         self.ATAC_track =  self.ATAC_track.loc[self.sequences.index]
