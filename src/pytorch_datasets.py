@@ -97,13 +97,13 @@ class PeaksDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        input = self.sequences.iloc[idx]
+        input = self.sequences.iloc[idx].ToTensor()
         tracks = self.ATAC_track[self.sequences.index[idx]]
 
         #Order tracks so that always returned in same order
         pseudo_bulk = self.pseudo_bulk[self.sequences.index[idx]]
         tracks.index = pseudo_bulk
-        tracks = tracks.loc[self.pseudo_bulk_order]
+        tracks = tracks.loc[self.pseudo_bulk_order].ToTensor()
 
         return input, tracks
 
