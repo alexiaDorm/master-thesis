@@ -33,6 +33,10 @@ class BiasDataset(Dataset):
         with open(path_ATAC_signal, 'rb') as file:
             self.ATAC_track = pickle.load(file)
 
+        print(self.ATAC_track)
+        print(self.sequences)
+        print(self.ATAC_track.index[0])
+
     def __len__(self):
         return self.ATAC_track.shape[0]
 
