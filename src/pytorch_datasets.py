@@ -43,7 +43,7 @@ class BiasDataset(Dataset):
     def __getitem__(self, idx):
         print('-----------------')
         print(idx)
-        track = torch.from_numpy(self.ATAC_track.iloc[idx,0])
+        track = self.ATAC_track.iloc[idx,0]
         input = torch.from_numpy(self.sequences[self.ATAC_track.index[idx]])
 
         return input, track
