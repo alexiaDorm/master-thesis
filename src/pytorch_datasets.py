@@ -77,6 +77,8 @@ class PeaksDataset(Dataset):
         self.sequences = self.sequences[self.sequences.chr.str.contains(self.chr)]
         self.sequences = self.sequences.sequence
 
+        print(self.sequences.sample())
+
         #Load the ATAC track
         with open(path_ATAC_peaks, 'rb') as file:
             self.ATAC_track = pickle.load(file)
@@ -104,6 +106,7 @@ class PeaksDataset(Dataset):
         #Order tracks so that always returned in same order
         pseudo_bulk = self.pseudo_bulk[self.sequences.index[idx]]
         tracks.index = pseudo_bulk
+        print(np.unique(tracks.index))
         
         print(tracks.shape)
         tracks = tracks.loc[self.pseudo_bulk_order]

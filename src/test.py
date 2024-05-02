@@ -27,17 +27,12 @@ train_dataset = PeaksDataset(data_dir + 'peaks_seq.pkl', data_dir + 'background_
 train_dataloader = DataLoader(train_dataset, batch_size=32,
                         shuffle=True, num_workers=2)
 
-print(train_dataset.pseudo_bulk)
-
-import numpy as np
-print(np.unique(train_dataset.pseudo_bulk, return_counts=True))
-
 import tqdm
 for i, data in enumerate(train_dataloader):
     inputs, tracks = data 
-    print(inputs)
+    """ print(inputs)
     print(tracks)
     print(len(input), len(tracks))
-    print(inputs[0].shape, tracks[0].shape)
+    print(inputs[0].shape, tracks[0].shape) """
     
     break
