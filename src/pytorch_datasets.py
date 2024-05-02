@@ -108,7 +108,12 @@ class PeaksDataset(Dataset):
         #Order tracks so that always returned in same order
         pseudo_bulk = self.pseudo_bulk[self.sequences.index[idx]]
         tracks.index = pseudo_bulk
-        tracks = torch.from_numpy(tracks.loc[self.pseudo_bulk_order].values)
+        
+        print(tracks.shape)
+        tracks = tracks.loc[self.pseudo_bulk_order]
+        tracks = np.stack(tracks.values)
+        print(tracks.shape)
+        tracks = torch.from_numpy(tracks)
 
         return input, tracks
 
