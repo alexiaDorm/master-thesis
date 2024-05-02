@@ -104,6 +104,8 @@ class PeaksDataset(Dataset):
         #Order tracks so that always returned in same order
         pseudo_bulk = self.pseudo_bulk[self.sequences.index[idx]]
         tracks.index = pseudo_bulk
+        print(tracks)
+        print(pseudo_bulk)
         
         tracks = tracks.loc[self.pseudo_bulk_order]
         tracks = np.stack(tracks.values)
