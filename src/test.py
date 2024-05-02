@@ -29,6 +29,9 @@ train_dataloader = DataLoader(train_dataset, batch_size=32,
 
 print(train_dataset.pseudo_bulk)
 
+import numpy as np
+print(np.unique(train_dataset.pseudo_bulk, return_counts=True))
+
 import tqdm
 for i, data in enumerate(train_dataloader):
     inputs, tracks = data 
