@@ -89,8 +89,8 @@ class PeaksDataset(Dataset):
         self.len_seq = len(self.sequences.iloc[0])
         self.sequences = self.sequences.apply(lambda x: one_hot_encode(x))
 
-        self.ATAC_track['pseudo_bulk'] = (self.ATAC_track.time.astype(str) + self.ATAC_track.cell_type.astype(str)).astype('category')
-        self.pseudo_bulk = self.ATAC_track.pseudo_bulk
+        self.pseudo_bulk = self.ATAC_track.pseudo_bulk.astype('category')
+        print(self.pseudo_bulk)
 
         self.ATAC_track = self.ATAC_track.iloc[:,0]
 
