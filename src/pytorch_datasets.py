@@ -33,6 +33,9 @@ class BiasDataset(Dataset):
         with open(path_ATAC_signal, 'rb') as file:
             self.ATAC_track = pickle.load(file)
 
+        #Only keep track for sequences in chrom test
+        self.ATAC_track =  self.ATAC_track[self.sequences.index]
+
         print(self.ATAC_track)
         print(self.sequences)
         print(self.ATAC_track.index[0])
