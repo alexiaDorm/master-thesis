@@ -47,7 +47,7 @@ for f in pkl_files:
     tmp['cell_type'] = ([f.split('/')[4].removesuffix('.pkl')] * tmp.shape[0])
     tmp.cell_type = tmp.cell_type.astype('category')
 
-    tmp['pseudo_bulk'] = tmp.time + tmp.cell_type
+    tmp['pseudo_bulk'] = tmp.time.astype('str') + tmp.cell_type.astype('str')
 
     tmp = tmp.drop(['time', 'cell_type'])
 
