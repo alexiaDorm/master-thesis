@@ -2,3 +2,7 @@
 .DS_Store
 /models
 /results
+/notes
+notes/~$initial_exploration-25.03.pptx
+*.pyc
+*.pptx

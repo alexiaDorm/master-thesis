@@ -63,7 +63,6 @@ def train(config, chr_train, chr_test):
             inputs, tracks = data 
             inputs = torch.reshape(inputs, (-1,4,train_dataset.len_seq)).to(device)
             tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
-            print(inputs.shape, tracks.shape)
 
             optimizer.zero_grad()
 
@@ -94,7 +93,7 @@ def train(config, chr_train, chr_test):
         for i, data in enumerate(test_dataloader):
             with torch.no_grad():
                 inputs, tracks = data 
-                inputs = torch.reshape(inputs, (-1,4,2114)).to(device)
+                inputs = torch.reshape(inputs, (-1,4,train_dataset.len_seq)).to(device)
                 tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
 
                 _, profile, count = biasModel(inputs)
