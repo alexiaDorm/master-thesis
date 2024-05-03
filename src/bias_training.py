@@ -146,6 +146,9 @@ def train(config, chr_train, chr_test):
     #Load best model weights
     biasModel.load_state_dict(best_model_weight)
 
+    #Save model
+    torch.save(biasModel, '../results/best_biasModel.pt')
+
     print('Finished Training')
 
     return best_model_weight, train_loss, test_loss, corr_test, jsd_test
@@ -190,6 +193,7 @@ with open('../results/corr_test.pkl', 'wb') as file:
     pickle.dump(corr_test, file)
 with open('../results/jsd_test.pkl', 'wb') as file:
     pickle.dump(jsd_test, file)
+
 
 """ ray.init()
 result = tune.run(
