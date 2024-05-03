@@ -81,7 +81,7 @@ class BPNet(nn.Module):
         self.linear = nn.Linear(self.nb_filters,1)
 
             
-    def forward(self,x):
+    def forward_train(self,x):
         
         #Residual + Dilated convolution layers
         #-----------------------------------------------
@@ -115,6 +115,42 @@ class BPNet(nn.Module):
         count = self.linear(count)
 
         return x, profile, count
+    
+    def forward(self,x):
+        
+        #Residual + Dilated convolution layers
+        #-----------------------------------------------
+        x = F.relu(self.convlayers[0](x))
+
+        for layer in self.convlayers[1:]:
+            
+            conv_x = F.relu(layer(x))
+
+            #Crop output previous layer to size of current 
+            x_len = x.size(2); conv_x_len = conv_x.size(2)
+            cropsize = (x_len - conv_x_len) // 2
+            x = x[:, :, cropsize:-cropsize] 
+
+            #Skipped connection
+            x = conv_x + x    
+
+        #Profile head
+        #-----------------------------------------------
+        profile = self.profile_conv(x)
+        
+        cropsize = int((profile.size(2)/2) - (self.out_pred_len/2))
+        profile = profile[:,:, cropsize:-cropsize]
+        
+        profile = self.flatten(profile)
+
+        #Total count head
+        #-----------------------------------------------
+        count = self.global_pool(x)  
+        count = count.squeeze()
+        count = self.linear(count)
+
+
+        return torch.reshape(count, (-1,1))
 
 
 

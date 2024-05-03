@@ -33,7 +33,7 @@ class ATACloss(nn.Module):
 def counts_metrics(tracks, counts_pred):
     
     counts_per_seq = torch.sum(tracks, dim=1)
-    corr_tot = spearmanr(counts_pred.detach(), counts_per_seq.detach())[0]
+    corr_tot = spearmanr(counts_pred.cpu().detach(), counts_per_seq.cpu().detach())[0]
 
     return corr_tot
 
@@ -46,7 +46,7 @@ def jsd_min_max_bounds(profile):
     #Tracks as prob 
     profile_prob = profile/profile.sum()
 
-    max_jsd = jensenshannon(profile_prob.detach(), uniform_profile)
+    max_jsd = jensenshannon(profile_prob.cpu().detach(), uniform_profile)
 
     return 0, max_jsd
 
@@ -66,7 +66,7 @@ def profile_metrics(tracks, profile_pred, pseudocount=0.001):
         
         #Compute Jensen-Shannon divergence + normalize it
         t = t[:-1]
-        curr_jsd = jensenshannon(t/(pseudocount+np.nansum(t)), profile_prob[idx,:].detach())
+        curr_jsd = jensenshannon(t/(pseudocount+np.nansum(t)), profile_prob[idx,:].cpu().detach())
         min_jsd, max_jsd = jsd_min_max_bounds(t)
 
         curr_jsd = normalized_min_max(curr_jsd, min_jsd, max_jsd)
