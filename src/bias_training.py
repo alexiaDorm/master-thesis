@@ -66,7 +66,7 @@ def train(config, chr_train, chr_test):
 
             optimizer.zero_grad()
 
-            _, profile, count = biasModel(inputs)
+            _, profile, count = biasModel.forward_train(inputs)
             
             loss = criterion(tracks, profile, count)
             loss.backward()
@@ -96,7 +96,7 @@ def train(config, chr_train, chr_test):
                 inputs = torch.reshape(inputs, (-1,4,train_dataset.len_seq)).to(device)
                 tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
 
-                _, profile, count = biasModel(inputs)
+                _, profile, count = biasModel.forward_train(inputs)
 
                 #Compute loss
                 loss = criterion(tracks, profile, count)
