@@ -73,7 +73,10 @@ def train(config, chr_train, chr_test):
             optimizer.step()
 
             running_loss += loss.item()
-            
+
+            j = profile_metrics(tracks, profile)
+
+            break
             #print every 2000 batch the loss
             epoch_steps += 1
             if i % 2000 == 1999:  # print every 2000 mini-batches
@@ -82,7 +85,7 @@ def train(config, chr_train, chr_test):
                     % (epoch + 1, i + 1, running_loss / epoch_steps)
                 )
             
-        
+        break
         epoch_loss = running_loss / len(train_dataloader)
         train_loss.append(epoch_loss)
 
