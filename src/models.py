@@ -64,17 +64,19 @@ class BPNet(nn.Module):
         #Convolutional layers
         self.convlayers = nn.ModuleList()
 
-        self.convlayers.append(nn.Conv1d(in_channels=4, 
-                                         out_channels=self.nb_filters,
-                                         kernel_size=self.first_kernel))
+        self.convlayers.append(nn.Sequential(
+            nn.Conv1d(in_channels=4, out_channels=self.nb_filters, kernel_size=self.first_kernel),
+            nn.ReLU()
+            ))
+        
         for i in range (1,self.nb_conv):
-            self.convlayers.append(nn.Conv1d(in_channels=self.nb_filters, 
-                                         out_channels=self.nb_filters,
-                                         kernel_size=self.rest_kernel,
-                                         dilation=2**i))
+            self.convlayers.append(nn.Sequential(
+                nn.Conv1d(in_channels=self.nb_filters,out_channels=self.nb_filters,kernel_size=self.rest_kernel,dilation=2**i),
+                nn.ReLU()
+                ))
+        
         #Profile prediction head   
         self.profile_conv = nn.Conv1d(self.nb_filters, 1, kernel_size=self.profile_kernel)
-        self.flatten = nn.Flatten()
 
         #Total count prediction head
         self.global_pool = nn.AdaptiveAvgPool1d(1)
@@ -85,11 +87,11 @@ class BPNet(nn.Module):
         
         #Residual + Dilated convolution layers
         #-----------------------------------------------
-        x = F.relu(self.convlayers[0](x))
+        x = self.convlayers[0](x)
 
         for layer in self.convlayers[1:]:
             
-            conv_x = F.relu(layer(x))
+            conv_x = layer(x)
 
             #Crop output previous layer to size of current 
             x_len = x.size(2); conv_x_len = conv_x.size(2)
@@ -105,8 +107,7 @@ class BPNet(nn.Module):
         
         cropsize = int((profile.size(2)/2) - (self.out_pred_len/2))
         profile = profile[:,:, cropsize:-cropsize]
-        
-        profile = self.flatten(profile)
+        profile = profile.reshape(-1, self.out_pred_len)
 
         #Total count head
         #-----------------------------------------------
@@ -120,11 +121,11 @@ class BPNet(nn.Module):
         
         #Residual + Dilated convolution layers
         #-----------------------------------------------
-        x = F.relu(self.convlayers[0](x))
+        x = self.convlayers[0](x)
 
         for layer in self.convlayers[1:]:
             
-            conv_x = F.relu(layer(x))
+            conv_x = layer(x)
 
             #Crop output previous layer to size of current 
             x_len = x.size(2); conv_x_len = conv_x.size(2)
@@ -141,7 +142,7 @@ class BPNet(nn.Module):
         cropsize = int((profile.size(2)/2) - (self.out_pred_len/2))
         profile = profile[:,:, cropsize:-cropsize]
         
-        profile = self.flatten(profile)
+        profile = profile.reshape(-1, self.out_pred_len)
 
         #Total count head
         #-----------------------------------------------
