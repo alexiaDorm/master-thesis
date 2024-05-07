@@ -49,8 +49,9 @@ def train(config, chr_train, chr_test):
         running_loss, epoch_steps = 0.0, 0
 
         for i, data in tqdm(enumerate(train_dataloader)):
-            prof.step()
             
+            prof.step()
+
             inputs, tracks = data 
             inputs = torch.reshape(inputs, (-1,4,train_dataset.len_seq)).to(device)
             tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
@@ -154,7 +155,7 @@ prof = torch.profiler.profile(
 prof.start()
 
 best_model_weight, train_loss, test_loss, corr_test, jsd_test = train(config, chrom_train, chrom_test)
-writer.flush()
+writer.flush(); prof.stop()
 
 writer.close()
 
