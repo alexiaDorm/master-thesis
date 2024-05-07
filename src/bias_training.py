@@ -8,11 +8,6 @@ from functools import partial
 import time
 import os
 
-""" import ray
-from ray import tune
-from ray.train import Checkpoint, session
-from ray.tune.schedulers import ASHAScheduler """
-
 from pytorch_datasets import BiasDataset
 from models import BPNet
 from eval_metrics import ATACloss, counts_metrics, profile_metrics
@@ -39,16 +34,6 @@ def train(config, chr_train, chr_test):
 
     criterion = ATACloss(weight_MSE=config["weight_MSE"])
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=config["lr"])
-
-    #checkpoint = session.get_checkpoint()
-
-    """ if checkpoint:
-        checkpoint_state = checkpoint.to_dict()
-        start_epoch = checkpoint_state["epoch"]
-        biasModel.load_state_dict(checkpoint_state["net_state_dict"])
-        optimizer.load_state_dict(checkpoint_state["optimizer_state_dict"])
-    else:
-        start_epoch = 0 """
 
     best_loss, best_model_weight, patience = float('inf'), None, 5
     
@@ -113,20 +98,6 @@ def train(config, chr_train, chr_test):
         corr_test.append(spear_corr/len(test_dataloader))
         jsd_test.append(jsd/len(test_dataloader))
 
-        """ checkpoint_data = {
-            "epoch": epoch,
-            "net_state_dict": biasModel.state_dict(),
-            "optimizer_state_dict": optimizer.state_dict(),
-        }
-        checkpoint = Checkpoint.from_dict(checkpoint_data)
-
-        session.report(
-            {"loss": val_loss / len(test_dataloader), 
-             "count_correlation": spear_corr/len(test_dataloader), 
-             "profile_jsd": jsd/len(test_dataloader)},
-            checkpoint=checkpoint,
-        ) """
-
         #Early stopping
         if val_loss < best_loss:
             best_loss = val_loss
@@ -138,9 +109,6 @@ def train(config, chr_train, chr_test):
         
         if patience == 0:
             break
-
-        break
-
     
     #Load best model weights
     biasModel.load_state_dict(best_model_weight)
@@ -152,14 +120,6 @@ def train(config, chr_train, chr_test):
 
     return best_model_weight, train_loss, test_loss, corr_test, jsd_test
 
-    
-
-""" config = {
-    "weight_MSE": tune.choice([2 ** i for i in range(9)]),
-    "nb_epoch": tune.choice([2 ** i for i in range(9)]),
-    "lr": tune.loguniform(1e-4, 1e-1),
-    "batch_size": tune.choice([8,16,32,64])
-} """
 
 config = {
     "weight_MSE": 1,
@@ -168,17 +128,9 @@ config = {
     "batch_size": 32
 }
 
-""" scheduler = ASHAScheduler(
-        metric="loss",
-        mode="min",
-        max_t=20,
-        grace_period=1,
-        reduction_factor=2,
-    ) """
-
 #Define chromosome split 
 chrom_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
-chrom_test = ['6','13''22']
+chrom_test = ['6','13','22']
 
 best_model_weight, train_loss, test_loss, corr_test, jsd_test = train(config, chrom_train, chrom_test)
 
@@ -192,22 +144,3 @@ with open('../results/corr_test.pkl', 'wb') as file:
     pickle.dump(corr_test, file)
 with open('../results/jsd_test.pkl', 'wb') as file:
     pickle.dump(jsd_test, file)
-
-
-""" ray.init()
-result = tune.run(
-    partial(train, chr_train=chrom_train, chr_test=chrom_test),
-    resources_per_trial={"cpu": 4, "gpu": 1},
-    config=config,
-    num_samples=1,
-    scheduler=scheduler,
-    checkpoint_at_end=False)
-
-best_trial = result.get_best_trial("loss", "min", "last")
-print(f"Best trial config: {best_trial.config}")
-print(f"Best trial final validation loss: {best_trial.last_result['loss']}")
-print(f"Best trial final validation correlation for count head: {best_trial.last_result['count_correlation']}")
-print(f"Best trial final validation jsd for profile head: {best_trial.last_result['profile_jsd']}")
-
-ray.shutdown()
- """
