@@ -106,7 +106,7 @@ def train(config, chr_train, chr_test):
                 spear_corr += corr
 
                 #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
-                j = profile_metrics(tracks, profile)
+                j = np.sum(profile_metrics(tracks, profile))
                 jsd += j
 
         test_loss.append(val_loss /len(test_dataloader))
