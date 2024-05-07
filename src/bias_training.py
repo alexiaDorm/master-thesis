@@ -12,6 +12,9 @@ from pytorch_datasets import BiasDataset
 from models import BPNet
 from eval_metrics import ATACloss, counts_metrics, profile_metrics
 
+from torch.utils.tensorboard import SummaryWriter
+writer = SummaryWriter()
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
@@ -35,6 +38,7 @@ def train(config, chr_train, chr_test):
     criterion = ATACloss(weight_MSE=config["weight_MSE"])
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=config["lr"])
 
+
     best_loss, best_model_weight, patience = float('inf'), None, 5
     
     train_loss, test_loss = [], []
@@ -45,6 +49,8 @@ def train(config, chr_train, chr_test):
         running_loss, epoch_steps = 0.0, 0
 
         for i, data in tqdm(enumerate(train_dataloader)):
+            prof.step()
+            
             inputs, tracks = data 
             inputs = torch.reshape(inputs, (-1,4,train_dataset.len_seq)).to(device)
             tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
@@ -54,6 +60,8 @@ def train(config, chr_train, chr_test):
             _, profile, count = biasModel.forward_train(inputs)
             
             loss = criterion(tracks, profile, count)
+            writer.add_scalar("Loss/train", loss, epoch)
+
             loss.backward()
             optimizer.step()
 
@@ -84,6 +92,8 @@ def train(config, chr_train, chr_test):
 
                 #Compute loss
                 loss = criterion(tracks, profile, count)
+                writer.add_scalar("Loss/test", loss, epoch)
+
                 val_loss += loss.cpu().item()
 
                 #Compute evaluation metrics: pearson correlation
@@ -97,6 +107,10 @@ def train(config, chr_train, chr_test):
         test_loss.append(val_loss /len(test_dataloader))
         corr_test.append(spear_corr/len(test_dataloader))
         jsd_test.append(jsd/len(test_dataloader))
+
+        writer.add_scalar("corr/test", spear_corr/len(test_dataloader), epoch)
+        writer.add_scalar("jsd/test", jsd/len(test_dataloader), epoch)
+
 
         #Early stopping
         if val_loss < best_loss:
@@ -132,7 +146,17 @@ config = {
 chrom_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
 chrom_test = ['6','13','22']
 
+prof = torch.profiler.profile(
+        schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
+        on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/resnet18'),
+        record_shapes=True,
+        with_stack=True)
+prof.start()
+
 best_model_weight, train_loss, test_loss, corr_test, jsd_test = train(config, chrom_train, chrom_test)
+writer.flush()
+
+writer.close()
 
 with open('../results/best_model_weight.pkl', 'wb') as file:
     pickle.dump(best_model_weight, file)
