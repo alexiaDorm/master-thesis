@@ -31,11 +31,11 @@ def train(trial):
 
     #Load the data
     batch_size = trial.suggest_int("batch_size", 4, 7)
-    train_dataset = BiasDataset(data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_train)
+    train_dataset = BiasDataset(data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=2**batch_size,
                         shuffle=True, num_workers=3)
         
-    test_dataset = BiasDataset( data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_test)
+    test_dataset = BiasDataset( data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_test)
     test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=3)
 
@@ -47,7 +47,7 @@ def train(trial):
 
     criterion = ATACloss(weight_MSE= weight_MSE)
 
-    lr = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
+    lr = trial.suggest_float("lr", 1e-3, 1e-1, log=True)
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=lr)
 
     best_loss, best_model_weight, patience = float('inf'), None, 5
@@ -55,7 +55,7 @@ def train(trial):
     train_loss, test_loss = [], []
     corr_test, jsd_test = [], []
     
-    nb_epoch=20
+    nb_epoch=50
     for epoch in range(0, nb_epoch):
         
         biasModel.train() 
