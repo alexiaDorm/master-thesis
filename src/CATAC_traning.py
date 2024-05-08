@@ -8,10 +8,6 @@ from functools import partial
 import time
 import os
 
-""" from ray import tune
-from ray.train import Checkpoint, session
-from ray.tune.schedulers import ASHAScheduler """
-
 from pytorch_datasets import PeaksDataset
 from models import CATAC
 from eval_metrics import ATACloss, counts_metrics, profile_metrics

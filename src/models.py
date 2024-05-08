@@ -222,14 +222,14 @@ class CATAC(nn.Module):
         #Convolutional layers
         self.convlayers = nn.ModuleList()
 
-        self.convlayers.append(nn.Conv1d(in_channels=4, 
-                                         out_channels=self.nb_filters,
-                                         kernel_size=self.first_kernel))
+        self.convlayers.append(nn.Sequential(nn.Conv1d(in_channels=4, out_channels=self.nb_filters,kernel_size=self.first_kernel),
+            nn.ReLU()))
+        
         for i in range (1,self.nb_conv):
-            self.convlayers.append(nn.Conv1d(in_channels=self.nb_filters, 
-                                         out_channels=self.nb_filters,
-                                         kernel_size=self.rest_kernel,
-                                         dilation=2**i))
+            self.convlayers.append(nn.Sequential(
+                nn.Conv1d(in_channels=self.nb_filters,out_channels=self.nb_filters,kernel_size=self.rest_kernel,dilation=2**i),
+                nn.ReLU()
+                ))
         
         #Pseudo bulk specific conv layers
         self.pb_convlayers = [] 
@@ -239,9 +239,10 @@ class CATAC(nn.Module):
             convs = nn.ModuleList()
 
             for j in range(self.nb_cell_type_CN):
-                convs.append(nn.Conv1d(in_channels=self.nb_filters, 
+                convs.append(nn.Sequential(nn.Conv1d(in_channels=self.nb_filters, 
                                          out_channels=self.nb_filters,
-                                         kernel_size=self.rest_kernel))
+                                         kernel_size=self.rest_kernel),
+                                         nn.ReLU()))
 
             self.pb_convlayers.append(convs)
         
@@ -250,8 +251,6 @@ class CATAC(nn.Module):
         for i in range(self.nb_pred):
             self.profile_heads.append(nn.Conv1d(self.nb_filters, 1, kernel_size=self.profile_kernel))
         
-        self.flatten = nn.Flatten()
-
         #Total count prediction heads
         self.global_pool = nn.AdaptiveAvgPool1d(1)
         
@@ -263,11 +262,11 @@ class CATAC(nn.Module):
         
         #Residual + Dilated convolution layers
         #-----------------------------------------------
-        x = F.relu(self.convlayers[0](x))
+        x = self.convlayers[0](x)
 
         for layer in self.convlayers[1:]:
             
-            conv_x = F.relu(layer(x))
+            conv_x = layer(x)
 
             #Crop output previous layer to size of current 
             x_len = x.size(2); conv_x_len = conv_x.size(2)
@@ -282,7 +281,7 @@ class CATAC(nn.Module):
         tmp_x, pred_x = [x]*self.nb_pred, []
         for i in range(self.nb_pred):
             for layer in self.pb_convlayers[i]:
-                conv_x = F.relu(layer(tmp_x[i]))
+                conv_x = layer(tmp_x[i])
 
                 #Crop output previous layer to size of current 
                 x_len = tmp_x[i].size(2); conv_x_len = conv_x.size(2)
@@ -305,7 +304,7 @@ class CATAC(nn.Module):
             #Crop and flatten the representation
             cropsize = int((profile.size(2)/2) - (self.out_pred_len/2))
             profile = profile[:,:, cropsize:-cropsize]
-            profile = self.flatten(profile)
+            profile = profile.reshape(-1, self.out_pred_len)
 
             pred_profiles.append(profile)
         

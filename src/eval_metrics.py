@@ -13,7 +13,7 @@ class ATACloss(nn.Module):
     def __init__(self, weight_MSE):
         super().__init__()
         self.weight_MSE = weight_MSE
-        self.MSE = nn.MSELoss()
+        self.MSE = nn.MSELoss(reduction='mean')
 
     def forward(self, true_counts, logits, tot_pred):
         counts_per_example = torch.sum(true_counts, dim=1)
@@ -25,7 +25,7 @@ class ATACloss(nn.Module):
         MNLLL = torch.Tensor([x.log_prob(true_counts[i,:]) for i,x in enumerate(dist)])
         MNLLL = ((-torch.sum(MNLLL))/float(true_counts.shape[0]))
 
-        MSE = self.MSE(counts_per_example, tot_pred.squeeze())
+        MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
         return self.weight_MSE*MSE + MNLLL
 
