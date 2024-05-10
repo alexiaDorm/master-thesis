@@ -147,7 +147,7 @@ def train(trial):
             break """
     
     #Load best model weights
-    biasModel.load_state_dict(best_model_weight)
+    #biasModel.load_state_dict(best_model_weight)
 
     print('Finished Training')
 
@@ -158,7 +158,7 @@ def objective(trial):
     model, best_model_weight, train_loss, test_loss, corr_test, jsd_test = train(trial)
 
     #Save model
-    torch.save(model, '../results/best_biasModel.pt')
+    #torch.save(model, '../results/best_biasModel.pt')
 
     with open('../results/train_loss.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
