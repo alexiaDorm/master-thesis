@@ -28,7 +28,8 @@ def train(trial):
     chr_test = ['6','13','22']
 
     #Load the data
-    batch_size = trial.suggest_int("batch_size", 1, 1)
+    batch_size = trial.suggest_int("batch_size", 4, 7)
+
     train_dataset = BiasDataset(data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=2**batch_size,
                         shuffle=True, num_workers=3)
@@ -40,6 +41,7 @@ def train(trial):
     #Initialize model, loss, and optimizer
     nb_conv= trial.suggest_int("nb_conv", 4, 8)
     nb_filters= trial.suggest_int("nb_filters", 4,7)
+
     biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
     biasModel.to(device)
 
@@ -47,6 +49,7 @@ def train(trial):
     criterion = ATACloss(weight_MSE= weight_MSE)
 
     lr = trial.suggest_float("lr", 1e-4, 1e-1, log=True)
+
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
 
