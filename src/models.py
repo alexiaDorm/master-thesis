@@ -83,7 +83,7 @@ class BPNet(nn.Module):
         self.linear = nn.Linear(self.nb_filters,1)
 
             
-    def forward_train(self,x):
+    def forward(self,x):
         
         #Residual + Dilated convolution layers
         #-----------------------------------------------
@@ -117,7 +117,7 @@ class BPNet(nn.Module):
 
         return x, profile, count
     
-    def forward(self,x):
+    def forward_t(self,x):
         
         #Residual + Dilated convolution layers
         #-----------------------------------------------

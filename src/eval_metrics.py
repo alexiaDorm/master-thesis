@@ -13,21 +13,23 @@ class ATACloss(nn.Module):
     def __init__(self, weight_MSE):
         super().__init__()
         self.weight_MSE = weight_MSE
+        self.NLL = nn.CrossEntropyLoss()
         self.MSE = nn.MSELoss(reduction='mean')
 
     def forward(self, true_counts, logits, tot_pred):
+                
+        true_counts = true_counts[:,:-1]
         counts_per_example = torch.sum(true_counts, dim=1)
 
-        dist = [Multinomial(total_count=x.item(), logits=logits[i,:], validate_args=False) 
-                    for i,x in enumerate(torch.round(counts_per_example).type(torch.int32))]
+        true_counts_prob = true_counts/ counts_per_example.unsqueeze(-1)
+        true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division to zero to 0 
 
-        true_counts = true_counts[:,:-1]
-        MNLLL = torch.Tensor([x.log_prob(true_counts[i,:]) for i,x in enumerate(dist)])
-        MNLLL = ((-torch.sum(MNLLL))/float(true_counts.shape[0]))
-
+        MNLLL = self.NLL(logits, true_counts_prob)
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
-        return self.weight_MSE*MSE + MNLLL
+        loss = self.weight_MSE*MSE + MNLLL
+
+        return loss, MNLLL, MSE
 
 #Compute spearmann correlations between observed total counts and predictions
 def counts_metrics(tracks, counts_pred):
