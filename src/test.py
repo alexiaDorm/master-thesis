@@ -2,15 +2,15 @@ import pandas as pd
 import pickle
 
 #Create test dataset
-ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/ATAC/D8/Somite.pkl', '../results/ATAC/D22-15/Myoblast.pkl'])
+""" ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/ATAC/D8/Somite.pkl', '../results/ATAC/D20/Myoblast.pkl'])
 with open('../results/ATAC_peakst.pkl', 'wb') as file:
-            pickle.dump(ATAC, file)
+            pickle.dump(ATAC, file) """
 
-ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/background/D8/Somite.pkl', '../results/background/D22-15/Myoblast.pkl'])
+ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/background/D8/Somite.pkl', '../results/background/D20/Myoblast.pkl'])
 with open('../results/ATAC_backgroundt.pkl', 'wb') as file:
             pickle.dump(ATAC, file)
 
-del ATAC
+""" del ATAC
 
 from pytorch_datasets import PeaksDataset
 from torch.utils.data import DataLoader
@@ -32,4 +32,4 @@ for i, data in enumerate(train_dataloader):
     inputs, tracks = data 
     print(inputs.shape, tracks.shape)
     
-    break
+    break """
