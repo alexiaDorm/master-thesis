@@ -21,7 +21,7 @@ class BiasDataset(Dataset):
         with open(path_sequences, 'rb') as file:
             self.sequences = pickle.load(file)
         
-        self.sequences.index = self.sequences.chr + ":" + self.sequences.start.astype('str') + "-" + self.sequences.end.astype('str')
+        self.sequences.index = self.sequences.chr.astype('str') + ":" + self.sequences.start.astype('str') + "-" + self.sequences.end.astype('str')
 
         #Only keep sequences from provided chromosomes
         self.sequences = self.sequences[self.sequences.chr.isin(chr_include)]
