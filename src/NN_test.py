@@ -31,7 +31,7 @@ chr_test = ['6','13','22']
 #Load the data
 batch_size = 5
 
-train_dataset = BiasDataset(data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_train)
+train_dataset = BiasDataset(data_dir + 'peaks_seq.pkl', data_dir + 'ATAC_peakst.pkl', chr_train)
 train_dataloader = DataLoader(train_dataset, batch_size=2**batch_size,
                     shuffle=True, num_workers=4)
 
