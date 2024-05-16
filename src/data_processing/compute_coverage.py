@@ -1,4 +1,5 @@
 #Compute coverage of each pseudo bulk at each time points
+#--------------------------------------------
 
 import glob
 import subprocess
@@ -10,21 +11,24 @@ import itertools
 import os
 
 NAME_DATASET =['D8_1','D8_2','D12_1','D12_2','D20_1', 'D20_2', 'D22_1', 'D22_2']
-NAME_DATASET =['D8_1','D12_1']
 
 chrom = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y']
 
+#Compute the coverage in 10000 genomic regions bin
 def compute_cov(start, bw):
     return np.count_nonzero(bw.values(c, start, start + 10000))/10000
 
 for d in NAME_DATASET:
 
+    #Compute the avrage deapth across position 
     splitted_files = glob.glob('../results/bam_cell_type/' + d +'/*.bam')
     for f in splitted_files:
         samtools_command = "samtools depth -a " + f +  " |  awk '{sum+=$3} END { print sum/NR}'"
         
-        #subprocess.run(samtools_command, shell=True)
+        subprocess.run(samtools_command, shell=True)
 
+    #Create bins of 10000 genomic regions and compute the coverage for each pseudobulk for each chromosome
+    #The histogram of the coverage is plotted for each chromosomes and for all chromosomes together
     bw_files = glob.glob('../results/bam_cell_type/' + d +'/*.bw')
     for f in bw_files:
         bw = pyBigWig.open(f)

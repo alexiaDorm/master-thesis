@@ -1,3 +1,6 @@
+#Subsample the D8_1 somite cells to have same number of cells as in D12_1 to see influence on coverage
+#--------------------------------------------
+
 import pandas as pd
 import subprocess
 import pyBigWig

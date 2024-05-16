@@ -1,3 +1,6 @@
+#Compute the total number of reads in each pseudobulk bam files
+#--------------------------------------------
+
 import glob
 import  subprocess
 import pandas as pd

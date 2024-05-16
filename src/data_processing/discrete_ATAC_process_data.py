@@ -1,3 +1,8 @@
+#NOT USED, code also not fully functional
+
+#Create pseudo-bulk read count matrix using anndata
+#--------------------------------------------
+
 import os
 import pickle 
 import anndata
@@ -48,7 +53,6 @@ with open('../results/encoded_seq.pkl', 'wb') as file:
     pickle.dump(encoded_sequences, file)
 
 adata.write('../results/pre_processed_3.h5ad')
-
 
 """ Create a sequence ATAC matrix. For each sequence extracts ATAC signal (discrete) at pseudo bulk level (cell_type + time point) """
 def get_sequence_ATAC_dicrete(adata):

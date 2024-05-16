@@ -1,3 +1,6 @@
+#Fetch continuous ATAC tracks for each pseudo-bulk and background regions
+#--------------------------------------------
+
 import pickle
 import numpy as np
 import glob

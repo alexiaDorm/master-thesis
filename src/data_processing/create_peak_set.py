@@ -1,7 +1,8 @@
 #Paths assume run from src folder
 
-#Create common peak set across time point and replicates
-#Assume that peak in each replicate are non-overlapping
+#Create common peak set across time point and replicates:
+#    -  Only the peaks that are present in both replicates are kept
+#    - The intersection of peaks of each time point is taken as the final peak set
 #--------------------------------------------
 import os
 import subprocess

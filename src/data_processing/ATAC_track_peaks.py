@@ -1,3 +1,6 @@
+#Fetch continuous ATAC tracks for each pseudo-bulk and peak regions
+#--------------------------------------------
+
 import pickle
 import numpy as np
 import glob
@@ -9,7 +12,7 @@ from utils_data_preprocessing import get_continuous_ATAC_peaks
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 
-""" with open('../results/peaks_seq.pkl', 'rb') as file:
+with open('../results/peaks_seq.pkl', 'rb') as file:
     peaks = pickle.load(file)
 
 peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('uint32')
@@ -32,12 +35,12 @@ for d in TIME_POINT:
         with open(("../results/ATAC/" + f.removeprefix("../results/bam_cell_type/").removesuffix(".bw") + ".pkl"), 'wb') as file:
             pickle.dump(ATAC, file)
 
-        del ATAC  """
+        del ATAC 
 
 #Merge all datasets into one adding columns: time + cell type 
 pkl_files = glob.glob('../results/ATAC/*/*.pkl')
 
-""" for f in pkl_files:
+for f in pkl_files:
     with open(f, 'rb') as file:
         tmp = pd.DataFrame(pickle.load(file))
 
@@ -54,7 +57,7 @@ pkl_files = glob.glob('../results/ATAC/*/*.pkl')
     with open(f, 'wb') as file:
             pickle.dump(tmp, file)
 
-    del tmp """
+    del tmp
 
 ATAC = pd.concat(pd.read_pickle(f) for f in pkl_files[:13])
 with open('../results/ATAC_peaks1.pkl', 'wb') as file:

@@ -1,6 +1,6 @@
 #Paths assume run from src folder
 
-#Create the bigwig files per time point and cell type, replicates are used together to generate the .bw files
+#Create the pseudo bulk (per time point and cell type) bigwig files , replicates are used together to generate the .bw files
 #--------------------------------------------
 
 import subprocess
@@ -10,13 +10,12 @@ import pandas as pd
 import gzip
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
-TIME_POINT = ["D22-15"]
 data_path = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/'
 
 cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
 
 #Keep track of dataset number to make barcodes unique
-i = 6
+i = 0
 for t in TIME_POINT:
  
     if not os.path.exists('../results/bam_cell_type/' + t):

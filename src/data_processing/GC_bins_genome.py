@@ -1,3 +1,6 @@
+#Create potential background regions by binning genome and computing the GC content of each sequence
+#--------------------------------------------
+
 import pickle 
 import pyfaidx
 import pandas as pd

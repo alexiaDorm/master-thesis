@@ -1,44 +1,29 @@
 Quick description of scripts
 --------------------------------------------------------------
+0. Divers 
+     - utils_data_processing.py: Utils functions for data processing (Fetch sequence, encode, generation ATAC tracks, GC content)
+     - subsample_Somite.py: Subsample the D8_1 somite cells to have same number of cells as in D12_1 to see influence on coverage
 
-utils_data_processing.py: Utils function for data processing
+1. Create Bw files and quality check
 
-create_bw_cell_type.py: Script to generate the ATAC track bigWigs files by pseudo-bulk 
+    - create_bw_cell_type.py: Script to generate the ATAC track bigWigs files by pseudo-bulk 
 
-create_total_reads.py: Compute total of reads per pseudo-bulk for normalization
+    - create_total_reads.py: Compute total of reads per pseudo-bulk for normalization
 
-compute_coverage.py: Plot coverage in 10000 bins distribution by chromosomes
+    - compute_coverage.py: Plot coverage in 10000 bins distribution by chromosomes and pseudo-bulk
 
-create_peak_set.py: Take all called peaks in datasets and merge overlapping peaks
+2. Create common peaks set and fetch ATAC tracks
 
-get_sequence_peaks.py: Fetch genomic sequence for peaks
+    - create_peak_set.py: Create common peak set across time point and replicates. Only the peaks that are present in both replicates are kept. The intersection of peaks of each time point is taken as the final peak set
 
-GC_bins_genome.py: Create potential background regions by binning genome and computing the GC content of each sequence
+    - get_sequence_peaks.py: Fetch genomic sequence for peaks
 
-GC_match_background.py: GC match genomic regions to peaks
+    - ATAC_track_peaks.py: Fetch continuous ATAC tracks for each pseudo-bulk and peak regions
 
-ATAC_track_peaks.py: Fetch continuous ATAC tracks for each pseudo-bulk and peak 
+3. Create GC matched background regions and fetch ATAC tracks
 
-ATAC_track_background.py: Fetch continuous ATAC tracks for each pseudo_bulk and background regions
+    - GC_bins_genome.py: Create potential background regions by binning genome and computing the GC content of each sequence
 
-model.py: Pytorch bias and final model class and training loop
+    - GC_match_background.py: GC match genomic regions to peaks
 
-datasets.py: Pytorch Dataset/Dataloader class 
-
-Description data processing pipeline
---------------------------------------------------------------
-1. Create common peaks by merging all overlapping peaks 
-
-2. Create BigWigs files of ATAC signal for each pseudo-bulk (cell_type + time)
-
-3. Compute coverage by pseudo bulk to determine for which one we have sufficient cells
-
-4. Get the sequences for each peaks
-
-5. Create potential background regions by binning genome and computing the GC content of each sequence
-
-6. GC match each peak to background region 
-
-7. Compute the total number of reads per pseudo-bulk for normalization purpose 
-
-8. Get ATAC continuous track using sliding window for peaks and background regions
+    - ATAC_track_background.py: Fetch continuous ATAC tracks for each pseudo_bulk and background regions

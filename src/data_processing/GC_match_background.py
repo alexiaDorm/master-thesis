@@ -1,3 +1,6 @@
+#GC match genomic regions to peaks
+#--------------------------------------------
+
 import os
 import pickle 
 import anndata
