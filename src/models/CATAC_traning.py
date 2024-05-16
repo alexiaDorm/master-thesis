@@ -10,7 +10,7 @@ import os
 
 from pytorch_datasets import PeaksDataset
 from models import CATAC
-from eval_metrics import ATACloss, counts_metrics, profile_metrics
+from models.eval_metrics import ATACloss, counts_metrics, profile_metrics
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)

@@ -12,7 +12,7 @@ import os
 
 from pytorch_datasets import BiasDataset
 from models import BPNet
-from eval_metrics import ATACloss, counts_metrics, profile_metrics
+from models.eval_metrics import ATACloss, counts_metrics, profile_metrics
 
 import optuna
 from optuna.trial import TrialState

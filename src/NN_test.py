@@ -11,8 +11,8 @@ import time
 import os
 
 from pytorch_datasets import BiasDataset
-from models import BPNet
-from eval_metrics import ATACloss, counts_metrics, profile_metrics
+from models.models import BPNet
+from models.eval_metrics import ATACloss, counts_metrics, profile_metrics
 
 import optuna
 from optuna.trial import TrialState
@@ -50,44 +50,22 @@ optimizer = torch.optim.Adam(biasModel.parameters(), lr=lr)
 scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
 
 def train(data, epoch):
-        
-    biasModel.train() 
-    running_loss, epoch_steps = 0.0, 0
-    running_MNLLL, running_MSE = 0.0, 0.0
-    for i, d in tqdm(enumerate(data)):
             
-        inputs, tracks = d 
-        inputs = torch.reshape(inputs, (-1,4,train_dataset.len_seq)).to(device)
-        tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
+    inputs, tracks = data
+    inputs = torch.reshape(inputs, (-1,4,train_dataset.len_seq)).to(device)
+    tracks = torch.stack(tracks, dim=1).type(torch.float32).to(device)
 
-        optimizer.zero_grad()
+    optimizer.zero_grad()
 
-        _, profile, count = biasModel(inputs)
+    _, profile, count = biasModel(inputs)
             
-        loss, MNLLL, MSE = criterion(tracks, profile, count)
+    loss, MNLLL, MSE = criterion(tracks, profile, count)
 
-        loss.backward()
-        optimizer.step()
+    loss.backward()
+    optimizer.step()
 
-        running_loss += loss.item()
-        running_MNLLL += MNLLL.item()
-        running_MSE += MSE.item()
 
-        #print every 2000 batch the loss
-        epoch_steps += 1
-        if i % 2000 == 1999:  # print every 2000 mini-batches
-            print(
-                "loss: %.3f"
-                % (running_loss / epoch_steps)
-            )
-        
-    scheduler.step()
-
-    epoch_loss = running_loss / len(train_dataloader)
-
-    print(f'Epoch [{epoch + 1}/{10}], Loss: {epoch_loss:.4f}, MNLLL: {running_MNLLL/len(train_dataloader):.4f}, MSE: {running_MSE/len(train_dataloader):.4f}')
-
-    print('Finished Training')
+biasModel.train() 
 
 with torch.profiler.profile(
         schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
@@ -101,3 +79,4 @@ with torch.profiler.profile(
         if step >= 1 + 1 + 3:
             break
         train(batch_data, step)
+        scheduler.step()
