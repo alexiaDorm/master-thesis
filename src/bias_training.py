@@ -17,7 +17,7 @@ from models.eval_metrics import ATACloss, counts_metrics, profile_metrics
 import optuna
 from optuna.trial import TrialState
 
-import torcheck
+#import torcheck
 
 data_dir = "../results/"
 
@@ -225,12 +225,3 @@ if __name__ == "__main__":
     print("  Params: ")
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
-
-    """ prof = torch.profiler.profile(
-            schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
-            on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/BiasModel'),
-            record_shapes=True,
-            with_stack=True)
-    prof.start()
-    
-    prof.stop() """
