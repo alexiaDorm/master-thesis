@@ -30,11 +30,11 @@ def train(trial):
     #Load the data
     batch_size = trial.suggest_int("batch_size", 4, 7)
 
-    train_dataset = BiasDataset(data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_background1.pkl', chr_train)
+    train_dataset = BiasDataset(data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=2**batch_size,
                         shuffle=True, num_workers=3)
         
-    test_dataset = BiasDataset( data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_background1.pkl', chr_test)
+    test_dataset = BiasDataset( data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_test)
     test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=3)
 
