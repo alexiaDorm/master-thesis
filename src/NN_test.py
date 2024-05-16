@@ -10,7 +10,7 @@ from functools import partial
 import time
 import os
 
-from pytorch_datasets import BiasDataset
+from models.pytorch_datasets import BiasDataset
 from models.models import BPNet
 from models.eval_metrics import ATACloss, counts_metrics, profile_metrics
 
