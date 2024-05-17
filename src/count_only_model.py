@@ -23,11 +23,11 @@ def train():
     chr_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
 
     #Load the data
-    batch_size = 32
+    batch_size = 64
 
     train_dataset = BiasDataset(data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundtest.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                        shuffle=True, num_workers=4)
+                        shuffle=True)
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
@@ -38,19 +38,18 @@ def train():
 
     criterion = nn.MSELoss(reduction='mean')
 
-    lr = 0.001
+    lr = 0.0001
 
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=lr)
-    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
     
-    train_loss, train_MNLLL, train_MSE = [], [], []
+    train_loss = []
 
     nb_epoch=50
     biasModel.train() 
     for epoch in range(0, nb_epoch):
         
         running_loss, epoch_steps = 0.0, 0
-        running_MNLLL, running_MSE = 0.0, 0.0
         for i, data in enumerate(train_dataloader):
             
             inputs, tracks = data 
@@ -59,16 +58,17 @@ def train():
 
             optimizer.zero_grad()
 
-            _, profile, count = biasModel(inputs)
+            _, count = biasModel(inputs)
             
-            loss, MNLLL, MSE = criterion(tracks, profile, count)
+            tracks = tracks[:,:-1]
+            counts_per_example = torch.sum(tracks, dim=1)
+
+            loss = criterion(torch.log(counts_per_example + 1), count.squeeze())
 
             loss.backward()
             optimizer.step()
 
             running_loss += loss.item()
-            running_MNLLL += MNLLL.item()
-            running_MSE += MSE.item()
 
             #print every 2000 batch the loss
             epoch_steps += 1
@@ -81,18 +81,13 @@ def train():
         scheduler.step()
 
         epoch_loss = running_loss / len(train_dataloader)
-        epoch_MNLL = running_MNLLL / len(train_dataloader)
-        epoch_MSE = running_MSE / len(train_dataloader)
-
         train_loss.append(epoch_loss)
-        train_MNLLL.append(epoch_MNLL)
-        train_MSE.append(epoch_MSE)
 
-        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, MNLLL: {running_MNLLL/len(train_dataloader):.4f}, MSE: {running_MSE/len(train_dataloader):.4f}')
+        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}')
 
     print('Finished Training')
 
-    return biasModel, train_loss, train_MNLLL, train_MSE
+    return biasModel, train_loss
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -100,12 +95,6 @@ print(device)
 
 biasModel, train_loss, train_MNLLL, train_MSE = train()
 
-with open('../results/train_loss_1e-2.pkl', 'wb') as file:
+with open('../results/count_train_loss_1e-4.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
-
-with open('../results/train_MNLL_1e-2.pkl', 'wb') as file:
-        pickle.dump(train_MNLLL, file)
-
-with open('../results/train_MSE_1e-2.pkl', 'wb') as file:
-        pickle.dump(train_MSE, file)
 
