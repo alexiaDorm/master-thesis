@@ -66,7 +66,7 @@ def train():
     
     train_loss, train_MNLLL, train_MSE = [], [], []
 
-    nb_epoch=100
+    nb_epoch=50
     biasModel.train() 
     for epoch in range(0, nb_epoch):
         
