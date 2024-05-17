@@ -121,7 +121,7 @@ def train():
 
     print('Finished Training')
 
-    return biasModel, train_loss, MNLL
+    return biasModel, train_loss, train_MNLLL, train_MSE
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
