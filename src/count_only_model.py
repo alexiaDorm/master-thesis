@@ -93,7 +93,7 @@ def train():
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)  
 
-biasModel, train_loss, train_MNLLL, train_MSE = train()
+biasModel, train_loss = train()
 
 with open('../results/count_train_loss_1e-4.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
