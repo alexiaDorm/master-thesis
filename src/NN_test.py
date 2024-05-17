@@ -14,7 +14,7 @@ from models.pytorch_datasets import BiasDataset
 from models.models import BPNet
 from models.eval_metrics import ATACloss, counts_metrics, profile_metrics
 
-#Create subset of data to check model on
+""" #Create subset of data to check model on
 with open('../results/background_GC_matched.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 sequences.index = sequences.chr + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
@@ -32,7 +32,7 @@ with open('../results/ATAC_backgroundtest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks
+del tracks """
 
 #Define training loop
 data_dir = "../results/"
@@ -59,7 +59,7 @@ def train():
     weight_MSE = 2
     criterion = ATACloss(weight_MSE= weight_MSE)
 
-    lr = 0.001
+    lr = 0.005
 
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
@@ -129,12 +129,12 @@ print(device)
 
 model, train_loss, MNLL, MSE = train()
 
-with open('../results/train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/train_loss_5e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/train_MNLL_1e-3.pkl', 'wb') as file:
+with open('../results/train_MNLL_5e-3.pkl', 'wb') as file:
         pickle.dump(MNLL, file)
 
-with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/train_MSE_5e-3.pkl', 'wb') as file:
         pickle.dump(MSE, file)
 
