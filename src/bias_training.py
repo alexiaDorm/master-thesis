@@ -25,16 +25,17 @@ def train(trial):
 
     #Define chromosome split 
     chr_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
-    chr_test = ['6','13','22']
+    #chr_test = ['6','13','22']
+    chr_test = chr_train
 
     #Load the data
     batch_size = trial.suggest_int("batch_size", 4, 7)
 
-    train_dataset = BiasDataset(data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_train)
+    train_dataset = BiasDataset(data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=2**batch_size,
                         shuffle=True, num_workers=3)
         
-    test_dataset = BiasDataset( data_dir + 'background_GC_matched.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_test)
+    test_dataset = BiasDataset( data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundt.pkl', chr_test)
     test_dataloader = DataLoader(test_dataset, batch_size=128,
                         shuffle=True, num_workers=3)
 
@@ -205,7 +206,7 @@ if __name__ == "__main__":
 
     study = optuna.create_study(direction="minimize")
     try:
-        study.optimize(objective, n_trials=10, timeout=600, callbacks=[early_stopping_opt])
+        study.optimize(objective, n_trials=1, timeout=600, callbacks=[early_stopping_opt])
     except EarlyStoppingExceeded:
         print(f'EarlyStopping Exceeded: No new best scores on iters {OPTUNA_EARLY_STOPING}')
     

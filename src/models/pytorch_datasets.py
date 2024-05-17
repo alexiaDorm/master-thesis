@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 import pickle
 import numpy as np
@@ -31,18 +31,30 @@ class BiasDataset(Dataset):
         self.len_seq = len(self.sequences.iloc[0])
         self.sequences = self.sequences.apply(lambda x: one_hot_encode(x))
 
+        #Store in tensor for faster access
+        self.sequences_id = self.sequences.index.to_numpy()
+        self.sequences = torch.from_numpy(np.stack(self.sequences.values))
+        self.sequences = self.sequences.reshape((-1,4,self.len_seq))
+
         with open(path_ATAC_signal, 'rb') as file:
             self.ATAC_track = pickle.load(file)
 
-        #Only keep track for sequences in chrom test
-        self.ATAC_track =  self.ATAC_track.loc[self.sequences.index]
+        #Only keep track coresponding to given sequences
+        self.ATAC_track =  self.ATAC_track.loc[self.sequences_id]
+        
+        self.ATAC_track_seq = self.ATAC_track.index.to_numpy()
+        self.ATAC_track = self.ATAC_track.iloc[:,0]
+        self.ATAC_track = torch.from_numpy(np.array(self.ATAC_track.values.tolist())).type(torch.float32)
+
 
     def __len__(self):
         return self.ATAC_track.shape[0]
 
     def __getitem__(self, idx):
-        track = self.ATAC_track.iloc[idx,0]
-        input = torch.from_numpy(self.sequences[self.ATAC_track.index[idx]])
+        track = self.ATAC_track[idx,:]
+
+        idx_input = np.argwhere(self.sequences_id == self.ATAC_track_seq[idx]).squeeze()
+        input = self.sequences[idx_input,:]
 
         return input, track
 
