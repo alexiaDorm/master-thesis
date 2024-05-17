@@ -1,5 +1,6 @@
 from tqdm import tqdm
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.optim.lr_scheduler as lr_scheduler
 
@@ -11,28 +12,7 @@ import time
 import os
 
 from models.pytorch_datasets import BiasDataset
-from models.models import BPNet
-from models.eval_metrics import ATACloss, counts_metrics, profile_metrics
-
-""" #Create subset of data to check model on
-with open('../results/background_GC_matched.pkl', 'rb') as file:
-    sequences = pickle.load(file)   
-sequences.index = sequences.chr + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
-
-with open('../results/ATAC_backgroundt.pkl', 'rb') as file:
-    tracks = pickle.load(file)
-
-sequences = sequences.sample(50000, replace=False)
-tracks = tracks.loc[sequences.index]
-
-with open('../results/background_GC_matchedt.pkl', 'wb') as file:
-    pickle.dump(sequences, file)
-
-with open('../results/ATAC_backgroundtest.pkl', 'wb') as file:
-    pickle.dump(tracks, file)
-
-del sequences
-del tracks """
+from models.models import TotCountOnly
 
 #Define training loop
 data_dir = "../results/"
@@ -53,13 +33,12 @@ def train():
     nb_conv = 8
     nb_filters = 6
 
-    biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
+    biasModel = TotCountOnly(nb_conv=nb_conv, nb_filters=2**nb_filters)
     biasModel.to(device)
 
-    weight_MSE = 2
-    criterion = ATACloss(weight_MSE= weight_MSE)
+    criterion = nn.MSELoss(reduction='mean')
 
-    lr = 0.01
+    lr = 0.001
 
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
@@ -84,7 +63,7 @@ def train():
             
             loss, MNLLL, MSE = criterion(tracks, profile, count)
 
-            loss.backward() 
+            loss.backward()
             optimizer.step()
 
             running_loss += loss.item()
