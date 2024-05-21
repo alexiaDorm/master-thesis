@@ -31,6 +31,28 @@ class ATACloss(nn.Module):
 
         return loss, MNLLL, MSE
 
+class ATACloss_alt(nn.Module):
+    def __init__(self, weight_MSE):
+        super().__init__()
+        self.weight_MSE = weight_MSE
+        self.KLD = nn.KLDivLoss(reduction="batchmean")
+        self.MSE = nn.MSELoss(reduction='mean')
+
+    def forward(self, true_counts, logits, tot_pred):
+                
+        true_counts = true_counts[:,:-1]
+        counts_per_example = torch.sum(true_counts, dim=1)
+
+        true_counts_prob = true_counts/ counts_per_example.unsqueeze(-1)
+        true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division to zero to 0 
+
+        KLD = self.KLD( nn.functional.log_softmax(logits, dim=1), true_counts_prob)
+        MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
+
+        loss = self.weight_MSE*MSE + KLD
+
+        return loss, KLD, MSE
+
 #Compute spearmann correlations between observed total counts and predictions
 def counts_metrics(tracks, counts_pred):
     

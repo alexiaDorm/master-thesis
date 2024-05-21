@@ -12,7 +12,7 @@ import os
 
 from models.pytorch_datasets import BiasDataset
 from models.models import BPNet
-from models.eval_metrics import ATACloss, counts_metrics, profile_metrics
+from models.eval_metrics import ATACloss, ATACloss_alt, counts_metrics, profile_metrics
 
 """ #Create subset of data to check model on
 with open('../results/background_GC_matched.pkl', 'rb') as file:
@@ -47,7 +47,7 @@ def train():
 
     train_dataset = BiasDataset(data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundtest.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                        shuffle=True, num_workers=0)
+                        shuffle=True, num_workers=4)
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
@@ -57,7 +57,7 @@ def train():
     biasModel.to(device)
 
     weight_MSE = 2
-    criterion = ATACloss(weight_MSE= weight_MSE)
+    criterion = ATACloss_alt(weight_MSE= weight_MSE)
 
     lr = 0.001
 
