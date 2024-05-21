@@ -24,7 +24,7 @@ class ATACloss(nn.Module):
         true_counts_prob = true_counts/ counts_per_example.unsqueeze(-1)
         true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division to zero to 0 
 
-        MNLLL = self.NLL(logits, true_counts_prob)
+        MNLLL = self.NLL(logits, true_counts_prob) * 1000
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
         loss = self.weight_MSE*MSE + MNLLL
