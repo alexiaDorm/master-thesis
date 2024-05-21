@@ -75,7 +75,7 @@ def train():
                 group['lr'] = lr
 
         if epoch > 24:
-            criterion = ATACloss_alt(weight_MSE = (epoch - 50)/50 * 4)
+            criterion = ATACloss_alt(weight_MSE = (epoch - 25)/50 * 4)
         
         running_loss, epoch_steps = 0.0, 0
         running_MNLLL, running_MSE = 0.0, 0.0
