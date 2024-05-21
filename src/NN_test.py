@@ -56,24 +56,31 @@ def train():
     biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
     biasModel.to(device)
 
-    weight_MSE = 2
-    criterion = ATACloss_alt(weight_MSE= weight_MSE)
+    weight_MSE, weight_KLD = 0, 1
+    criterion = ATACloss_alt(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
 
     lr = 0.001
 
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=lr)
-    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
     
     train_loss, train_MNLLL, train_MSE = [], [], []
 
-    nb_epoch=150
+    nb_epoch = 100
     biasModel.train() 
     for epoch in range(0, nb_epoch):
+
+        if epoch == 25:
+            for group in optimizer.param_groups:
+                group['lr'] = lr
+
+        if epoch > 24:
+            criterion = ATACloss_alt(weight_MSE = (epoch - 50)/50 * 4)
         
         running_loss, epoch_steps = 0.0, 0
         running_MNLLL, running_MSE = 0.0, 0.0
         for i, data in enumerate(train_dataloader):
-            
+
             inputs, tracks = data 
             inputs = inputs.to(device)
             tracks = tracks.to(device)

@@ -32,8 +32,9 @@ class ATACloss(nn.Module):
         return loss, MNLLL, MSE
 
 class ATACloss_alt(nn.Module):
-    def __init__(self, weight_MSE):
+    def __init__(self, weight_MSE=1, weight_KLD=1):
         super().__init__()
+        self.weight_KLD = weight_KLD
         self.weight_MSE = weight_MSE
         self.KLD = nn.KLDivLoss(reduction="batchmean")
         self.MSE = nn.MSELoss(reduction='mean')
@@ -49,7 +50,7 @@ class ATACloss_alt(nn.Module):
         KLD = self.KLD( nn.functional.log_softmax(logits, dim=1), true_counts_prob)
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
-        loss = self.weight_MSE*MSE + KLD
+        loss = self.weight_MSE*MSE + self.weight_KLD*KLD
 
         return loss, KLD, MSE
 
