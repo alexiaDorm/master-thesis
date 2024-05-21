@@ -47,7 +47,7 @@ def train():
 
     train_dataset = BiasDataset(data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundtest.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                        shuffle=True, num_workers=4)
+                        shuffle=True, num_workers=0)
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
@@ -85,6 +85,9 @@ def train():
             loss, MNLLL, MSE = criterion(tracks, profile, count)
 
             loss.backward() 
+            #print(biasModel.profile_conv.weight.grad) 
+            #print(biasModel.linear.weight.grad) 
+
             optimizer.step()
 
             running_loss += loss.item()
@@ -121,12 +124,12 @@ print(device)
 
 biasModel, train_loss, train_MNLLL, train_MSE = train()
 
-with open('../results/train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/scale_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/train_MNLL_1e-3.pkl', 'wb') as file:
+with open('../results/scale_train_MNLL_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MNLLL, file)
 
-with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/scale_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
