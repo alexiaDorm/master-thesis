@@ -61,7 +61,7 @@ def train():
     weight_MSE, weight_KLD = 0, 1
     criterion = ATACloss_alt(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
 
-    lr = 0.005
+    lr = 0.001
 
     optimizer = torch.optim.Adam(biasModel.parameters(), lr=lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
@@ -133,12 +133,12 @@ print(device)
 
 biasModel, train_loss, train_MNLLL, train_MSE = train()
 
-with open('../results/two_phases_train_loss_5e-3.pkl', 'wb') as file:
+with open('../results/two_phases_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/two_phases_train_KLD_5e-3.pkl', 'wb') as file:
+with open('../results/two_phases_train_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MNLLL, file)
 
-with open('../results/two_phases_train_MSE_5e-3.pkl', 'wb') as file:
+with open('../results/two_phases_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
