@@ -61,9 +61,8 @@ class BiasDataset(Dataset):
 #Utils function to order the tracks always in the same order
 def order_categories(categories, desired_order):
     category_index_map = {category: index for index, category in enumerate(desired_order)}
-    sorted_categories = sorted(categories, key=lambda x: category_index_map.get(x, float('inf')))
     indexes = [category_index_map.get(category) for category in categories]
-    return sorted_categories, indexes
+    return indexes
 
 class PeaksDataset(Dataset):
     """Peaks and background sequences for main model training"""
@@ -125,18 +124,18 @@ class PeaksDataset(Dataset):
 
     def __getitem__(self, idx):
         
-        input = torch.from_numpy(self.sequences[idx,:])
+        input = self.sequences[idx,:,:]
+        print(self.sequences_id[idx])
         
         idx_input = np.argwhere(self.ATAC_track_seq == self.sequences_id[idx]).squeeze()
+        print(idx_input)
         tracks = self.ATAC_track[idx_input, :]
 
         #Order tracks so that always returned in same order
-        pseudo_bulk = self.pseudo_bulk[self.sequences_id[idx]]
-        ordered_categories, indexes = order_categories(pseudo_bulk, self.pseudo_bulk_order)
+        pseudo_bulk = self.pseudo_bulk[self.sequences_id[idx]].values
+        indexes = order_categories(self.pseudo_bulk_order, pseudo_bulk)
 
-        print(self.pseudo_bulk_order)
-        print(pseudo_bulk, ordered_categories)
-
+        print(tracks.shape)
         tracks = tracks[indexes,:]
 
         return input, tracks

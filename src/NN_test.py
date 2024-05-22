@@ -22,17 +22,17 @@ sequences.index = sequences.chr + ":" + sequences.start.astype("str") + "-" + se
 with open('../results/ATAC_background1.pkl', 'rb') as file:
     tracks = pickle.load(file)
 
-sequences = sequences.sample(100, replace=False)
+sequences = sequences.sample(50000, replace=False)
 tracks = tracks.loc[sequences.index]
 
-with open('../results/background_GC_matchedtest.pkl', 'wb') as file:
+with open('../results/background_GC_matchedt.pkl', 'wb') as file:
     pickle.dump(sequences, file)
 
-with open('../results/ATAC_backgroundtest2.pkl', 'wb') as file:
+with open('../results/ATAC_backgroundtest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks 
+del tracks  
 
 """ #Define training loop
 data_dir = "../results/"
@@ -47,7 +47,7 @@ def train():
 
     train_dataset = BiasDataset(data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundtest.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                        shuffle=True, num_workers=4)
+                        shuffle=True, num_workers=0)
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
@@ -140,6 +140,4 @@ with open('../results/two_phases_train_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MNLLL, file)
 
 with open('../results/two_phases_train_MSE_1e-3.pkl', 'wb') as file:
-        pickle.dump(train_MSE, file)
-
- """
+        pickle.dump(train_MSE, file) """
