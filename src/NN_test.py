@@ -14,27 +14,27 @@ from models.pytorch_datasets import BiasDataset
 from models.models import BPNet
 from models.eval_metrics import ATACloss, ATACloss_alt, counts_metrics, profile_metrics
 
-""" #Create subset of data to check model on
+#Create subset of data to check model on
 with open('../results/background_GC_matched.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 sequences.index = sequences.chr + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
 
-with open('../results/ATAC_backgroundt.pkl', 'rb') as file:
+with open('../results/ATAC_background1.pkl', 'rb') as file:
     tracks = pickle.load(file)
 
-sequences = sequences.sample(50000, replace=False)
+sequences = sequences.sample(100, replace=False)
 tracks = tracks.loc[sequences.index]
 
-with open('../results/background_GC_matchedt.pkl', 'wb') as file:
+with open('../results/background_GC_matchedtest.pkl', 'wb') as file:
     pickle.dump(sequences, file)
 
-with open('../results/ATAC_backgroundtest.pkl', 'wb') as file:
+with open('../results/ATAC_backgroundtest2.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks """
+del tracks 
 
-#Define training loop
+""" #Define training loop
 data_dir = "../results/"
 
 def train():
@@ -76,8 +76,8 @@ def train():
             for group in optimizer.param_groups:
                 group['lr'] = lr
 
-        if epoch > (nb_epoch_profile - 1) :
-            criterion = ATACloss_alt(weight_MSE = (epoch - nb_epoch_profile)/25 * 2)
+        if epoch > (nb_epoch_profile - 1)  and epoch > (nb_epoch_profile + 50):
+            criterion = ATACloss_alt(weight_MSE = (epoch - nb_epoch_profile)/50 * 2)
         
         running_loss, epoch_steps = 0.0, 0
         running_MNLLL, running_MSE = 0.0, 0.0
@@ -142,3 +142,4 @@ with open('../results/two_phases_train_KLD_1e-3.pkl', 'wb') as file:
 with open('../results/two_phases_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
+ """
