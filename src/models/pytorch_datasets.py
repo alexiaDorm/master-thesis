@@ -58,6 +58,13 @@ class BiasDataset(Dataset):
 
         return input, track
 
+#Utils function to order the tracks always in the same order
+def order_categories(categories, desired_order):
+    category_index_map = {category: index for index, category in enumerate(desired_order)}
+    sorted_categories = sorted(categories, key=lambda x: category_index_map.get(x, float('inf')))
+    indexes = [category_index_map.get(category) for category in categories]
+    return sorted_categories, indexes
+
 class PeaksDataset(Dataset):
     """Peaks and background sequences for main model training"""
 
@@ -82,9 +89,20 @@ class PeaksDataset(Dataset):
         with open(path_sequences_back, 'rb') as file:
             self.sequences = pd.concat([self.sequences, pickle.load(file).sample(nb_back)])
 
+        self.sequences.index = self.sequences.chr.astype('str') + ":" + self.sequences.start.astype('str') + "-" + self.sequences.end.astype('str')
+
         #Only keep sequences from provided chromosomes
         self.sequences = self.sequences[self.sequences.chr.isin(chr_include)]
         self.sequences = self.sequences.sequence
+
+        #Encode sequences
+        self.len_seq = len(self.sequences.iloc[0])
+        self.sequences = self.sequences.apply(lambda x: one_hot_encode(x))
+
+        #Store in tensor for faster access
+        self.sequences_id = self.sequences.index.to_numpy()
+        self.sequences = torch.from_numpy(np.stack(self.sequences.values))
+        self.sequences = self.sequences.reshape((-1,4,self.len_seq))
 
         #Load the ATAC track
         with open(path_ATAC_peaks, 'rb') as file:
@@ -93,31 +111,33 @@ class PeaksDataset(Dataset):
         with open(path_ATAC_back, 'rb') as file:
             self.ATAC_track = pd.concat([self.ATAC_track, pickle.load(file)]) 
 
-        #Encode sequences
-        self.len_seq = len(self.sequences.iloc[0])
-        self.sequences = self.sequences.apply(lambda x: one_hot_encode(x))
-
         self.pseudo_bulk = self.ATAC_track.pseudo_bulk.astype('category')
 
+        #Only keep track coresponding to given sequences
+        self.ATAC_track =  self.ATAC_track.loc[self.sequences_id]
+
+        self.ATAC_track_seq = self.ATAC_track.index.to_numpy()
         self.ATAC_track = self.ATAC_track.iloc[:,0]
+        self.ATAC_track = torch.from_numpy(np.array(self.ATAC_track.values.tolist())).type(torch.float32)
 
     def __len__(self):
         return self.sequences.shape[0]
 
     def __getitem__(self, idx):
         
-        input = torch.from_numpy(self.sequences.iloc[idx])
-        tracks = self.ATAC_track.loc[self.sequences.index[idx]]
+        input = torch.from_numpy(self.sequences[idx,:])
+        
+        idx_input = np.argwhere(self.ATAC_track_seq == self.sequences_id[idx]).squeeze()
+        tracks = self.ATAC_track[idx_input, :]
 
         #Order tracks so that always returned in same order
-        pseudo_bulk = self.pseudo_bulk[self.sequences.index[idx]]
-        tracks.index = pseudo_bulk
-        print(tracks)
-        print(pseudo_bulk)
-        
-        tracks = tracks.loc[self.pseudo_bulk_order]
-        tracks = np.stack(tracks.values)
-        tracks = torch.from_numpy(tracks)
+        pseudo_bulk = self.pseudo_bulk[self.sequences_id[idx]]
+        ordered_categories, indexes = order_categories(pseudo_bulk, self.pseudo_bulk_order)
+
+        print(self.pseudo_bulk_order)
+        print(pseudo_bulk, ordered_categories)
+
+        tracks = tracks[indexes,:]
 
         return input, tracks
 
