@@ -53,6 +53,8 @@ def train():
     nb_conv = 8
     nb_filters = 6
 
+    nb_epoch_profile = 100
+
     biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
     biasModel.to(device)
 
@@ -66,16 +68,16 @@ def train():
     
     train_loss, train_MNLLL, train_MSE = [], [], []
 
-    nb_epoch = 100
+    nb_epoch = 150
     biasModel.train() 
     for epoch in range(0, nb_epoch):
 
-        if epoch == 25:
+        if epoch == nb_epoch_profile:
             for group in optimizer.param_groups:
                 group['lr'] = lr
 
-        if epoch > 24:
-            criterion = ATACloss_alt(weight_MSE = (epoch - 25)/50 * 2)
+        if epoch > (nb_epoch_profile - 1) :
+            criterion = ATACloss_alt(weight_MSE = (epoch - nb_epoch_profile)/nb_epoch_profile * 2)
         
         running_loss, epoch_steps = 0.0, 0
         running_MNLLL, running_MSE = 0.0, 0.0
@@ -131,12 +133,12 @@ print(device)
 
 biasModel, train_loss, train_MNLLL, train_MSE = train()
 
-with open('../results/scale_train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/two_phases_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/scale_train_MNLL_1e-3.pkl', 'wb') as file:
+with open('../results/two_phases_train_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MNLLL, file)
 
-with open('../results/scale_train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/two_phases_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
