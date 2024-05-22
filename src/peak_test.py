@@ -17,7 +17,8 @@ from models.eval_metrics import ATACloss, ATACloss_alt, counts_metrics, profile_
 #Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
     sequences = pickle.load(file)   
-sequences.index = sequences.chr + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
+
+sequences.index = sequences.chr.astype("str") + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
 
 with open('../results/ATAC_peaks1.pkl', 'rb') as file:
     tracks = pickle.load(file)
