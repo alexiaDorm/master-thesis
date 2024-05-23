@@ -46,6 +46,7 @@ def train():
 
     #Define chromosome split 
     chr_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
+    chr_test = ['6','13','22']
 
     #Load the data
     batch_size = 32
@@ -55,7 +56,13 @@ def train():
                                  data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
                                  chr_train, pseudo_bulk_order, 0)
     train_dataloader = DataLoader(train_dataset, batch_size,
-                        shuffle=True, num_workers=0)
+                        shuffle=True, num_workers=4)
+
+    test_dataset = PeaksDataset(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
+                                 data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
+                                 chr_test, pseudo_bulk_order, 0)
+    test_dataloader = DataLoader(test_dataset, 108,
+                        shuffle=True, num_workers=4)
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
@@ -80,6 +87,8 @@ def train():
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
     
     train_loss, train_KLD, train_MSE = [], [], []
+    test_loss, test_KLD, test_MSE = [], [], []
+    corr_test, jsd_test = [], []
 
     nb_epoch = 100
     model.train() 
@@ -109,9 +118,6 @@ def train():
             loss = torch.stack([loss[0] for loss in losses]).sum()
 
             loss.backward() 
-            #print(model.profile_conv.weight.grad) 
-            #print(model.linear.weight.grad) 
-
             optimizer.step()
 
             running_loss += loss.item()
@@ -138,15 +144,55 @@ def train():
 
         print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {running_KLD.sum()/len(train_dataloader):.4f}, MSE: {running_MSE.sum()/len(train_dataloader):.4f}')
 
+
+        #Evaluate the model on test set after each epoch, save best performing model weights
+        val_loss, spear_corr, jsd = 0.0, 0.0, 0.0
+        running_KLD, running_MSE = 0.0, 0.0
+        for i, data in enumerate(test_dataloader):
+            with torch.no_grad():
+                inputs, tracks = data 
+                inputs = inputs.to(device)
+                tracks = tracks.to(device)
+
+                _, profile, count = model(inputs)
+
+                #Compute loss
+                losses = [criterion(tracks[:,j,:], profile[j], count[j]) for j in range(0,len(profile))]
+                KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
+                loss = torch.stack([loss[0] for loss in losses]).sum()
+
+                val_loss += loss.item()
+                running_KLD += KLD
+                running_MSE += MSE
+
+                #Compute evaluation metrics: pearson correlation
+                corr =  [counts_metrics(tracks[:,j,:], count[j]) for j in range(0,len(profile))]
+                corr = torch.tensor(corr)
+                spear_corr += corr
+
+                #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
+                j = [np.nanmean(profile_metrics(tracks[:,j,:], profile[j])) for j in range(0,len(profile))]
+                j = torch.tensor(j)
+                jsd += j
+
+        test_loss.append(val_loss /len(test_dataloader))
+        test_KLD.append(running_KLD/len(test_dataloader))
+        test_MSE.append(running_MSE/len(test_dataloader))
+        corr_test.append(spear_corr/len(test_dataloader))
+        jsd_test.append(jsd/len(test_dataloader))
+
+        print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
+
+
     print('Finished Training')
 
-    return model, train_loss, train_KLD, train_MSE
+    return model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)  
 
-model, train_loss, train_KLD, train_MSE = train()
+model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
 with open('../results/peak_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
@@ -156,4 +202,16 @@ with open('../results/peak_train_KLD_1e-3.pkl', 'wb') as file:
 
 with open('../results/peak_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
+
+with open('../results/peak_test_KLD_1e-3.pkl', 'wb') as file:
+        pickle.dump(test_KLD, file)
+
+with open('../results/peak_test_MSE_1e-3.pkl', 'wb') as file:
+        pickle.dump(test_MSE, file)
+
+with open('../results/peak_corr_1e-3.pkl', 'wb') as file:
+        pickle.dump(corr_test, file)
+
+with open('../results/peak_jsd_1e-3.pkl', 'wb') as file:
+        pickle.dump(jsd_test, file)
 
