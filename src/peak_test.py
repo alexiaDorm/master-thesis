@@ -10,11 +10,11 @@ from functools import partial
 import time
 import os
 
-from models.pytorch_datasets import BiasDataset
-from models.models import BPNet
-from models.eval_metrics import ATACloss, ATACloss_alt, counts_metrics, profile_metrics
+from models.pytorch_datasets import PeaksDataset
+from models.models import CATAC
+from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
 
-#Create subset of data to check model on
+""" #Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 
@@ -23,7 +23,7 @@ sequences.index = sequences.chr.astype("str") + ":" + sequences.start.astype("st
 with open('../results/ATAC_peaks1.pkl', 'rb') as file:
     tracks = pickle.load(file)
 
-sequences = sequences.sample(100, replace=False)
+sequences = sequences.sample(50000, replace=False)
 tracks = tracks.loc[sequences.index]
 
 with open('../results/peaks_seqtest.pkl', 'wb') as file:
@@ -33,10 +33,14 @@ with open('../results/ATAC_peakstest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks
+del tracks """
 
-""" #Define training loop
+#Define training loop
 data_dir = "../results/"
+pseudo_bulk_order = ['D12Neuronal', 'D12Somite', 'D20Immature', 'D20Mesenchymal',
+       'D20Myoblast', 'D20Myogenic', 'D20Neuroblast', 'D20Neuronal',
+       'D20Somite', 'D8Mesenchymal', 'D8Myogenic', 'D8Neuronal', 'D8Somite']
+
 
 def train():
 
@@ -46,31 +50,39 @@ def train():
     #Load the data
     batch_size = 32
 
-    train_dataset = BiasDataset(data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundtest.pkl', chr_train)
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                        shuffle=True, num_workers=4)
+    #Load the data
+    train_dataset = PeaksDataset(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
+                                 data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
+                                 chr_train, pseudo_bulk_order, 0)
+    train_dataloader = DataLoader(train_dataset, batch_size,
+                        shuffle=True, num_workers=0)
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
     nb_filters = 6
+    nb_pred = 13
 
-    nb_epoch_profile = 100
-
-    biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
-    biasModel.to(device)
+    nb_epoch_profile = 50
+    
+    #Initialize model, loss, and optimizer
+    model = CATAC(nb_conv=nb_conv, nb_filters=2**nb_filters, first_kernel=21, 
+                      rest_kernel=3, profile_kernel_size=75, out_pred_len=1024, 
+                      nb_pred=nb_pred, nb_cell_type_CN = 1)
+        
+    model.to(device)
 
     weight_MSE, weight_KLD = 0, 1
-    criterion = ATACloss_alt(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
+    criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
 
     lr = 0.001
 
-    optimizer = torch.optim.Adam(biasModel.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
     
-    train_loss, train_MNLLL, train_MSE = [], [], []
+    train_loss, train_KLD, train_MSE = [], [], []
 
-    nb_epoch = 150
-    biasModel.train() 
+    nb_epoch = 100
+    model.train() 
     for epoch in range(0, nb_epoch):
 
         if epoch == nb_epoch_profile:
@@ -78,10 +90,10 @@ def train():
                 group['lr'] = lr
 
         if epoch > (nb_epoch_profile - 1) :
-            criterion = ATACloss_alt(weight_MSE = (epoch - nb_epoch_profile)/25 * 2)
+            criterion = ATACloss_KLD(weight_MSE = (epoch - nb_epoch_profile)/25 * 1)
         
         running_loss, epoch_steps = 0.0, 0
-        running_MNLLL, running_MSE = 0.0, 0.0
+        running_KLD, running_MSE = 0.0, 0.0
         for i, data in enumerate(train_dataloader):
 
             inputs, tracks = data 
@@ -90,19 +102,21 @@ def train():
 
             optimizer.zero_grad()
 
-            _, profile, count = biasModel(inputs)
-            
-            loss, MNLLL, MSE = criterion(tracks, profile, count)
+            _, profile, count = model(inputs)
+
+            losses = [criterion(tracks[:,j,:], profile[j], count[j]) for j in range(0,len(profile))]
+            KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
+            loss = torch.stack([loss[0] for loss in losses]).sum()
 
             loss.backward() 
-            #print(biasModel.profile_conv.weight.grad) 
-            #print(biasModel.linear.weight.grad) 
+            #print(model.profile_conv.weight.grad) 
+            #print(model.linear.weight.grad) 
 
             optimizer.step()
 
             running_loss += loss.item()
-            running_MNLLL += MNLLL.item()
-            running_MSE += MSE.item()
+            running_KLD += KLD
+            running_MSE += MSE
 
             #print every 2000 batch the loss
             epoch_steps += 1
@@ -115,32 +129,31 @@ def train():
         scheduler.step()
 
         epoch_loss = running_loss / len(train_dataloader)
-        epoch_MNLL = running_MNLLL / len(train_dataloader)
+        epoch_KLD = running_KLD / len(train_dataloader)
         epoch_MSE = running_MSE / len(train_dataloader)
 
         train_loss.append(epoch_loss)
-        train_MNLLL.append(epoch_MNLL)
+        train_KLD.append(epoch_KLD)
         train_MSE.append(epoch_MSE)
 
-        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, MNLLL: {running_MNLLL/len(train_dataloader):.4f}, MSE: {running_MSE/len(train_dataloader):.4f}')
+        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {running_KLD.sum()/len(train_dataloader):.4f}, MSE: {running_MSE.sum()/len(train_dataloader):.4f}')
 
     print('Finished Training')
 
-    return biasModel, train_loss, train_MNLLL, train_MSE
+    return model, train_loss, train_KLD, train_MSE
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)  
 
-biasModel, train_loss, train_MNLLL, train_MSE = train()
+model, train_loss, train_KLD, train_MSE = train()
 
-with open('../results/two_phases_train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/peak_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/two_phases_train_KLD_1e-3.pkl', 'wb') as file:
-        pickle.dump(train_MNLLL, file)
+with open('../results/peak_train_KLD_1e-3.pkl', 'wb') as file:
+        pickle.dump(train_KLD, file)
 
-with open('../results/two_phases_train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/peak_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
- """

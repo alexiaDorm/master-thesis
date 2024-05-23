@@ -410,7 +410,7 @@ class CATAC(nn.Module):
             #Aplly linear layer
             count = c(count)
 
+            pred_counts.append(count)
+
         return pred_x, pred_profiles, pred_counts
-
-
 

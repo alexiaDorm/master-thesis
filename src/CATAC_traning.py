@@ -21,7 +21,7 @@ def train(config, chr_train, chr_test):
 
     #Load the data
     train_dataset = PeaksDataset(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched.pkl',
-                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_background.pkl', 
+                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
                                  chr_train, pseudo_bulk_order, nb_back)
     train_dataloader = DataLoader(train_dataset, batch_size=config["batch_size"],
                         shuffle=True, num_workers=2)

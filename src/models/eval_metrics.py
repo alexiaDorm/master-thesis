@@ -9,7 +9,7 @@ from scipy.stats import spearmanr
 from scipy.spatial.distance import jensenshannon
 
 #Custom losses functions
-class ATACloss(nn.Module):
+class ATACloss_MNLLL(nn.Module):
     def __init__(self, weight_MSE):
         super().__init__()
         self.weight_MSE = weight_MSE
@@ -31,7 +31,7 @@ class ATACloss(nn.Module):
 
         return loss, MNLLL, MSE
 
-class ATACloss_alt(nn.Module):
+class ATACloss_KLD(nn.Module):
     def __init__(self, weight_MSE=1, weight_KLD=1):
         super().__init__()
         self.weight_KLD = weight_KLD
@@ -49,6 +49,32 @@ class ATACloss_alt(nn.Module):
 
         KLD = self.KLD( nn.functional.log_softmax(logits, dim=1), true_counts_prob)
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
+
+        loss = self.weight_MSE*MSE + self.weight_KLD*KLD
+
+        return loss, KLD, MSE
+    
+class ATACloss_KLD_multi_heads(nn.Module):
+    def __init__(self, weight_MSE=1, weight_KLD=1):
+        super().__init__()
+        self.weight_KLD = weight_KLD
+        self.weight_MSE = weight_MSE
+        self.KLD = nn.KLDivLoss(reduction="none")
+        self.MSE = nn.MSELoss(reduction='none')
+
+    def forward(self, true_counts, logits, tot_pred):
+
+        true_counts = true_counts[: ,:, :-1]
+        counts_per_example = torch.sum(true_counts, dim=2, keepdim=True)
+
+        true_counts = true_counts/counts_per_example
+        true_counts[true_counts != true_counts] = 0 #set division to zero to 0 
+
+        KLD = self.KLD(torch.nn.functional.log_softmax(logits, dim=2), true_counts)
+        KLD = KLD.sum(dim=2).mean(dim=0)
+
+        MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred)
+        MSE = MSE.sum(dim=2).mean(dim=0)
 
         loss = self.weight_MSE*MSE + self.weight_KLD*KLD
 

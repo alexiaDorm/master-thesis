@@ -125,17 +125,14 @@ class PeaksDataset(Dataset):
     def __getitem__(self, idx):
         
         input = self.sequences[idx,:,:]
-        print(self.sequences_id[idx])
         
         idx_input = np.argwhere(self.ATAC_track_seq == self.sequences_id[idx]).squeeze()
-        print(idx_input)
         tracks = self.ATAC_track[idx_input, :]
 
         #Order tracks so that always returned in same order
         pseudo_bulk = self.pseudo_bulk[self.sequences_id[idx]].values
         indexes = order_categories(self.pseudo_bulk_order, pseudo_bulk)
 
-        print(tracks.shape)
         tracks = tracks[indexes,:]
 
         return input, tracks
