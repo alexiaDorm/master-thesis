@@ -78,6 +78,8 @@ for t in TIME_POINT:
                             ' -o ' + f[:-3] + 'bw --binSize 1' )
             
         subprocess.run(bamCoverage_command, shell=True) """
+ 
+    #Adapted from https://github.com/kundajelab/chrombpnet/tree/master/chrombpnet/helpers/preprocessing
 
     #Create ATAC tracks of 5' count using splitted files
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
@@ -102,3 +104,6 @@ for t in TIME_POINT:
             p2.communicate()
 
         subprocess.run(["bedGraphToBigWig", '../results/bam_cell_type/' + t + '/tmp', chrom_sizes_file, f[:-3] + "_unstranded.bw"])
+
+        break
+    break
