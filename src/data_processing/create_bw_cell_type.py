@@ -87,7 +87,7 @@ for t in TIME_POINT:
     plus_shift_delta, minus_shift_delta = 4, -4
     
     chrom_sizes_file =  '../results/bam_cell_type/' + t + '/sizes.genome'
-    cmd_size = "samtools idxstats " + splitted_files[0] + " | cut -f1,2"
+    cmd_size = "samtools idxstats " + splitted_files[0] + " | cut -f1,2 > " + chrom_sizes_file
     subprocess.run(cmd_size, shell=True)
  
     for f in splitted_files:
