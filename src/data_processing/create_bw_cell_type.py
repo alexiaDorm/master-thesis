@@ -95,7 +95,6 @@ for t in TIME_POINT:
     chrom_size.to_csv(chrom_sizes_file, sep='\t', header=None)
 
     for f in splitted_files:
-        f = splitted_files[2]
         print(f)
 
         #Remove scaffolds chromosomes
