@@ -18,8 +18,8 @@ cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
 i = 0
 for t in TIME_POINT:
  
- """
-    if not os.path.exists('../results/bam_cell_type/' + t):
+
+    """ if not os.path.exists('../results/bam_cell_type/' + t):
         os.makedirs('../results/bam_cell_type/' + t)
 
     #Create cell type file for time point
@@ -61,9 +61,9 @@ for t in TIME_POINT:
                  '/' + t + '_cell_types.tsv --outdir ../results/bam_cell_type/' +
                  t + '/')
 
-    subprocess.run(sinto_command, shell=True) """
+    subprocess.run(sinto_command, shell=True)
 
-    """ #Create ATAC tracks of read counts using splitted files
+    #Create ATAC tracks of read counts using splitted files
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
 
     for f in splitted_files:
@@ -82,6 +82,7 @@ for t in TIME_POINT:
     #Adapted from https://github.com/kundajelab/chrombpnet/tree/master/chrombpnet/helpers/preprocessing
 
     #Create ATAC tracks of 5' count using splitted files
+
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
     plus_shift_delta, minus_shift_delta = 4, -4
     
