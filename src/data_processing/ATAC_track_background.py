@@ -9,7 +9,7 @@ import pandas as pd
 import pyBigWig
 
 
-from utils_data_preprocessing import get_continuous_ATAC_background
+from utils_data_preprocessing import get_continuous_wh_window
 
 NAME_DATASET = ["D8", "D12", "D20", "D22-15"]
 
@@ -22,12 +22,12 @@ for d in NAME_DATASET:
 
     total_reads = pd.read_csv('../results/bam_cell_type/' + d + '/total_reads.csv', header=None, index_col=[0])
     
-    bw_files = glob.glob('../results/bam_cell_type/' + d +'/*.bw')
+    bw_files = glob.glob('../results/bam_cell_type/' + d +'/*_unstranded.bw')
     for f in bw_files:
         bw = pyBigWig.open(f)
 
         tot = int(total_reads.loc[f.removeprefix('../results/bam_cell_type/').removesuffix('.bw')].values[0][2:-3])
-        ATAC = background.apply(lambda x: get_continuous_ATAC_background(bw, x, tot, seq_len=1024), axis=1)
+        ATAC = background.apply(lambda x: get_continuous_wh_window(bw, x, tot, seq_len=1024), axis=1)
 
         if not os.path.exists('../results/background/' + d):
             os.makedirs('../results/background/' + d)

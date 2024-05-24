@@ -88,6 +88,33 @@ def get_continuous_ATAC_peaks(bw, seq_loc, total_reads, norm_mult = 100000, seq_
 
     return ATAC
 
+def get_continuous_wh_window(bw, seq_loc, total_reads, norm_mult = 100000, seq_len=1024):
+    """
+    Get continuous ATAC track of given pseudobulk data at provided peak genome location.
+    The track values are normalized by divinding by the total number across regions and multiplied by a factor
+
+    bw: object
+        bigWig file of a pseudo-bulk ATAC tracks
+    seq: pd.Serie
+        pd.Serie of genomic region with chr, middle columns
+    total_reads: int
+        total number of reads in the provided ATAC pseudobulk track accross all regions (use for nomalization)
+    norm_mult: int (10000)
+        the normalized values are multiplied by this value
+    seq_len: int (1024)
+        length of of the ATAC tracks
+    
+    return:  the ATAC track over the provided genomic region
+    """ 
+    middle = int(seq_loc.start + (seq_loc.end - seq_loc.start)/2)
+    bp_around = seq_len/2
+    
+    ATAC = bw.values(seq_loc.chr, middle - bp_around, 
+                    middle + bp_around)
+    ATAC = (ATAC/total_reads) * norm_mult
+
+    return ATAC
+
 def get_continuous_ATAC_background(bw, seq_loc, total_reads, norm_mult = 100000, seq_len=1024, window_size=200):
     """
     Get continuous ATAC track of given pseudobulk data with sliding window at provided background genomic location.
