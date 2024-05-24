@@ -94,6 +94,7 @@ for t in TIME_POINT:
     subprocess.run(cmd_size, shell=True)
  
     for f in splitted_files:
+        f = splitted_files[2]
         print(f)
 
         #Remove scaffolds chromosomes
