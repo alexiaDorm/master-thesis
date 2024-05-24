@@ -18,6 +18,7 @@ cell_type = pd.read_csv('../results/cell_types.csv', index_col=0)
 i = 0
 for t in TIME_POINT:
  
+ """
     if not os.path.exists('../results/bam_cell_type/' + t):
         os.makedirs('../results/bam_cell_type/' + t)
 
@@ -60,9 +61,9 @@ for t in TIME_POINT:
                  '/' + t + '_cell_types.tsv --outdir ../results/bam_cell_type/' +
                  t + '/')
 
-    subprocess.run(sinto_command, shell=True)
+    subprocess.run(sinto_command, shell=True) """
 
-    #Create ATAC tracks using splitted files
+    """ #Create ATAC tracks of read counts using splitted files
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
 
     for f in splitted_files:
@@ -76,4 +77,28 @@ for t in TIME_POINT:
         bamCoverage_command = ('bamCoverage -p 8 -b ' + f  + 
                             ' -o ' + f[:-3] + 'bw --binSize 1' )
             
-        subprocess.run(bamCoverage_command, shell=True)
+        subprocess.run(bamCoverage_command, shell=True) """
+
+    #Create ATAC tracks of 5' count using splitted files
+    splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
+    plus_shift_delta, minus_shift_delta = 4, -4
+    
+    chrom_sizes_file =  '../results/bam_cell_type/' + t + '/sizes.genome'
+    cmd_size = "samtools idxstats " + splitted_files[0] + " | cut -f1,2"
+    subprocess.run(cmd_size, shell=True)
+ 
+    for f in splitted_files:
+
+        #Convert the bam to bed file
+        p1 = subprocess.Popen(["bedtools", "bamtobed", "-i", f], stdout=subprocess.PIPE)
+        
+        #Create the bedgraphfile
+        cmd = """awk -v OFS="\\t" '{{if ($6=="+"){{print $1,$2{0:+},$3,$4,$5,$6}} else if ($6=="-") {{print $1,$2,$3{1:+},$4,$5,$6}}}}' | sort -k1,1 | bedtools genomecov -bg -5 -i stdin -g {2} | bedtools sort -i stdin """.format(plus_shift_delta, minus_shift_delta, chrom_sizes_file)
+        subprocess.run(cmd, shell=True)
+
+        with open('../results/bam_cell_type/' + t + '/tmp', 'w') as f:
+            p2 = subprocess.Popen([cmd], stdin=p1.stdout, stdout=f, shell=True)
+            p1.stdout.close()
+            p2.communicate()
+
+        subprocess.run(["bedGraphToBigWig", '../results/bam_cell_type/' + t + '/tmp', chrom_sizes_file, f[:-3] + "_unstranded.bw"])
