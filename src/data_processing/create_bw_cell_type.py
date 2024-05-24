@@ -91,10 +91,9 @@ for t in TIME_POINT:
     subprocess.run(cmd_size, shell=True)
 
     chrom_size = pd.read_csv(chrom_sizes_file, sep='\t', header=None, index_col=0)
-    print(chrom_size.index)
     chrom_size = chrom_size.loc[['1','2','3','4','5','6','7','8','9','10','11','12', '13','14','15','16','17','18','19','20','21','22','X','Y']]
-    print(chrom_size.index)
- 
+    chrom_size.to_csv(chrom_sizes_file, sep='\t', header=None)
+    
     for f in splitted_files:
         f = splitted_files[2]
         print(f)
