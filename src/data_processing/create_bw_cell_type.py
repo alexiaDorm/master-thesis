@@ -93,14 +93,14 @@ for t in TIME_POINT:
     chrom_size = pd.read_csv(chrom_sizes_file, sep='\t', header=None, index_col=0)
     chrom_size = chrom_size.loc[['1','2','3','4','5','6','7','8','9','10','11','12', '13','14','15','16','17','18','19','20','21','22','X','Y']]
     chrom_size.to_csv(chrom_sizes_file, sep='\t', header=None)
-    
+
     for f in splitted_files:
         f = splitted_files[2]
         print(f)
 
         #Remove scaffolds chromosomes
         print("Removing scaffold chromosomes")
-        cmd_remove_scaff = "samtools view -b " + f + " {1..22} > ../results/bam_cell_type/output.bam"
+        cmd_remove_scaff = "samtools view -b " + f + " $(echo {1..22} X Y) > ../results/bam_cell_type/output.bam"
         subprocess.run(cmd_remove_scaff, shell=True)
 
         #Convert the bam to bed file
