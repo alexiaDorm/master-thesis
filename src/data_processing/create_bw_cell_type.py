@@ -86,13 +86,12 @@ for t in TIME_POINT:
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
     plus_shift_delta, minus_shift_delta = 4, -4
 
-    #Remove scaffolds chromosomes
-    cmd_remove_scaff = "samtools view -b " + splitted_files[1] + " {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y} > ../results/bam_cell_type/'" + t + "/output.bam"
-    subprocess.run(cmd_remove_scaff, shell=True)
-
     chrom_sizes_file =  '../results/bam_cell_type/' + t + '/sizes.genome'
     cmd_size = "samtools idxstats " + splitted_files[0] + " | cut -f1,2 > " + chrom_sizes_file
     subprocess.run(cmd_size, shell=True)
+
+    chrom_size = pd.read_csv(chrom_sizes_file, sep='\t', header=None)
+    print(chrom_size)
  
     for f in splitted_files:
         f = splitted_files[2]
@@ -100,7 +99,7 @@ for t in TIME_POINT:
 
         #Remove scaffolds chromosomes
         print("Removing scaffold chromosomes")
-        cmd_remove_scaff = "samtools view -b " + f + " {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y} > ../results/bam_cell_type/output.bam"
+        cmd_remove_scaff = "samtools view -b " + f + " {1..22,X,Y} > ../results/bam_cell_type/output.bam"
         subprocess.run(cmd_remove_scaff, shell=True)
 
         #Convert the bam to bed file
