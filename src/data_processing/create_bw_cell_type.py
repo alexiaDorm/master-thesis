@@ -100,12 +100,12 @@ for t in TIME_POINT:
 
         #Remove scaffolds chromosomes
         print("Removing scaffold chromosomes")
-        cmd_remove_scaff = "samtools view -b " + f + " $(echo {1..22} X Y) > ../results/bam_cell_type/output.bam"
+        cmd_remove_scaff = "samtools view -b " + f + " $(echo {1..22} X Y)  > ../results/bam_cell_type/output.bam"
         subprocess.run(cmd_remove_scaff, shell=True)
 
         #Convert the bam to bed file
         print("Convert bam to bed")
-        cmd_bam_to_bed = "bedtools bamtobed -i" + " ../results/bam_cell_type/'" + t + "/output.bam > ../results/bam_cell_type/output.bed"
+        cmd_bam_to_bed = "bedtools bamtobed -i" + " ../results/bam_cell_type/output.bam > ../results/bam_cell_type/output.bed"
         subprocess.run(cmd_bam_to_bed, shell=True)
 
         #Create the bedgraphfile
