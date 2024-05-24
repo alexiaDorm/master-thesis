@@ -85,26 +85,35 @@ for t in TIME_POINT:
 
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
     plus_shift_delta, minus_shift_delta = 4, -4
-    
+
+    #Remove scaffolds chromosomes
+    cmd_remove_scaff = "samtools view -b " + splitted_files[0] + " {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y} > ../results/bam_cell_type/'" + t + "/output.bam"
+
     chrom_sizes_file =  '../results/bam_cell_type/' + t + '/sizes.genome'
     cmd_size = "samtools idxstats " + splitted_files[0] + " | cut -f1,2 > " + chrom_sizes_file
     subprocess.run(cmd_size, shell=True)
  
     for f in splitted_files:
 
+        #Remove scaffolds chromosomes
+        print("Removing scaffold chromosomes")
+        cmd_remove_scaff = "samtools view -b " + f + " {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y} > ../results/bam_cell_type/output.bam"
+        subprocess.run(cmd_remove_scaff, shell=True)
+
         #Convert the bam to bed file
-        p1 = subprocess.Popen(["bedtools", "bamtobed", "-i", f], stdout=subprocess.PIPE)
-        
+        print("Convert bam to bed")
+        cmd_bam_to_bed = "bedtools bamtobed -i" + " ../results/bam_cell_type/'" + t + "/output.bam > ../results/bam_cell_type/output.bed"
+        subprocess.run(cmd_bam_to_bed, shell=True)
+
         #Create the bedgraphfile
-        cmd = """awk -v OFS="\\t" '{{if ($6=="+"){{print $1,$2{0:+},$3,$4,$5,$6}} else if ($6=="-") {{print $1,$2,$3{1:+},$4,$5,$6}}}}' | sort -k1,1 | bedtools genomecov -bg -5 -i stdin -g {2} | bedtools sort -i stdin """.format(plus_shift_delta, minus_shift_delta, chrom_sizes_file)
+        print("Create the bedGraphfile")
+        cmd = """awk -v OFS="\\t" '{{if ($6=="+"){{print $1,$2{0:+},$3,$4,$5,$6}} else if ($6=="-") {{print $1,$2,$3{1:+},$4,$5,$6}}}}' ../results/bam_cell_type/output.bed | sort -k1,1 | bedtools genomecov -bg -5 -i stdin -g {2} | bedtools sort -i stdin """.format(plus_shift_delta, minus_shift_delta, chrom_sizes_file)       
+        cmd = cmd + "> ../results/bam_cell_type/output"
         subprocess.run(cmd, shell=True)
 
-        with open('../results/bam_cell_type/' + t + '/tmp', 'w') as f:
-            p2 = subprocess.Popen([cmd], stdin=p1.stdout, stdout=f, shell=True)
-            p1.stdout.close()
-            p2.communicate()
-
-        subprocess.run(["bedGraphToBigWig", '../results/bam_cell_type/' + t + '/tmp', chrom_sizes_file, f[:-3] + "_unstranded.bw"])
+        #Convert to Bigwig
+        print("Convert to bigwig")
+        subprocess.run(["bedGraphToBigWig", '../results/bam_cell_type/output', chrom_sizes_file, f[:-3] + "_unstranded.bw"])
 
         break
     break
