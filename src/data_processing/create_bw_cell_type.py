@@ -87,7 +87,8 @@ for t in TIME_POINT:
     plus_shift_delta, minus_shift_delta = 4, -4
 
     #Remove scaffolds chromosomes
-    cmd_remove_scaff = "samtools view -b " + splitted_files[0] + " {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y} > ../results/bam_cell_type/'" + t + "/output.bam"
+    cmd_remove_scaff = "samtools view -b " + splitted_files[1] + " {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y} > ../results/bam_cell_type/'" + t + "/output.bam"
+    subprocess.run(cmd_remove_scaff, shell=True)
 
     chrom_sizes_file =  '../results/bam_cell_type/' + t + '/sizes.genome'
     cmd_size = "samtools idxstats " + splitted_files[0] + " | cut -f1,2 > " + chrom_sizes_file
