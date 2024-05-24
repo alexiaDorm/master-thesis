@@ -116,8 +116,5 @@ for t in TIME_POINT:
 
         #Convert to Bigwig
         print("Convert to bigwig")
-        cmd_bw = "bedGraphToBigWig ../results/bam_cell_type/output " + chrom_sizes_file + " "+  f[:-3] + "_unstranded.bw"
+        cmd_bw = "bedGraphToBigWig ../results/bam_cell_type/output " + chrom_sizes_file + " "+  f[:-4] + "_unstranded.bw"
         subprocess.run(cmd_bw, shell=True)
-
-        break
-    break
