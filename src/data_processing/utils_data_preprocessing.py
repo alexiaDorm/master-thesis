@@ -111,7 +111,7 @@ def get_continuous_wh_window(bw, seq_loc, total_reads, norm_mult = 100000, seq_l
     
     ATAC = bw.values(seq_loc.chr, middle - bp_around, 
                     middle + bp_around)
-    ATAC = (ATAC/total_reads) * norm_mult
+    ATAC = [(x/total_reads) * norm_mult for x in ATAC]
 
     return ATAC
 
