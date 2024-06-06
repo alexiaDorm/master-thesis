@@ -108,6 +108,7 @@ def get_continuous_wh_window(bw, seq_loc, total_reads, norm_mult = 100000, seq_l
     """ 
     middle = int(seq_loc.start + (seq_loc.end - seq_loc.start)/2)
     bp_around = seq_len/2
+    print(middle, bp_around)
     
     ATAC = bw.values(seq_loc.chr, middle - bp_around, 
                     middle + bp_around)
