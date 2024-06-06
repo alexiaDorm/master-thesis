@@ -58,12 +58,12 @@ def train():
     nb_conv = 8
     nb_filters = 6
 
-    nb_epoch_profile = 0
+    nb_epoch_profile = 50
 
     biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
     biasModel.to(device)
 
-    weight_MSE, weight_KLD = 0, 1
+    weight_MSE, weight_KLD = 1, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
 
     lr = 0.001
@@ -85,8 +85,8 @@ def train():
             for group in optimizer.param_groups:
                 group['lr'] = lr
 
-        if epoch > (nb_epoch_profile - 1)  and epoch < (nb_epoch_profile + 50):
-            criterion = ATACloss_KLD(weight_MSE = (epoch - nb_epoch_profile)/50 * 1)
+        """ if epoch > (nb_epoch_profile - 1)  and epoch < (nb_epoch_profile + 50):
+            criterion = ATACloss_KLD(weight_MSE = (epoch - nb_epoch_profile)/50 * 1) """
         
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = 0.0, 0.0
