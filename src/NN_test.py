@@ -14,7 +14,7 @@ from models.pytorch_datasets import BiasDataset
 from models.models import BPNet
 from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
 
-""" #Create subset of data to check model on
+#Create subset of data to check model on
 with open('../results/background_GC_matched.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 sequences.index = sequences.chr + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
@@ -32,7 +32,7 @@ with open('../results/ATAC_backgroundtest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks """
+del tracks
 
 #Define training loop
 data_dir = "../results/"
@@ -58,7 +58,7 @@ def train():
     nb_conv = 8
     nb_filters = 6
 
-    nb_epoch_profile = 50
+    nb_epoch_profile = 0
 
     biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
     biasModel.to(device)
@@ -169,23 +169,23 @@ print(device)
 
 biasModel, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
-with open('../results/two_phases_train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/two_phases_train_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/train_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(train_KLD, file)
 
-with open('../results/two_phases_train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
-with open('../results/two_phases_test_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/test_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(test_KLD, file)
 
-with open('../results/two_phases_test_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/test_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(test_MSE, file)
 
-with open('../results/two_phases_corr_1e-3.pkl', 'wb') as file:
+with open('../results/corr_1e-3.pkl', 'wb') as file:
         pickle.dump(corr_test, file)
 
-with open('../results/two_phases_jsd_1e-3.pkl', 'wb') as file:
+with open('../results/jsd_1e-3.pkl', 'wb') as file:
         pickle.dump(jsd_test, file)
