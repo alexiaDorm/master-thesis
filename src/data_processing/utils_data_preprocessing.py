@@ -115,7 +115,7 @@ def get_continuous_wh_window(bw, seq_loc, total_reads, norm_mult = 100000, seq_l
 
     return ATAC
 
-def get_continuous_ATAC_background(bw, seq_loc, total_reads, norm_mult = 100000, seq_len=1024, window_size=200):
+def get_continuous_ATAC_background(bw, seq_loc, total_reads, norm_mult = 1000000, seq_len=1024, window_size=200):
     """
     Get continuous ATAC track of given pseudobulk data with sliding window at provided background genomic location.
     The track values are normalized by divinding by the total number across regions and multiplied by a factor
