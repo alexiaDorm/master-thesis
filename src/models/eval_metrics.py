@@ -18,7 +18,6 @@ class ATACloss_MNLLL(nn.Module):
 
     def forward(self, true_counts, logits, tot_pred):
                 
-        true_counts = true_counts[:,:-1]
         counts_per_example = torch.sum(true_counts, dim=1)
 
         true_counts_prob = true_counts/ counts_per_example.unsqueeze(-1)
@@ -41,7 +40,6 @@ class ATACloss_KLD(nn.Module):
 
     def forward(self, true_counts, logits, tot_pred):
                 
-        true_counts = true_counts[:,:-1]
         counts_per_example = torch.sum(true_counts, dim=1)
 
         true_counts_prob = true_counts/ counts_per_example.unsqueeze(-1)
