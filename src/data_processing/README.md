@@ -8,7 +8,7 @@ Quick description of scripts
 
     - create_bw_cell_type.py: Script to generate the ATAC track bigWigs files by pseudo-bulk 
 
-    - create_total_reads.py: Compute total of reads per pseudo-bulk for normalization
+    - compute_total_reads.py: Compute total of reads per pseudo-bulk for normalization
 
     - compute_coverage.py: Plot coverage in 10000 bins distribution by chromosomes and pseudo-bulk
 
