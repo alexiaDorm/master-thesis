@@ -26,13 +26,13 @@ for d in NAME_DATASET:
     for f in bw_files:
         bw = pyBigWig.open(f)
 
-        tot = int(total_reads.loc[f.removeprefix('../results/bam_cell_type/').removesuffix('.bw')].values[0][2:-3])
+        tot = int(total_reads.loc[f.removeprefix('../results/bam_cell_type/').removesuffix('_unstranded.bw')].values[0][2:-3])
         ATAC = background.apply(lambda x: get_continuous_wh_window(bw, x, tot, seq_len=1024), axis=1)
 
         if not os.path.exists('../results/background/' + d):
             os.makedirs('../results/background/' + d)
         
-        with open(('../results/background/' + f.removeprefix("../results/bam_cell_type/").removesuffix(".bw") + ".pkl"), 'wb') as file:
+        with open(('../results/background/' + f.removeprefix("../results/bam_cell_type/").removesuffix("_unstranded.bw") + ".pkl"), 'wb') as file:
             pickle.dump(ATAC, file)
 
         del ATAC

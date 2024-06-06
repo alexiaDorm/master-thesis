@@ -26,13 +26,13 @@ for d in TIME_POINT:
     for f in bw_files:
         bw = pyBigWig.open(f)
 
-        tot = int(total_reads.loc[f.removeprefix('../results/bam_cell_type/').removesuffix('.bw')].values[0][2:-3])
+        tot = int(total_reads.loc[f.removeprefix('../results/bam_cell_type/').removesuffix('_unstranded.bw')].values[0][2:-3])
         ATAC = peaks.apply(lambda x: get_continuous_wh_window(bw, x, tot, seq_len=1024), axis=1)
 
         if not os.path.exists('../results/ATAC/' + d):
             os.makedirs('../results/ATAC/' + d)
         
-        with open(("../results/ATAC/" + f.removeprefix("../results/bam_cell_type/").removesuffix(".bw") + ".pkl"), 'wb') as file:
+        with open(("../results/ATAC/" + f.removeprefix("../results/bam_cell_type/").removesuffix("_unstranded.bw") + ".pkl"), 'wb') as file:
             pickle.dump(ATAC, file)
 
         del ATAC 
