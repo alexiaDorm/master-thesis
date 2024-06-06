@@ -14,7 +14,7 @@ from models.pytorch_datasets import BiasDataset
 from models.models import BPNet
 from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
 
-#Create subset of data to check model on
+""" #Create subset of data to check model on
 with open('../results/background_GC_matched.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 sequences.index = sequences.chr + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
@@ -32,7 +32,7 @@ with open('../results/ATAC_backgroundtest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks
+del tracks """
 
 #Define training loop
 data_dir = "../results/"
@@ -63,7 +63,7 @@ def train():
     biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
     biasModel.to(device)
 
-    weight_MSE, weight_KLD = 1, 1
+    weight_MSE, weight_KLD = 0, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
 
     lr = 0.001
@@ -85,8 +85,8 @@ def train():
             for group in optimizer.param_groups:
                 group['lr'] = lr
 
-        """ if epoch > (nb_epoch_profile - 1)  and epoch < (nb_epoch_profile + 50):
-            criterion = ATACloss_KLD(weight_MSE = (epoch - nb_epoch_profile)/50 * 1) """
+        if epoch > (nb_epoch_profile - 1)  and epoch < (nb_epoch_profile + 50):
+            criterion = ATACloss_KLD(weight_MSE = (epoch - nb_epoch_profile)/50 * 1)
         
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = 0.0, 0.0
@@ -169,23 +169,23 @@ print(device)
 
 biasModel, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
-with open('../results/train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/2phase_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/train_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/2phase_train_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(train_KLD, file)
 
-with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/2phase_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
-with open('../results/test_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/2phase_test_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(test_KLD, file)
 
-with open('../results/test_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/2phase_test_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(test_MSE, file)
 
-with open('../results/corr_1e-3.pkl', 'wb') as file:
+with open('../results/2phase_corr_1e-3.pkl', 'wb') as file:
         pickle.dump(corr_test, file)
 
-with open('../results/jsd_1e-3.pkl', 'wb') as file:
+with open('../results/2phase_jsd_1e-3.pkl', 'wb') as file:
         pickle.dump(jsd_test, file)

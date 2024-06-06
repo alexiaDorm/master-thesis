@@ -14,7 +14,7 @@ from models.pytorch_datasets import PeaksDataset
 from models.models import CATAC
 from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
 
-""" #Create subset of data to check model on
+#Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 
@@ -33,7 +33,7 @@ with open('../results/ATAC_peakstest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks """
+del tracks
 
 #Define training loop
 data_dir = "../results/"
@@ -94,13 +94,13 @@ def train():
     model.train() 
     for epoch in range(0, nb_epoch):
 
-        if epoch == nb_epoch_profile:
+        """ if epoch == nb_epoch_profile:
             for group in optimizer.param_groups:
                 group['lr'] = lr
 
         if epoch > (nb_epoch_profile - 1) :
             criterion = ATACloss_KLD(weight_MSE = (epoch - nb_epoch_profile)/25 * 1)
-        
+        """
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = 0.0, 0.0
         for i, data in enumerate(train_dataloader):
