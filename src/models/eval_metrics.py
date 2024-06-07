@@ -114,7 +114,7 @@ def profile_metrics(tracks, profile_pred, pseudocount=0.001):
     for idx,t in enumerate(tracks):
         
         #Compute Jensen-Shannon divergence + normalize it
-        t = t[:-1].cpu()
+        t = t.cpu()
         curr_jsd = jensenshannon(t/(pseudocount+np.nansum(t)), profile_prob[idx,:].cpu().detach())
         min_jsd, max_jsd = jsd_min_max_bounds(t)
 

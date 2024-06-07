@@ -63,7 +63,7 @@ def train():
     biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
     biasModel.to(device)
 
-    weight_MSE, weight_KLD = 0, 1
+    weight_MSE, weight_KLD = 1, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
 
     lr = 0.001
