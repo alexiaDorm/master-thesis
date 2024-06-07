@@ -323,7 +323,7 @@ class CATAC(nn.Module):
                 ))
         
         #Pseudo bulk specific conv layers
-        self.pb_convlayers = [] 
+        self.pb_convlayers = nn.ModuleList()
 
         for i in range(self.nb_pred):
             
