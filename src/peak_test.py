@@ -76,7 +76,7 @@ def train():
                       rest_kernel=3, profile_kernel_size=75, out_pred_len=1024, 
                       nb_pred=nb_pred, nb_cell_type_CN = 1)
         
-    model.to(device)
+    model = model.to(device)
 
     weight_MSE, weight_KLD = 1, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)

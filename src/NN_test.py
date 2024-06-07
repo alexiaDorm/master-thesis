@@ -61,7 +61,7 @@ def train():
     nb_epoch_profile = 50
 
     biasModel = BPNet(nb_conv=nb_conv, nb_filters=2**nb_filters)
-    biasModel.to(device)
+    biasModel = biasModel.to(device)
 
     weight_MSE, weight_KLD = 1, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
