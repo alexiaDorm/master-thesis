@@ -48,11 +48,11 @@ def train():
 
     train_dataset = BiasDataset(data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundtest.pkl', chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                        shuffle=True, num_workers=0)
+                        shuffle=True, num_workers=4)
 
     test_dataset = BiasDataset(data_dir + 'background_GC_matchedt.pkl', data_dir + 'ATAC_backgroundtest.pkl', chr_test)
     test_dataloader = DataLoader(test_dataset, batch_size=108,
-                        shuffle=True, num_workers=0)
+                        shuffle=True, num_workers=4)
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
