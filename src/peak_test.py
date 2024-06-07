@@ -78,7 +78,7 @@ def train():
         
     model.to(device)
 
-    weight_MSE, weight_KLD = 0, 1
+    weight_MSE, weight_KLD = 1, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
 
     lr = 0.001
