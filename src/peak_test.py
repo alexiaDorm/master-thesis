@@ -65,8 +65,8 @@ def train():
                         shuffle=True, num_workers=4)
 
     #Initialize model, loss, and optimizer
-    nb_conv = 8
-    nb_filters = 6
+    nb_conv = 10
+    nb_filters = 7
     nb_pred = 13
 
     nb_epoch_profile = 50
@@ -194,26 +194,26 @@ print(device)
 
 model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
-torch.save(model.state_dict(), '../results/MNLL_model_1e-3.pkl')
+torch.save(model.state_dict(), '../results/deeper_model_1e-3.pkl')
 
-with open('../results/MNLL_train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/deeper_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/MNLL_train_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/deeper_train_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(train_KLD, file)
 
-with open('../results/MNLL_train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/deeper_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
-with open('../results/MNLL_test_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/deeper_test_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(test_KLD, file)
 
-with open('../results/MNLL_test_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/deeper_test_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(test_MSE, file)
 
-with open('../results/MNLL_corr_1e-3.pkl', 'wb') as file:
+with open('../results/deeper_corr_1e-3.pkl', 'wb') as file:
         pickle.dump(corr_test, file)
 
-with open('../results/MNLL_jsd_1e-3.pkl', 'wb') as file:
+with open('../results/deeper_jsd_1e-3.pkl', 'wb') as file:
         pickle.dump(jsd_test, file)
 
