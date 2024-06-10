@@ -370,7 +370,6 @@ class CATAC(nn.Module):
         #Pseudo-bulk specific convolutional layers 
         #-----------------------------------------------
         tmp_x, pred_x = [x]*self.nb_pred, []
-        print(tmp_x[0].get_device())
         for i in range(self.nb_pred):
             for layer in self.pb_convlayers[i]:
                 conv_x = layer(tmp_x[i])

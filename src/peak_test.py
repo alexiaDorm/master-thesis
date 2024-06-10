@@ -78,7 +78,7 @@ def train():
         
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 1, 1
+    weight_MSE, weight_KLD = 1, 2
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
 
     lr = 0.001
@@ -90,7 +90,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 100
+    nb_epoch = 25
     model.train() 
     for epoch in range(0, nb_epoch):
 
@@ -193,6 +193,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)  
 
 model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
+
+torch.save(model.state_dict(), '../results/peak_model_1e-3.pkl')
 
 with open('../results/peak_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
