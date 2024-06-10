@@ -10,7 +10,7 @@ from scipy.spatial.distance import jensenshannon
 
 #Custom losses functions
 class ATACloss_MNLLL(nn.Module):
-    def __init__(self, weight_MSE):
+    def __init__(self, weight_MSE=1):
         super().__init__()
         self.weight_MSE = weight_MSE
         self.NLL = nn.CrossEntropyLoss()
