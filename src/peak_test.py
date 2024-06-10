@@ -194,7 +194,7 @@ print(device)
 
 model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
-torch.save(model.state_dict(), '../results/peak_model_1e-3.pkl')
+torch.save(model.state_dict(), '../results/MNLL_model_1e-3.pkl')
 
 with open('../results/MNLL_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
