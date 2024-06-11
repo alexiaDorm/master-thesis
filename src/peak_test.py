@@ -79,8 +79,8 @@ def train():
     model = model.to(device)
 
     weight_MSE, weight_KLD = 1, 1
-    #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
-    criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
+    criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
+    #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -194,26 +194,26 @@ print(device)
 
 model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
-torch.save(model.state_dict(), '../results/MNLL_model_1e-3.pkl')
+torch.save(model.state_dict(), '../results/KLD_model_1e-3.pkl')
 
-with open('../results/MNLL_train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/KLD_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/MNLL_train_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/KLD_train_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(train_KLD, file)
 
-with open('../results/MNLL_train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/KLD_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
-with open('../results/MNLL_test_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/KLD_test_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(test_KLD, file)
 
-with open('../results/MNLL_test_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/KLD_test_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(test_MSE, file)
 
-with open('../results/MNLL_corr_1e-3.pkl', 'wb') as file:
+with open('../results/KLD_corr_1e-3.pkl', 'wb') as file:
         pickle.dump(corr_test, file)
 
-with open('../results/MNLL_jsd_1e-3.pkl', 'wb') as file:
+with open('../results/KLD_jsd_1e-3.pkl', 'wb') as file:
         pickle.dump(jsd_test, file)
 
