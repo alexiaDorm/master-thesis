@@ -14,7 +14,7 @@ from models.pytorch_datasets import PeaksDataset
 from models.models import CATAC
 from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
 
-""" #Create subset of data to check model on
+#Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 
@@ -23,7 +23,7 @@ sequences.index = sequences.chr.astype("str") + ":" + sequences.start.astype("st
 with open('../results/ATAC_peaks1.pkl', 'rb') as file:
     tracks = pickle.load(file)
 
-sequences = sequences.sample(50000, replace=False)
+sequences = sequences.sample(100000, replace=False)
 tracks = tracks.loc[sequences.index]
 
 with open('../results/peaks_seqtest.pkl', 'wb') as file:
@@ -33,7 +33,7 @@ with open('../results/ATAC_peakstest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks """
+del tracks
 
 #Define training loop
 data_dir = "../results/"
@@ -54,13 +54,13 @@ def train():
     #Load the data
     train_dataset = PeaksDataset(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
                                  data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
-                                 chr_train, pseudo_bulk_order, 0)
+                                 chr_train, pseudo_bulk_order, 500)
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
     test_dataset = PeaksDataset(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
                                  data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
-                                 chr_test, pseudo_bulk_order, 0)
+                                 chr_test, pseudo_bulk_order, 500)
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
 
