@@ -14,7 +14,7 @@ from models.pytorch_datasets import PeaksDataset
 from models.models import CATAC
 from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
 
-#Create subset of data to check model on
+""" #Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 
@@ -23,7 +23,7 @@ sequences.index = sequences.chr.astype("str") + ":" + sequences.start.astype("st
 with open('../results/ATAC_peaks1.pkl', 'rb') as file:
     tracks = pickle.load(file)
 
-sequences = sequences.sample(100000, replace=False)
+sequences = sequences.sample(50000, replace=False)
 tracks = tracks.loc[sequences.index]
 
 with open('../results/peaks_seqtest.pkl', 'wb') as file:
@@ -33,7 +33,7 @@ with open('../results/ATAC_peakstest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks
+del tracks """
 
 #Define training loop
 data_dir = "../results/"
@@ -74,7 +74,7 @@ def train():
     #Initialize model, loss, and optimizer
     model = CATAC(nb_conv=nb_conv, nb_filters=2**nb_filters, first_kernel=21, 
                       rest_kernel=3, profile_kernel_size=75, out_pred_len=1024, 
-                      nb_pred=nb_pred, nb_cell_type_CN = 1)
+                      nb_pred=nb_pred, nb_cell_type_CN = 0)
         
     model = model.to(device)
 
@@ -194,26 +194,26 @@ print(device)
 
 model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
-torch.save(model.state_dict(), '../results/deeper_model_1e-3.pkl')
+torch.save(model.state_dict(), '../results/MNLL_model_1e-3.pkl')
 
-with open('../results/deeper_train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/MNLL_train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/deeper_train_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/MNLL_train_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(train_KLD, file)
 
-with open('../results/deeper_train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/MNLL_train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
-with open('../results/deeper_test_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/MNLL_test_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(test_KLD, file)
 
-with open('../results/deeper_test_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/MNLL_test_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(test_MSE, file)
 
-with open('../results/deeper_corr_1e-3.pkl', 'wb') as file:
+with open('../results/MNLL_corr_1e-3.pkl', 'wb') as file:
         pickle.dump(corr_test, file)
 
-with open('../results/deeper_jsd_1e-3.pkl', 'wb') as file:
+with open('../results/MNLL_jsd_1e-3.pkl', 'wb') as file:
         pickle.dump(jsd_test, file)
 
