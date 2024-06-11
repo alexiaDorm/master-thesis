@@ -65,8 +65,8 @@ def train():
                         shuffle=True, num_workers=4)
 
     #Initialize model, loss, and optimizer
-    nb_conv = 10
-    nb_filters = 7
+    nb_conv = 8
+    nb_filters = 6
     nb_pred = 13
 
     nb_epoch_profile = 50
@@ -78,7 +78,7 @@ def train():
         
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 1, 2
+    weight_MSE, weight_KLD = 1, 1
     #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001

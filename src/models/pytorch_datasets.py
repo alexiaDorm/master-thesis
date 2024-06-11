@@ -34,7 +34,7 @@ class BiasDataset(Dataset):
         #Store in tensor for faster access
         self.sequences_id = self.sequences.index.to_numpy()
         self.sequences = torch.from_numpy(np.stack(self.sequences.values))
-        self.sequences = self.sequences.reshape((-1,4,self.len_seq))
+        self.sequences = self.sequences.permute(0,2,1)
 
         with open(path_ATAC_signal, 'rb') as file:
             self.ATAC_track = pickle.load(file)
@@ -101,7 +101,7 @@ class PeaksDataset(Dataset):
         #Store in tensor for faster access
         self.sequences_id = self.sequences.index.to_numpy()
         self.sequences = torch.from_numpy(np.stack(self.sequences.values))
-        self.sequences = self.sequences.reshape((-1,4,self.len_seq))
+        self.sequences = self.sequences.permute(0,2,1)
 
         #Load the ATAC track
         with open(path_ATAC_peaks, 'rb') as file:
