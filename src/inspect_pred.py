@@ -24,7 +24,7 @@ seq_id = ATAC.sample(5).index
 
 seq = pd.read_pickle(path_seq).sequence
 
-ATAC = ATAC.loc[seq_id, 0]
+ATAC = ATAC.loc[seq_id, :]
 seq = seq.loc[seq_id]
 
 
