@@ -36,6 +36,8 @@ with torch.no_grad():
     profile = torch.nn.functional.softmax(profile[0])
     profile = profile * torch.exp(count[0])
 
-ATAC = pd.DataFrame({"true": ATAC, "pred": profile})
 with open('../results/pred.pkl', 'wb') as file:
+    pickle.dump(profile, file)
+
+with open('../results/true.pkl', 'wb') as file:
     pickle.dump(ATAC, file)
