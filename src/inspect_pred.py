@@ -18,10 +18,10 @@ model = CATAC(nb_conv=8, nb_filters=64, first_kernel=21,
 model.load_state_dict(torch.load(path_model, map_location=device))
  """
 #Load sequence and ATAC
-ATAC = pd.Series(pd.read_pickle(path_ATAC))
+ATAC = pd.read_pickle(path_ATAC)
 print(ATAC.head())
 
-seq = pd.Series(pd.read_pickle(path_seq)).sequence
+seq = pd.read_pickle(path_seq).sequence
 print(seq.head())
 
 #On-hot encode the sequences
