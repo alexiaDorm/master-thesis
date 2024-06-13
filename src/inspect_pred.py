@@ -22,12 +22,13 @@ ATAC = pd.Series(pd.read_pickle(path_ATAC))
 print(ATAC.head())
 
 seq = pd.Series(pd.read_pickle(path_seq)).sequence
+print(seq.head())
 
 #On-hot encode the sequences
-seq = seq.apply(lambda x: one_hot_encode(x))
+""" seq = seq.apply(lambda x: one_hot_encode(x))
 seq = torch.tensor(seq).permute(0,2,1)
 
 x, profile, count = model(seq)
 profile = torch.nn.functional.softmax(profile[0])
-profile = profile * torch.exp(count[0])
+profile = profile * torch.exp(count[0]) """
 
