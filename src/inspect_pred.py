@@ -8,7 +8,7 @@ path_ATAC = "../results/ATAC_peakstest.pkl"
 
 path_model = '../results/insertion/KLD_model_1e-3.pkl'
 
-#Load model
+""" #Load model
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 model = CATAC(nb_conv=8, nb_filters=64, first_kernel=21, 
@@ -16,7 +16,7 @@ model = CATAC(nb_conv=8, nb_filters=64, first_kernel=21,
                       nb_pred=13, nb_cell_type_CN = 0)
         
 model.load_state_dict(torch.load(path_model, map_location=device))
-
+ """
 #Load sequence and ATAC
 ATAC = pd.Series(pd.read_pickle(path_ATAC))
 print(ATAC.head())
