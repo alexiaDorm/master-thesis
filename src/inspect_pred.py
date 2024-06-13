@@ -19,10 +19,15 @@ model.load_state_dict(torch.load(path_model, map_location=device))
  """
 #Load sequence and ATAC
 ATAC = pd.read_pickle(path_ATAC)
-print(ATAC.head())
+seq_id = ATAC.index[0:5]
 
 seq = pd.read_pickle(path_seq).sequence
-print(seq.head())
+
+ATAC = ATAC.loc[seq_id]
+seq = seq.loc[seq_id]
+
+print(ATAC)
+print(seq)
 
 #On-hot encode the sequences
 """ seq = seq.apply(lambda x: one_hot_encode(x))
