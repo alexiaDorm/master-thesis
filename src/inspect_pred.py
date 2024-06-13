@@ -31,10 +31,10 @@ seq = seq.loc[seq_id]
 #On-hot encode the sequences
 seq = seq.apply(lambda x: one_hot_encode(x))
 seq = torch.tensor(seq).permute(0,2,1)
-
-x, profile, count = model(seq)
-profile = torch.nn.functional.softmax(profile[0])
-profile = profile * torch.exp(count[0])
+with torch.no_grad():
+    x, profile, count = model(seq)
+    profile = torch.nn.functional.softmax(profile[0])
+    profile = profile * torch.exp(count[0])
 
 ATAC = pd.DataFrame({"true": ATAC, "pred": profile})
 with open('../results/pred.pkl', 'wb') as file:
