@@ -20,7 +20,7 @@ model.load_state_dict(torch.load(path_model, map_location=device))
 
 #Load sequence and ATAC
 ATAC = pd.read_pickle(path_ATAC)
-seq_id = ATAC.sample(5).index
+seq_id = ATAC.sample(50).index
 
 seq = pd.read_pickle(path_seq).sequence
 
