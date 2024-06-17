@@ -97,11 +97,11 @@ def train():
         running_KLD, running_MSE = 0.0, 0.0
         for i, data in enumerate(train_dataloader):
 
-            inputs, tracks, idx = data 
+            inputs, tracks, idx_skip = data 
             inputs = inputs.to(device)
             tracks = tracks.to(device)
             
-            idx = torch.stack(idx)
+            idx_skip = torch.stack(idx_skip)
             idx_skip = idx_skip != -1
 
             
@@ -110,7 +110,7 @@ def train():
             _, profile, count = model(inputs)
 
             #Compute loss for each head
-            losses = [criterion(tracks[:,j,:], profile[j], count[j], idx[j,:]) for j in range(0,len(profile))]
+            losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
             KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
             loss = torch.stack([loss[0] for loss in losses]).nansum()
 
@@ -147,17 +147,17 @@ def train():
         running_KLD, running_MSE = 0.0, 0.0
         for i, data in enumerate(test_dataloader):
             with torch.no_grad():
-                inputs, tracks, idx = data 
+                inputs, tracks, idx_skip = data 
                 inputs = inputs.to(device)
                 tracks = tracks.to(device)
                 
-                idx = torch.stack(idx)
+                idx_skip = torch.stack(idx_skip)
                 idx_skip = idx_skip != -1
 
                 _, profile, count = model(inputs)
 
                 #Compute loss
-                losses = [criterion(tracks[:,j,:], profile[j], count[j], idx[j,:]) for j in range(0,len(profile))]
+                losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
                 KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
                 loss = torch.stack([loss[0] for loss in losses]).nansum()
 
@@ -166,12 +166,12 @@ def train():
                 running_MSE += MSE
 
                 #Compute evaluation metrics: pearson correlation
-                corr =  [counts_metrics(tracks[:,j,:], count[j], idx[j,:]) for j in range(0,len(profile))]
+                corr =  [counts_metrics(tracks[:,j,:], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
                 corr = torch.tensor(corr)
                 spear_corr += corr
 
                 #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
-                j = [np.nanmean(profile_metrics(tracks[:,j,:], profile[j], idx[j,:])) for j in range(0,len(profile))]
+                j = [np.nanmean(profile_metrics(tracks[:,j,:], profile[j], idx_skip[j,:])) for j in range(0,len(profile))]
                 j = torch.tensor(j)
                 jsd += j
 
