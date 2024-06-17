@@ -54,6 +54,3 @@ subprocess.run(merge_bedtools, shell=True)
 
 #Check peaks are not inside blacklisted regions of genome
 subprocess.run("bedtools intersect -a ../results/tmp/common_peaks.bed -b ../data/hg38_blacklist.bed -v > ../results/common_peaks.bed", shell=True)
-
-#Remove temporary files
-subprocess.run("rm -r ../results/tmp", shell=True)

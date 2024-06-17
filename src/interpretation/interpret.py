@@ -18,15 +18,14 @@ def compute_shap_score(model ,seq, back):
         model, back)
     raw_scores = explainer.shap_values(seq)
     
-    return np.squeeze(raw_scores)
+    return raw_scores
 
-def compute_importance_score(path_model, path_sequence, device):
+def compute_importance_score(model, path_sequence, device):
 
     #Load the model and sequenece to predict
-    model = torch.load(path_model)
     model.to(device)
-    seq = pd.read_pickle(path_sequence).sequence.iloc[:5]
-
+    seq = pd.Series(pd.read_pickle(path_sequence))
+    
     #On-hot encode the sequences
     seq = seq.apply(lambda x: one_hot_encode(x))
     
@@ -36,17 +35,16 @@ def compute_importance_score(path_model, path_sequence, device):
     #Compute importance score for each base of sequences
     shap_scores = [compute_shap_score(model,s,torch.from_numpy(background[i])) for i,s in enumerate(seq)]
 
-    #Reshape the sequeneces an scores
+    #Reshape the sequeneces and scores
     seq = np.stack(seq.to_numpy())
-    seq = torch.reshape(torch.from_numpy(seq),(-1,4,seq.shape[1]))
+    seq = torch.from_numpy(seq).permute(0,2,1)
+    print(seq.shape)
 
-    shap_scores = np.stack(shap_scores)
-
-    print(seq.shape, shap_scores.shape)
+    shap_scores = torch.from_numpy(np.squeeze(np.stack(shap_scores)))
     
     #Project the scores on the sequence
-    proj_score = [s * shap_scores[i] for i,s in enumerate(seq)]
-    
+    proj_score = (shap_scores.sum(axis=1)[:,np.newaxis,:] * seq)
+
     return seq, shap_scores, proj_score
 
 def visualize_sequence_imp(proj_scores,idx_start, idx_end):
