@@ -65,8 +65,8 @@ def train():
     
     #Initialize model, loss, and optimizer
     model = CATAC2(nb_conv=nb_conv, nb_filters=2**nb_filters, first_kernel=21, 
-                      rest_kernel=3, profile_kernel_size=75, out_pred_len=1024, 
-                      nb_pred=nb_pred, nb_cell_type_CN = 0)
+                      rest_kernel=3, out_pred_len=1024, 
+                      nb_pred=nb_pred)
         
     model = model.to(device)
 
