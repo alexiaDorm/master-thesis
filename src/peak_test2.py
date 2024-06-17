@@ -5,14 +5,10 @@ import torch.optim.lr_scheduler as lr_scheduler
 
 import pickle
 import numpy as np
-import copy
-from functools import partial
-import time
-import os
 
-from models.pytorch_datasets import PeaksDataset
-from models.models import CATAC
-from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
+from models.pytorch_datasets import PeaksDataset2
+from models.models import CATAC2
+from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
 
 """ #Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
@@ -37,10 +33,7 @@ del tracks """
 
 #Define training loop
 data_dir = "../results/"
-pseudo_bulk_order = ['D12Neuronal', 'D12Somite', 'D20Immature', 'D20Mesenchymal',
-       'D20Myoblast', 'D20Myogenic', 'D20Neuroblast', 'D20Neuronal',
-       'D20Somite', 'D8Mesenchymal', 'D8Myogenic', 'D8Neuronal', 'D8Somite']
-
+time_order = ['D8', 'D12', 'D20', 'D22']
 
 def train():
 
@@ -48,31 +41,30 @@ def train():
     chr_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
     chr_test = ['6','13','22']
 
-    #Load the data
     batch_size = 32
 
     #Load the data
-    train_dataset = PeaksDataset(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
+    train_dataset = PeaksDataset2(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
                                  data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
-                                 chr_train, pseudo_bulk_order, 500)
+                                 chr_train, time_order, 500)
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
-    test_dataset = PeaksDataset(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
+    test_dataset = PeaksDataset2(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
                                  data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
-                                 chr_test, pseudo_bulk_order, 500)
+                                 chr_test, time_order, 500)
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
     nb_filters = 6
-    nb_pred = 13
+    nb_pred = len(time_order)
 
     nb_epoch_profile = 50
     
     #Initialize model, loss, and optimizer
-    model = CATAC(nb_conv=nb_conv, nb_filters=2**nb_filters, first_kernel=21, 
+    model = CATAC2(nb_conv=nb_conv, nb_filters=2**nb_filters, first_kernel=21, 
                       rest_kernel=3, profile_kernel_size=75, out_pred_len=1024, 
                       nb_pred=nb_pred, nb_cell_type_CN = 0)
         
@@ -105,20 +97,22 @@ def train():
         running_KLD, running_MSE = 0.0, 0.0
         for i, data in enumerate(train_dataloader):
 
-            inputs, cell_type, tracks, idx = data 
+            inputs, tracks, idx = data 
             inputs = inputs.to(device)
             tracks = tracks.to(device)
-
-            #Concatenate cell type to input sequence
+            
+            idx = torch.stack(idx)
+            idx_skip = idx_skip != -1
 
             
             optimizer.zero_grad()
 
             _, profile, count = model(inputs)
 
-            losses = [criterion(tracks[:,j,:], profile[j], count[j]) for j in range(0,len(profile))]
+            #Compute loss for each head
+            losses = [criterion(tracks[:,j,:], profile[j], count[j], idx[j,:]) for j in range(0,len(profile))]
             KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-            loss = torch.stack([loss[0] for loss in losses]).sum()
+            loss = torch.stack([loss[0] for loss in losses]).nansum()
 
             loss.backward() 
             optimizer.step()
@@ -153,28 +147,31 @@ def train():
         running_KLD, running_MSE = 0.0, 0.0
         for i, data in enumerate(test_dataloader):
             with torch.no_grad():
-                inputs, tracks = data 
+                inputs, tracks, idx = data 
                 inputs = inputs.to(device)
                 tracks = tracks.to(device)
+                
+                idx = torch.stack(idx)
+                idx_skip = idx_skip != -1
 
                 _, profile, count = model(inputs)
 
                 #Compute loss
-                losses = [criterion(tracks[:,j,:], profile[j], count[j]) for j in range(0,len(profile))]
+                losses = [criterion(tracks[:,j,:], profile[j], count[j], idx[j,:]) for j in range(0,len(profile))]
                 KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-                loss = torch.stack([loss[0] for loss in losses]).sum()
+                loss = torch.stack([loss[0] for loss in losses]).nansum()
 
                 val_loss += loss.item()
                 running_KLD += KLD
                 running_MSE += MSE
 
                 #Compute evaluation metrics: pearson correlation
-                corr =  [counts_metrics(tracks[:,j,:], count[j]) for j in range(0,len(profile))]
+                corr =  [counts_metrics(tracks[:,j,:], count[j], idx[j,:]) for j in range(0,len(profile))]
                 corr = torch.tensor(corr)
                 spear_corr += corr
 
                 #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
-                j = [np.nanmean(profile_metrics(tracks[:,j,:], profile[j])) for j in range(0,len(profile))]
+                j = [np.nanmean(profile_metrics(tracks[:,j,:], profile[j], idx[j,:])) for j in range(0,len(profile))]
                 j = torch.tensor(j)
                 jsd += j
 
@@ -197,26 +194,26 @@ print(device)
 
 model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
-torch.save(model.state_dict(), '../results/KLD_model_1e-3.pkl')
+torch.save(model.state_dict(), '../results/model_1e-3.pkl')
 
-with open('../results/KLD_train_loss_1e-3.pkl', 'wb') as file:
+with open('../results/train_loss_1e-3.pkl', 'wb') as file:
         pickle.dump(train_loss, file)
 
-with open('../results/KLD_train_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/train_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(train_KLD, file)
 
-with open('../results/KLD_train_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(train_MSE, file)
 
-with open('../results/KLD_test_KLD_1e-3.pkl', 'wb') as file:
+with open('../results/test_KLD_1e-3.pkl', 'wb') as file:
         pickle.dump(test_KLD, file)
 
-with open('../results/KLD_test_MSE_1e-3.pkl', 'wb') as file:
+with open('../results/test_MSE_1e-3.pkl', 'wb') as file:
         pickle.dump(test_MSE, file)
 
-with open('../results/KLD_corr_1e-3.pkl', 'wb') as file:
+with open('../results/corr_1e-3.pkl', 'wb') as file:
         pickle.dump(corr_test, file)
 
-with open('../results/KLD_jsd_1e-3.pkl', 'wb') as file:
+with open('../results/jsd_1e-3.pkl', 'wb') as file:
         pickle.dump(jsd_test, file)
 

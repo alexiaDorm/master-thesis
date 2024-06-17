@@ -35,10 +35,10 @@ class ATACloss_KLD(nn.Module):
         super().__init__()
         self.weight_KLD = weight_KLD
         self.weight_MSE = weight_MSE
-        self.KLD = nn.KLDivLoss(reduction="batchmean")
-        self.MSE = nn.MSELoss(reduction='mean')
+        self.KLD = nn.KLDivLoss(reduction="none")
+        self.MSE = nn.MSELoss(reduction='none')
 
-    def forward(self, true_counts, logits, tot_pred):
+    def forward(self, true_counts, logits, tot_pred, idx_skip):
                 
         counts_per_example = torch.sum(true_counts, dim=1)
 
@@ -48,41 +48,21 @@ class ATACloss_KLD(nn.Module):
         KLD = self.KLD( nn.functional.log_softmax(logits, dim=1), true_counts_prob)
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
-        loss = self.weight_MSE*MSE + self.weight_KLD*KLD
-
-        return loss, KLD, MSE
-    
-class ATACloss_KLD_multi_heads(nn.Module):
-    def __init__(self, weight_MSE=1, weight_KLD=1):
-        super().__init__()
-        self.weight_KLD = weight_KLD
-        self.weight_MSE = weight_MSE
-        self.KLD = nn.KLDivLoss(reduction="none")
-        self.MSE = nn.MSELoss(reduction='none')
-
-    def forward(self, true_counts, logits, tot_pred):
-
-        true_counts = true_counts[: ,:, :-1]
-        counts_per_example = torch.sum(true_counts, dim=2, keepdim=True)
-
-        true_counts = true_counts/counts_per_example
-        true_counts[true_counts != true_counts] = 0 #set division to zero to 0 
-
-        KLD = self.KLD(torch.nn.functional.log_softmax(logits, dim=2), true_counts)
-        KLD = KLD.sum(dim=2).mean(dim=0)
-
-        MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred)
-        MSE = MSE.sum(dim=2).mean(dim=0)
+        #Skip idx where track was not defined for loss computation
+        KLD = KLD[idx_skip,:].mean()
+        MSE = MSE[idx_skip].mean()
 
         loss = self.weight_MSE*MSE + self.weight_KLD*KLD
 
         return loss, KLD, MSE
 
 #Compute spearmann correlations between observed total counts and predictions
-def counts_metrics(tracks, counts_pred):
+def counts_metrics(tracks, counts_pred, idx_skip):
     
     counts_per_seq = torch.sum(tracks, dim=1)
-    corr_tot = spearmanr(counts_pred.cpu().detach(), counts_per_seq.cpu().detach())[0]
+    counts_pred = counts_pred.cpu().detach()[idx_skip]
+
+    corr_tot = spearmanr(counts_pred, counts_per_seq.cpu().detach())[0]
 
     return corr_tot
 
@@ -105,7 +85,7 @@ def normalized_min_max(value, min, max):
     return norm 
 
 #Compute the Jensen-Shannon divergence between observed and predicted profiles
-def profile_metrics(tracks, profile_pred, pseudocount=0.001):
+def profile_metrics(tracks, profile_pred, idx_skip, pseudocount=0.001):
     
     #Convert logits to prob
     profile_prob = F.softmax(profile_pred, dim=1)
@@ -122,5 +102,5 @@ def profile_metrics(tracks, profile_pred, pseudocount=0.001):
 
         jsd.append(curr_jsd)
 
-    return jsd
+    return jsd[idx_skip]
 
