@@ -59,7 +59,7 @@ class ATACloss_KLD(nn.Module):
 #Compute spearmann correlations between observed total counts and predictions
 def counts_metrics(tracks, counts_pred, idx_skip):
     
-    counts_per_seq = torch.sum(tracks, dim=1)[idx_skip]
+    counts_per_seq = torch.sum(tracks, dim=1)[idx_skip].cpu()
     counts_pred = counts_pred.cpu().detach()[idx_skip]
 
     corr_tot = spearmanr(counts_pred, counts_per_seq)[0]
