@@ -59,10 +59,10 @@ class ATACloss_KLD(nn.Module):
 #Compute spearmann correlations between observed total counts and predictions
 def counts_metrics(tracks, counts_pred, idx_skip):
     
-    counts_per_seq = torch.sum(tracks, dim=1)
+    counts_per_seq = torch.sum(tracks, dim=1)[idx_skip]
     counts_pred = counts_pred.cpu().detach()[idx_skip]
 
-    corr_tot = spearmanr(counts_pred, counts_per_seq.cpu().detach())[0]
+    corr_tot = spearmanr(counts_pred, counts_per_seq)[0]
 
     return corr_tot
 
@@ -92,15 +92,20 @@ def profile_metrics(tracks, profile_pred, idx_skip, pseudocount=0.001):
 
     jsd = []
     for idx,t in enumerate(tracks):
+
+        if idx_skip[idx]:
         
-        #Compute Jensen-Shannon divergence + normalize it
-        t = t.cpu()
-        curr_jsd = jensenshannon(t/(pseudocount+np.nansum(t)), profile_prob[idx,:].cpu().detach())
-        min_jsd, max_jsd = jsd_min_max_bounds(t)
+            #Compute Jensen-Shannon divergence + normalize it
+            t = t.cpu()
+            curr_jsd = jensenshannon(t/(pseudocount+np.nansum(t)), profile_prob[idx,:].cpu().detach())
+            min_jsd, max_jsd = jsd_min_max_bounds(t)
 
-        curr_jsd = normalized_min_max(curr_jsd, min_jsd, max_jsd)
+            curr_jsd = normalized_min_max(curr_jsd, min_jsd, max_jsd)
 
-        jsd.append(curr_jsd)
+            jsd.append(curr_jsd)
+        
+        else:
+            jsd.append(np.nan)
 
-    return jsd[idx_skip]
+    return jsd
 

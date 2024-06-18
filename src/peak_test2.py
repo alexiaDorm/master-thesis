@@ -10,7 +10,7 @@ from models.pytorch_datasets import PeaksDataset2
 from models.models import CATAC2
 from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
 
-""" #Create subset of data to check model on
+#Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 
@@ -19,7 +19,7 @@ sequences.index = sequences.chr.astype("str") + ":" + sequences.start.astype("st
 with open('../results/ATAC_peaks1.pkl', 'rb') as file:
     tracks = pickle.load(file)
 
-sequences = sequences.sample(50000, replace=False)
+sequences = sequences.sample(5000, replace=False)
 tracks = tracks.loc[sequences.index]
 
 with open('../results/peaks_seqtest.pkl', 'wb') as file:
@@ -29,7 +29,7 @@ with open('../results/ATAC_peakstest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks """
+del tracks
 
 #Define training loop
 data_dir = "../results/"
@@ -46,13 +46,13 @@ def train():
     #Load the data
     train_dataset = PeaksDataset2(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
                                  data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
-                                 chr_train, time_order, 500)
+                                 chr_train, time_order, 0)
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
     test_dataset = PeaksDataset2(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
                                  data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
-                                 chr_test, time_order, 500)
+                                 chr_test, time_order, 0)
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
 
@@ -60,8 +60,6 @@ def train():
     nb_conv = 8
     nb_filters = 6
     nb_pred = len(time_order)
-
-    nb_epoch_profile = 50
     
     #Initialize model, loss, and optimizer
     model = CATAC2(nb_conv=nb_conv, nb_filters=2**nb_filters, first_kernel=21, 
@@ -82,19 +80,12 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 25
+    nb_epoch = 10
     model.train() 
     for epoch in range(0, nb_epoch):
 
-        """ if epoch == nb_epoch_profile:
-            for group in optimizer.param_groups:
-                group['lr'] = lr
-
-        if epoch > (nb_epoch_profile - 1) :
-            criterion = ATACloss_KLD(weight_MSE = (epoch - nb_epoch_profile)/25 * 1)
-        """
         running_loss, epoch_steps = 0.0, 0
-        running_KLD, running_MSE = 0.0, 0.0
+        running_KLD, running_MSE = [], []
         for i, data in enumerate(train_dataloader):
 
             inputs, tracks, idx_skip = data 
@@ -104,7 +95,6 @@ def train():
             idx_skip = torch.stack(idx_skip)
             idx_skip = idx_skip != -1
 
-            
             optimizer.zero_grad()
 
             _, profile, count = model(inputs)
@@ -118,8 +108,8 @@ def train():
             optimizer.step()
 
             running_loss += loss.item()
-            running_KLD += KLD
-            running_MSE += MSE
+            running_KLD.append(KLD)
+            running_MSE.append(MSE)
 
             #print every 2000 batch the loss
             epoch_steps += 1
@@ -128,8 +118,13 @@ def train():
                     "[%d, %5d] loss: %.3f"
                     % (epoch + 1, i + 1, running_loss / epoch_steps)
                 )
-        
+            
         scheduler.step()
+    
+        running_KLD = np.array(running_KLD)
+        running_KLD = np.nansum(running_KLD, axis=0)
+        running_MSE = np.array(running_MSE)
+        running_MSE = np.nansum(running_MSE, axis=0)
 
         epoch_loss = running_loss / len(train_dataloader)
         epoch_KLD = running_KLD / len(train_dataloader)
@@ -139,12 +134,11 @@ def train():
         train_KLD.append(epoch_KLD)
         train_MSE.append(epoch_MSE)
 
-        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {running_KLD.sum()/len(train_dataloader):.4f}, MSE: {running_MSE.sum()/len(train_dataloader):.4f}')
-
+        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {np.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {np.nansum(running_MSE)/len(train_dataloader):.4f}')
 
         #Evaluate the model on test set after each epoch, save best performing model weights
-        val_loss, spear_corr, jsd = 0.0, 0.0, 0.0
-        running_KLD, running_MSE = 0.0, 0.0
+        val_loss, spear_corr, jsd = 0.0, [], []
+        running_KLD, running_MSE = [], []
         for i, data in enumerate(test_dataloader):
             with torch.no_grad():
                 inputs, tracks, idx_skip = data 
@@ -162,18 +156,25 @@ def train():
                 loss = torch.stack([loss[0] for loss in losses]).nansum()
 
                 val_loss += loss.item()
-                running_KLD += KLD
-                running_MSE += MSE
+                running_KLD.append(KLD)
+                running_MSE.append(MSE)
 
                 #Compute evaluation metrics: pearson correlation
                 corr =  [counts_metrics(tracks[:,j,:], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
-                corr = torch.tensor(corr)
-                spear_corr += corr
+                spear_corr.append(corr)
 
                 #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
                 j = [np.nanmean(profile_metrics(tracks[:,j,:], profile[j], idx_skip[j,:])) for j in range(0,len(profile))]
-                j = torch.tensor(j)
-                jsd += j
+                jsd.append(j)
+
+        running_KLD = np.array(running_KLD)
+        running_KLD = np.nansum(running_KLD, axis=0)
+        running_MSE = np.array(running_MSE)
+        running_MSE = np.nansum(running_MSE, axis=0)
+        spear_corr = np.array(spear_corr)
+        spear_corr = np.nansum(spear_corr, axis=0)
+        jsd = np.array(jsd)
+        jsd = np.nansum(jsd, axis=0)
 
         test_loss.append(val_loss /len(test_dataloader))
         test_KLD.append(running_KLD/len(test_dataloader))
