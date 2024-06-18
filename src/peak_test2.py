@@ -126,10 +126,8 @@ def train():
 
         running_KLD = torch.stack(running_KLD)
         running_KLD = torch.nansum(running_KLD, dim=0)
-        print(running_KLD.shape)
-
-        running_MSE = np.array(running_MSE)
-        running_MSE = np.nansum(running_MSE, axis=0)
+        running_MSE = torch.stack(running_MSE)
+        running_MSE = torch.nansum(running_MSE, dim=0)
 
         epoch_loss = running_loss / len(train_dataloader)
         epoch_KLD = running_KLD / len(train_dataloader)
@@ -139,12 +137,14 @@ def train():
         train_KLD.append(epoch_KLD)
         train_MSE.append(epoch_MSE)
 
-        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {np.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {np.nansum(running_MSE)/len(train_dataloader):.4f}')
+        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
 
         #Evaluate the model on test set after each epoch, save best performing model weights
         val_loss, spear_corr, jsd = 0.0, [], []
         running_KLD, running_MSE = [], []
         for i, data in enumerate(test_dataloader):
+            if i ==2 :
+                break
             with torch.no_grad():
                 inputs, tracks, idx_skip = data 
                 inputs = inputs.to(device)
@@ -166,20 +166,22 @@ def train():
 
                 #Compute evaluation metrics: pearson correlation
                 corr =  [counts_metrics(tracks[:,j,:], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
+                corr = torch.tensor(corr)
                 spear_corr.append(corr)
 
                 #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
                 j = [np.nanmean(profile_metrics(tracks[:,j,:], profile[j], idx_skip[j,:])) for j in range(0,len(profile))]
+                j = torch.tensor(j)
                 jsd.append(j)
 
-        running_KLD = np.array(running_KLD)
-        running_KLD = np.nansum(running_KLD, axis=0)
-        running_MSE = np.array(running_MSE)
-        running_MSE = np.nansum(running_MSE, axis=0)
-        spear_corr = np.array(spear_corr)
-        spear_corr = np.nansum(spear_corr, axis=0)
-        jsd = np.array(jsd)
-        jsd = np.nansum(jsd, axis=0)
+        running_KLD = torch.stack(running_KLD)
+        running_KLD = torch.nansum(running_KLD, dim=0)
+        running_MSE = torch.stack(running_MSE)
+        running_MSE = torch.nansum(running_MSE, dim=0)
+        spear_corr = torch.stack(spear_corr)
+        spear_corr = torch.nansum(spear_corr, dim=0)
+        jsd = torch.stack(jsd)
+        jsd = torch.nansum(jsd, dim=0)
 
         test_loss.append(val_loss /len(test_dataloader))
         test_KLD.append(running_KLD/len(test_dataloader))
