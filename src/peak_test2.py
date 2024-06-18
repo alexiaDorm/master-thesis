@@ -23,7 +23,7 @@ with open('../results/ATAC_peaks1.pkl', 'rb') as file:
 with open('../results/ATAC_peaks2.pkl', 'rb') as file:
     tracks = pd.concat([tracks, pickle.load(file)]) 
 
-sequences = sequences.sample(20000, replace=False)
+sequences = sequences.sample(10000, replace=False)
 tracks = tracks.loc[sequences.index]
 
 with open('../results/peaks_seqtest.pkl', 'wb') as file:
