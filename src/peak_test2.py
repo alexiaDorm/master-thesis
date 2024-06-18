@@ -88,9 +88,6 @@ def train():
         running_KLD, running_MSE = [], []
         for i, data in enumerate(train_dataloader):
 
-            if i ==2:
-                break
-
             inputs, tracks, idx_skip = data 
             inputs = inputs.to(device)
             tracks = tracks.to(device)
@@ -143,8 +140,7 @@ def train():
         val_loss, spear_corr, jsd = 0.0, [], []
         running_KLD, running_MSE = [], []
         for i, data in enumerate(test_dataloader):
-            if i ==2 :
-                break
+
             with torch.no_grad():
                 inputs, tracks, idx_skip = data 
                 inputs = inputs.to(device)
