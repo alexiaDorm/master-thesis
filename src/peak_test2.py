@@ -5,6 +5,7 @@ import torch.optim.lr_scheduler as lr_scheduler
 
 import pickle
 import numpy as np
+import pandas as pd
 
 from models.pytorch_datasets import PeaksDataset2
 from models.models import CATAC2
@@ -18,6 +19,9 @@ sequences.index = sequences.chr.astype("str") + ":" + sequences.start.astype("st
 
 with open('../results/ATAC_peaks1.pkl', 'rb') as file:
     tracks = pickle.load(file)
+
+with open('../results/ATAC_peaks2.pkl', 'rb') as file:
+    tracks = pd.concat([tracks, pickle.load(file)]) 
 
 sequences = sequences.sample(20000, replace=False)
 tracks = tracks.loc[sequences.index]
