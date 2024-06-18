@@ -10,7 +10,7 @@ from models.pytorch_datasets import PeaksDataset2
 from models.models import CATAC2
 from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
 
-#Create subset of data to check model on
+""" #Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 
@@ -29,7 +29,7 @@ with open('../results/ATAC_peakstest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks
+del tracks """
 
 #Define training loop
 data_dir = "../results/"
@@ -80,13 +80,16 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 10
+    nb_epoch = 1
     model.train() 
     for epoch in range(0, nb_epoch):
 
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = [], []
         for i, data in enumerate(train_dataloader):
+
+            if i ==2:
+                break
 
             inputs, tracks, idx_skip = data 
             inputs = inputs.to(device)
@@ -120,9 +123,10 @@ def train():
                 )
             
         scheduler.step()
-    
-        running_KLD = np.array(running_KLD)
-        running_KLD = np.nansum(running_KLD, axis=0)
+
+        running_KLD = torch.stack(running_KLD)
+        print(running_KLD.shape)
+
         running_MSE = np.array(running_MSE)
         running_MSE = np.nansum(running_MSE, axis=0)
 
