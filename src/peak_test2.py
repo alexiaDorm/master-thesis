@@ -125,6 +125,7 @@ def train():
         scheduler.step()
 
         running_KLD = torch.stack(running_KLD)
+        running_KLD = torch.nansum(running_KLD, dim=0)
         print(running_KLD.shape)
 
         running_MSE = np.array(running_MSE)
