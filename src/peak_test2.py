@@ -83,14 +83,14 @@ time_order = ['D8', 'D12', 'D20', 'D22-15']
     batch_size = 64
 
     #Load the data
-    train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matchedt.pkl',
-                                 data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
+    train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
+                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_background_sample.pkl', 
                                  chr_train, time_order, 20000)
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
-    test_dataset = PeaksDataset2(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
-                                 data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
+    test_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
+                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_background_sample.pkl', 
                                  chr_test, time_order, 20000)
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
@@ -119,7 +119,7 @@ time_order = ['D8', 'D12', 'D20', 'D22-15']
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 10
+    nb_epoch = 25
     model.train() 
     for epoch in range(0, nb_epoch):
 
