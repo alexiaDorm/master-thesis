@@ -49,8 +49,8 @@ class ATACloss_KLD(nn.Module):
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
         #Skip idx where track was not defined for loss computation
-        KLD = KLD[idx_skip,:].mean()
-        MSE = MSE[idx_skip].mean()
+        KLD = KLD[idx_skip,:].sum()
+        MSE = MSE[idx_skip].sum()
 
         loss = self.weight_MSE*MSE + self.weight_KLD*KLD
 

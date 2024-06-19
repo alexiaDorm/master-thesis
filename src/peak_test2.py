@@ -11,7 +11,7 @@ from models.pytorch_datasets import PeaksDataset2
 from models.models import CATAC2
 from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
 
-#Create subset of data to check model on
+""" #Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
     sequences = pickle.load(file)   
 
@@ -33,11 +33,11 @@ with open('../results/ATAC_peakstest.pkl', 'wb') as file:
     pickle.dump(tracks, file)
 
 del sequences
-del tracks
+del tracks """
 
 #Define training loop
 data_dir = "../results/"
-time_order = ['D8', 'D12', 'D20', 'D22']
+time_order = ['D8', 'D12', 'D20', 'D22-15']
 
 def train():
 
