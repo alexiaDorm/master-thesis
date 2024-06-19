@@ -12,9 +12,9 @@ from utils_data_preprocessing import get_continuous_wh_window
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 
-with open('../results/aug_peaks.pkl', 'rb') as file:
+with open('../results/peaks_seq.pkl', 'rb') as file:
     peaks = pickle.load(file)
-    
+
 peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('uint32')
 
 #Per cell type + dataset createa dataframe with continous track for each peaks
