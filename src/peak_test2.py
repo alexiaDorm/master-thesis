@@ -35,28 +35,63 @@ with open('../results/ATAC_peakstest.pkl', 'wb') as file:
 del sequences
 del tracks """
 
+#Concatenate ATAC peaks data
+with open('../results/ATAC_peaks1.pkl', 'rb') as file:
+    tracks = pickle.load(file)
+
+with open('../results/ATAC_peaks2.pkl', 'rb') as file:
+    tracks = pd.concat([tracks, pickle.load(file)]) 
+
+with open('../results/ATAC_peaks.pkl', 'wb') as file:
+    pickle.dump(tracks, file)
+
+del tracks
+
+#Sample background regions
+with open('../results/background_GC_matched.pkl', 'rb') as file:
+    sequences = pickle.load(file)   
+sequences.index = sequences.chr + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
+
+with open('../results/ATAC_background1.pkl', 'rb') as file:
+    tracks = pickle.load(file)
+
+with open('../results/ATAC_background2.pkl', 'rb') as file:
+    tracks = pd.concat([tracks, pickle.load(file)]) 
+
+sequences = sequences.sample(20000, replace=False)
+tracks = tracks.loc[sequences.index]
+
+with open('../results/background_GC_matched_sample.pkl', 'wb') as file:
+    pickle.dump(sequences, file)
+
+with open('../results/ATAC_background_sample.pkl', 'wb') as file:
+    pickle.dump(tracks, file)
+
+del sequences
+del tracks
+
 #Define training loop
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-def train():
+""" def train():
 
     #Define chromosome split 
     chr_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
     chr_test = ['6','13','22']
 
-    batch_size = 32
+    batch_size = 64
 
     #Load the data
-    train_dataset = PeaksDataset2(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
+    train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matchedt.pkl',
                                  data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
-                                 chr_train, time_order, 500)
+                                 chr_train, time_order, 20000)
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
     test_dataset = PeaksDataset2(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
                                  data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
-                                 chr_test, time_order, 500)
+                                 chr_test, time_order, 20000)
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
 
@@ -225,3 +260,4 @@ with open('../results/corr_1e-3.pkl', 'wb') as file:
 with open('../results/jsd_1e-3.pkl', 'wb') as file:
         pickle.dump(jsd_test, file)
 
+ """
