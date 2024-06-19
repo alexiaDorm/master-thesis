@@ -206,7 +206,7 @@ class PeaksDataset2(Dataset):
         self.seq_c_type.drop_duplicates(inplace=True)
 
         #Store all unique cell type name
-        self.unique_c_type = np.unique(self.seq_c_type.c_type)
+        self.unique_c_type = np.sort(np.unique(self.seq_c_type.c_type))
 
     def __len__(self):
         return self.seq_c_type.shape[0]
