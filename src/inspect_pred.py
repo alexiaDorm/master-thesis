@@ -9,7 +9,7 @@ import numpy as np
 path_seq = "../results/peaks_seqtest.pkl"
 path_ATAC = "../results/ATAC_peakstest.pkl"
 
-path_model = '../results/insertion/model_1e-3.pkl'
+path_model = '../results/model_1e-3.pkl'
 
 all_c_type = ['Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast',
        'Neuronal', 'Somite']
