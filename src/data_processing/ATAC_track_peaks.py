@@ -68,6 +68,6 @@ ATAC = pd.concat(pd.read_pickle(f) for f in pkl_files[13:])
 with open('../results/ATAC_peaks2.pkl', 'wb') as file:
             pickle.dump(ATAC, file)
 
-""" ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/ATAC_peaks1.pkl', '../results/ATAC_peaks2.pkl'])
+ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/ATAC_peaks1.pkl', '../results/ATAC_peaks2.pkl'])
 with open('../results/ATAC_peaks.pkl', 'wb') as file:
-            pickle.dump(ATAC, file) """
+            pickle.dump(ATAC, file)
