@@ -35,7 +35,7 @@ with open('../results/ATAC_peakstest.pkl', 'wb') as file:
 del sequences
 del tracks """
 
-#Concatenate ATAC peaks data
+""" #Concatenate ATAC peaks data
 with open('../results/ATAC_peaks1.pkl', 'rb') as file:
     tracks = pickle.load(file)
 
@@ -65,16 +65,16 @@ with open('../results/background_GC_matched_sample.pkl', 'wb') as file:
     pickle.dump(sequences, file)
 
 with open('../results/ATAC_background_sample.pkl', 'wb') as file:
-    pickle.dump(tracks, file)
+    pickle.dump(tracks, file) 
 
 del sequences
-del tracks
+del tracks """
 
 #Define training loop
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-""" def train():
+def train():
 
     #Define chromosome split 
     chr_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
@@ -259,5 +259,3 @@ with open('../results/corr_1e-3.pkl', 'wb') as file:
 
 with open('../results/jsd_1e-3.pkl', 'wb') as file:
         pickle.dump(jsd_test, file)
-
- """
