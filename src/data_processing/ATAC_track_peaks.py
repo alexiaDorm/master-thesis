@@ -12,8 +12,8 @@ from utils_data_preprocessing import get_continuous_wh_window
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 
-with open('../results/aug_peaks.pkl', 'rb') as file:
-    peaks = pickle.load(file)
+peaks = pd.read_csv("../results/aug_peaks.bed", header=None, sep='\t', low_memory=False, names= ["chr", "start", "end"])
+
 
 peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('uint32')
 
