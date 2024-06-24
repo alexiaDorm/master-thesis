@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import re
-import h5py
+#import h5py
 
 from timeit import default_timer as timer
 
