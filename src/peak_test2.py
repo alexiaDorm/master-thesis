@@ -121,42 +121,57 @@ def train():
 
     nb_epoch = 25
     model.train() 
+
     for epoch in range(0, nb_epoch):
 
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = [], []
-        for i, data in enumerate(train_dataloader):
 
-            inputs, tracks, idx_skip = data 
-            inputs = inputs.to(device)
-            tracks = tracks.to(device)
-            
-            idx_skip = torch.stack(idx_skip)
-            idx_skip = idx_skip != -1
+        with torch.profiler.profile(
+        schedule=torch.profiler.schedule(
+            wait=2,
+            warmup=2,
+            active=6,
+            repeat=1),
+        on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/main'),
+        with_stack=True
+        ) as profiler:
+            for i, data in enumerate(train_dataloader):
+                profiler.step()
 
-            optimizer.zero_grad()
+                if i >= 2 + 2 + 6:
+                    break
 
-            _, profile, count = model(inputs)
+                inputs, tracks, idx_skip = data 
+                inputs = inputs.to(device)
+                tracks = tracks.to(device)
+                
+                idx_skip = torch.stack(idx_skip)
+                idx_skip = idx_skip != -1
 
-            #Compute loss for each head
-            losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
-            KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-            loss = torch.stack([loss[0] for loss in losses]).nansum()
+                optimizer.zero_grad()
 
-            loss.backward() 
-            optimizer.step()
+                _, profile, count = model(inputs)
 
-            running_loss += loss.item()
-            running_KLD.append(KLD)
-            running_MSE.append(MSE)
+                #Compute loss for each head
+                losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
+                KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
+                loss = torch.stack([loss[0] for loss in losses]).nansum()
 
-            #print every 2000 batch the loss
-            epoch_steps += 1
-            if i % 2000 == 1999:  # print every 2000 mini-batches
-                print(
-                    "[%d, %5d] loss: %.3f"
-                    % (epoch + 1, i + 1, running_loss / epoch_steps)
-                )
+                loss.backward() 
+                optimizer.step()
+
+                running_loss += loss.item()
+                running_KLD.append(KLD)
+                running_MSE.append(MSE)
+
+                #print every 2000 batch the loss
+                epoch_steps += 1
+                if i % 2000 == 1999:  # print every 2000 mini-batches
+                    print(
+                        "[%d, %5d] loss: %.3f"
+                        % (epoch + 1, i + 1, running_loss / epoch_steps)
+                    )
             
         scheduler.step()
 
@@ -226,7 +241,29 @@ def train():
 
         print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
 
+        torch.save(model.state_dict(), '../results/model_1e-3.pkl')
 
+        with open('../results/train_loss_1e-3.pkl', 'wb') as file:
+                pickle.dump(train_loss, file)
+
+        with open('../results/train_KLD_1e-3.pkl', 'wb') as file:
+                pickle.dump(train_KLD, file)
+
+        with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
+                pickle.dump(train_MSE, file)
+
+        with open('../results/test_KLD_1e-3.pkl', 'wb') as file:
+                pickle.dump(test_KLD, file)
+
+        with open('../results/test_MSE_1e-3.pkl', 'wb') as file:
+                pickle.dump(test_MSE, file)
+
+        with open('../results/corr_1e-3.pkl', 'wb') as file:
+                pickle.dump(corr_test, file)
+
+        with open('../results/jsd_1e-3.pkl', 'wb') as file:
+                pickle.dump(jsd_test, file)
+    
     print('Finished Training')
 
     return model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test
@@ -237,25 +274,3 @@ print(device)
 
 model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
-torch.save(model.state_dict(), '../results/model_1e-3.pkl')
-
-with open('../results/train_loss_1e-3.pkl', 'wb') as file:
-        pickle.dump(train_loss, file)
-
-with open('../results/train_KLD_1e-3.pkl', 'wb') as file:
-        pickle.dump(train_KLD, file)
-
-with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
-        pickle.dump(train_MSE, file)
-
-with open('../results/test_KLD_1e-3.pkl', 'wb') as file:
-        pickle.dump(test_KLD, file)
-
-with open('../results/test_MSE_1e-3.pkl', 'wb') as file:
-        pickle.dump(test_MSE, file)
-
-with open('../results/corr_1e-3.pkl', 'wb') as file:
-        pickle.dump(corr_test, file)
-
-with open('../results/jsd_1e-3.pkl', 'wb') as file:
-        pickle.dump(jsd_test, file)
