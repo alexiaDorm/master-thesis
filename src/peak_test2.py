@@ -122,7 +122,7 @@ def train():
     nb_epoch = 25
     model.train() 
 
-    for epoch in range(0, nb_epoch):
+    """ for epoch in range(0, nb_epoch):
 
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = [], []
@@ -189,8 +189,8 @@ def train():
         train_MSE.append(epoch_MSE)
 
         print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
-
-        #Evaluate the model on test set after each epoch, save best performing model weights
+    """
+    """ #Evaluate the model on test set after each epoch, save best performing model weights
         val_loss, spear_corr, jsd = 0.0, [], []
         running_KLD, running_MSE = [], []
         for i, data in enumerate(test_dataloader):
@@ -265,7 +265,7 @@ def train():
                 pickle.dump(jsd_test, file)
     
     print('Finished Training')
-
+        """
     return model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test
 
 
