@@ -18,3 +18,5 @@ import torch
 for data in train_dataloader:
     input, tracks, indexes = data
     indexes = torch.stack(indexes)
+
+    break
