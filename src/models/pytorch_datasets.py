@@ -222,27 +222,47 @@ class PeaksDataset2(Dataset):
         start = timer()
 
         seq_c_type = self.seq_c_type.iloc[idx,:]
+        end = timer()
+        print(end - start)
 
         seq_idx = np.where(self.sequences_id == seq_c_type["seq_id"])[0]
+        end = timer()
+        print(end - start)
         input = self.sequences[seq_idx,:,:] 
+        end = timer()
+        print(end - start)
         
         idx_input = np.argwhere(np.logical_and(self.ATAC_track_seq == seq_c_type["seq_id"], np.array(self.c_type) == seq_c_type["c_type"])).squeeze()
+        end = timer()
+        print(end - start)
         tracks = self.ATAC_track[idx_input, :]
+        end = timer()
+        print(end - start)
 
         if tracks.ndim < 2:
             tracks = tracks[None,:]
+        end = timer()
+        print(end - start)
 
         end = timer()
         print(end - start)
+        print("------------------")
+
 
         #Order tracks so that always returned in same order
         #Keep which time point not present so skip during loss computation
         time = self.time.iloc[idx_input]
+        end = timer()
+        print(end - start)
         indexes = order_categories(self.time_order, time)
+        end = timer()
+        print(end - start)
         indexes = [-1 if i is None else i for i in indexes]
 
         end = timer()
         print(end - start)
+        print("------------------")
+
         
         #Add zero tracks for not defined time point
         missing_tracks = torch.zeros((4, tracks.shape[1]))
