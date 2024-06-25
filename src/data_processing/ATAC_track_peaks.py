@@ -50,7 +50,7 @@ for c in all_cell_types:
     
     #Stack the ATAC tracks and is_defined -> shape:(#peaks, 1024, #time)
     all_ATAC.append(np.transpose(np.stack(ATAC_tracks), (1, 2, 0)))
-    all_is_defined.append(np.transpose(np.stack(is_defined), (1, 2, 0)))
+    all_is_defined.append(np.transpose(np.stack(is_defined), (1, 0)))
 
     #Keep sequence idx and cell type
     idx_seq.append(np.arange(0,nb_peaks))
@@ -76,6 +76,7 @@ with open('../results/idx_seq.pkl', 'wb') as file:
 with open('../results/c_type_track.pkl', 'wb') as file:
             pickle.dump(c_type, file)
 
+#Old way 
 """ #Per cell type + dataset create dataframe with continous track for each peaks
 for d in TIME_POINT:
 
