@@ -21,7 +21,7 @@ peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('ui
 nb_peaks = peaks.shape[0]
 
 
-all_ATAC, all_is_defined, idx_seq, c_type = [], [], [], []
+all_ATAC, all_is_defined, idx_seq, chr_seq, c_type = [], [], [], [], []
 for c in all_cell_types:
 
     bw_files = ['../results/bam_cell_type/' + t +'/' + c  + '_unstranded.bw' for t in TIME_POINT]
@@ -54,27 +54,30 @@ for c in all_cell_types:
 
     #Keep sequence idx and cell type
     idx_seq.append(np.arange(0,nb_peaks))
+    chr_seq.append(peaks.chr.values)
     c_type.append([c]*nb_peaks)
     
     print(all_ATAC[0].shape)
 
 all_ATAC = torch.from_numpy(np.concatenate(all_ATAC, axis=0))
-print(all_ATAC.shape)
 all_is_defined = torch.from_numpy(np.concatenate(all_is_defined, axis=0))
 idx_seq = torch.from_numpy(np.concatenate(idx_seq, axis=0))
+chr_seq = torch.from_numpy(np.concatenate(chr_seq, axis=0))
 c_type = torch.from_numpy(np.concatenate(c_type, axis=0))
 
 with open('../results/ATAC_peaks_new.pkl', 'wb') as file:
-            pickle.dump(all_ATAC, file)
+    pickle.dump(all_ATAC, file)
             
 with open('../results/is_defined.pkl', 'wb') as file:
-            pickle.dump(all_is_defined, file)
+    pickle.dump(all_is_defined, file)
 
 with open('../results/idx_seq.pkl', 'wb') as file:
-            pickle.dump(idx_seq, file)
+    pickle.dump(idx_seq, file)
+with open('../results/chr_seq.pkl', 'wb') as file:
+    pickle.dump(chr_seq, file)
 
 with open('../results/c_type_track.pkl', 'wb') as file:
-            pickle.dump(c_type, file)
+    pickle.dump(c_type, file)
 
 #Old way 
 """ #Per cell type + dataset create dataframe with continous track for each peaks
