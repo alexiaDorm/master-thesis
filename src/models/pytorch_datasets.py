@@ -194,59 +194,58 @@ class PeaksDataset2(Dataset):
 
         #Only keep track coresponding to given sequences
         self.ATAC_track = self.ATAC_track.loc[self.sequences_id]
+        self.ATAC_track = self.ATAC_track.reset_index()
 
-        self.pseudo_bulk = self.ATAC_track.pseudo_bulk.astype('category')
-        self.c_type = [re.findall('[A-Z][^A-Z]*', x) for x in self.pseudo_bulk]
-        self.time = pd.Series([x[0] for x in self.c_type]); self.c_type = [x[1] for x in self.c_type]
-        self.time.index = self.pseudo_bulk.index
-        
-        self.ATAC_track_seq = self.ATAC_track.index.to_numpy()
-        self.ATAC_track = self.ATAC_track.iloc[:,0]
-        self.ATAC_track = torch.from_numpy(np.array(self.ATAC_track.values.tolist())).type(torch.float32)
+        #Split pseudo_bulk name into time and c_type
+        self.ATAC_track.pseudo_bulk = self.ATAC_track.pseudo_bulk.astype('category')
+        self.ATAC_track["c_type"] = [re.findall('[A-Z][^A-Z]*', x) for x in self.ATAC_track.pseudo_bulk]
+        self.ATAC_track["time"] = [x[0] for x in self.ATAC_track.c_type]; self.ATAC_track.c_type = [x[1] for x in self.ATAC_track.c_type]
 
-        #Create dataframe with seq id + cell type 
-        self.seq_c_type = pd.DataFrame({"seq_id": self.ATAC_track_seq, "c_type": self.c_type})
-        self.seq_c_type.drop_duplicates(inplace=True)
+        #Rename column of tracks
+        self.ATAC_track.rename(columns={"index": "seq_id", 0: "track"}, inplace=True)
 
-        #Store all unique cell type name
-        self.unique_c_type = np.sort(np.unique(self.seq_c_type.c_type))
+        #Get unique combinations of sequence_id and cell_type
+        unique_id = self.ATAC_track[['seq_id', 'c_type']].drop_duplicates()
+
+        #Create a DataFrame for all required combinations of seq_id, c_type, and time
+        all_comb = pd.MultiIndex.from_product([unique_id['seq_id'], 
+                                         unique_id['c_type'], 
+                                         self.time_order], 
+                                        names=['seq_id', 'c_type', 'time'])
+        all_comb_df = pd.DataFrame(index=all_comb).reset_index()
+
+        #Merge the all combinaison with the ATAC dataframe
+        self.ATAC_track = pd.merge(all_comb_df, self.ATAC_track, on=['seq_id', 'c_type', 'time'], how='left')
+
+        #Split the dataframe into tensor for fast access
+        self.ATAC_track_idx = list(zip(self.ATAC_track.seq_id, self.ATAC_track.c_type))
+        self.time = self.ATAC_track.time.values
+
+        self.ATAC_track = self.ATAC_track["track"]
+
+        #Replace the nan with zero tracks
+        self.ATAC_track.loc[self.ATAC_track.isna()] = [np.zeros(1024)] * self.ATAC_track.isna().sum()  
+
+        #Transform into a tensor ATAC track
+        self.ATAC_track =  np.stack(self.ATAC_track.values)  
+        self.ATAC_track = torch.from_numpy(self.ATAC_track)
 
     def __len__(self):
-        return self.seq_c_type.shape[0]
+        return int(self.ATAC_track.shape[0]/len(self.time_order))
 
     def __getitem__(self, idx):
 
         print("------------------")
         print(idx)
-
         start = timer()
+        seq, c_type = self.ATAC_track_idx[idx]
 
-        seq_c_type = self.seq_c_type.iloc[idx,:]
-        end = timer()
-        print(end - start)
-
-        seq_idx = np.where(self.sequences_id == seq_c_type["seq_id"])[0]
-        end = timer()
-        print(end - start)
+        seq_idx = np.where(self.sequences_id == seq)[0]
         input = self.sequences[seq_idx,:,:] 
-        end = timer()
-        print(end - start)
         
-        idx_input = np.argwhere(np.logical_and(self.ATAC_track_seq == seq_c_type["seq_id"], np.array(self.c_type) == seq_c_type["c_type"])).squeeze()
+        tracks = self.ATAC_track[idx:idx+4, :]
         end = timer()
         print(end - start)
-        tracks = self.ATAC_track[idx_input, :]
-        end = timer()
-        print(end - start)
-
-        if tracks.ndim < 2:
-            tracks = tracks[None,:]
-        end = timer()
-        print(end - start)
-
-        end = timer()
-        print(end - start)
-        print("------------------")
 
 
         #Order tracks so that always returned in same order
