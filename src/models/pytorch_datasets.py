@@ -239,7 +239,6 @@ class PeaksDataset2(Dataset):
         #Get track and associated encoded sequence input
         tracks = self.ATAC_track[idx,:,:]
         
-        print(seq_idx.shape)
         seq_idx = self.idx_seq[idx]
         seq_idx = torch.where(self.sequences_id == seq_idx)[0]
         input = self.sequences[seq_idx,:,:] 
