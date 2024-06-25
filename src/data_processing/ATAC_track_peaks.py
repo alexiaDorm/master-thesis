@@ -3,6 +3,7 @@
 
 import pickle
 import numpy as np
+import torch
 import glob
 import pyBigWig
 import os
@@ -48,16 +49,32 @@ for c in all_cell_types:
             is_defined.append([False]*nb_peaks)
     
     #Stack the ATAC tracks and is_defined -> shape:(#peaks, 1024, #time)
-    all_ATAC.append(np.stack(ATAC_tracks))
-    all_is_defined.append(np.stack(is_defined))
+    all_ATAC.append(np.transpose(np.stack(ATAC_tracks), (1, 2, 0)))
+    all_is_defined.append(np.transpose(np.stack(is_defined), (1, 2, 0)))
 
     #Keep sequence idx and cell type
     idx_seq.append(np.arange(0,nb_peaks))
     c_type.append([c]*nb_peaks)
     
     print(all_ATAC[0].shape)
-    break
 
+all_ATAC = torch.from_numpy(np.concatenate(all_ATAC, axis=0))
+print(all_ATAC.shape)
+all_is_defined = torch.from_numpy(np.concatenate(all_is_defined, axis=0))
+idx_seq = torch.from_numpy(np.concatenate(idx_seq, axis=0))
+c_type = torch.from_numpy(np.concatenate(c_type, axis=0))
+
+with open('../results/ATAC_peaks_new.pkl', 'wb') as file:
+            pickle.dump(all_ATAC, file)
+            
+with open('../results/is_defined.pkl', 'wb') as file:
+            pickle.dump(all_is_defined, file)
+
+with open('../results/idx_seq.pkl', 'wb') as file:
+            pickle.dump(idx_seq, file)
+
+with open('../results/c_type_track.pkl', 'wb') as file:
+            pickle.dump(c_type, file)
 
 """ #Per cell type + dataset create dataframe with continous track for each peaks
 for d in TIME_POINT:
