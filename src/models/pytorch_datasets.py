@@ -149,152 +149,122 @@ class PeaksDataset(Dataset):
 class PeaksDataset2(Dataset):
     """Peaks and background sequences for main model training"""
 
-    def __init__(self, path_sequences_peaks, path_sequences_back, path_ATAC_peaks, path_ATAC_back, chr_include, time_order, nb_back):
+    def __init__(self, path_sequences_peaks, path_sequences_back, paths_ATAC_peaks, paths_ATAC_back, chr_include, time_order, nb_back):
         """
         Arguments:
             path_sequences_peaks (string): Path to the pickle file with peaks regions sequences
             path_sequences_back (string): Path to the pickle file with background regions sequences
-            path_ATAC_peaks (string): Path to the pickle file with ATAC tracks per datasets and time points for peaks regions
-            path_ATAC_back (string): Path to the pickle file with ATAC tracks per datasets and time points for background regions
+            paths_ATAC_peaks (list of strings): Paths to the pickle files of ATAC tracks and corresponding seq_id, c_type, and if track is_defined
+            paths_ATAC_back (list of strings): Paths to the pickle files of ATAC tracks and corresponding seq_id, c_type, and if track is_defined
             chr_include (list of string): only keep the sequences on the provided chromosome, used to define train/split
             time_order (list of string): define order in which the time should be returned 
             nb_back (int): number of background regions to include in training set
 
         """
-        self.time_order = time_order
 
-        #Open sequences files
-        with open(path_sequences_peaks, 'rb') as file:
-            self.sequences = pickle.load(file)
+        #Load peak ATAC tracks
+        self.sequences, self.sequences_id = self.load_sequences(path_sequences_peaks, chr_include)
+        self.ATAC_track, self.is_defined, self.idx_seq, self.c_type = self.load_ATAC_tracks(paths_ATAC_peaks, chr_include)
+        
+        """ #Load the background ATAC tracks
+        sequences, sequences_id = self.load_sequences(path_sequences_back, chr_include)
+        self.sequences = torch.cat((self.sequences, sequences), 0); self.sequences_id = torch.cat((self.sequences_id, sequences_id), 0)
 
-        with open(path_sequences_back, 'rb') as file:
-            self.sequences = pd.concat([self.sequences, pickle.load(file).sample(nb_back)])
-
-        self.sequences.index = self.sequences.chr.astype('str') + ":" + self.sequences.start.astype('str') + "-" + self.sequences.end.astype('str')
-
-        #Only keep sequences from provided chromosomes
-        self.sequences = self.sequences[self.sequences.chr.isin(chr_include)]
-        self.sequences = self.sequences.sequence
-
-        #Encode sequences
-        self.len_seq = len(self.sequences.iloc[0])
-        self.sequences = self.sequences.apply(lambda x: one_hot_encode(x))
-
-        #Store in tensor for faster access
-        self.sequences_id = self.sequences.index.to_numpy()
-        self.sequences = torch.from_numpy(np.stack(self.sequences.values))
-        self.sequences = self.sequences.permute(0,2,1)
-
-        #Load the ATAC track
-        with open(path_ATAC_peaks, 'rb') as file:
-            self.ATAC_track = pickle.load(file)
-
-        with open(path_ATAC_back, 'rb') as file:
-            self.ATAC_track = pd.concat([self.ATAC_track, pickle.load(file)]) 
-
-        #Only keep track coresponding to given sequences
-        self.ATAC_track = self.ATAC_track.loc[self.sequences_id]
-        self.ATAC_track = self.ATAC_track.reset_index()
-
-        #Split pseudo_bulk name into time and c_type
-        self.ATAC_track.pseudo_bulk = self.ATAC_track.pseudo_bulk.astype('category')
-        self.ATAC_track["c_type"] = [re.findall('[A-Z][^A-Z]*', x) for x in self.ATAC_track.pseudo_bulk]
-        self.ATAC_track["time"] = [x[0] for x in self.ATAC_track.c_type]; self.ATAC_track.c_type = [x[1] for x in self.ATAC_track.c_type]
-
-        #Rename column of tracks
-        self.ATAC_track.rename(columns={"index": "seq_id", 0: "track"}, inplace=True)
-
-        #Get unique combinations of sequence_id and cell_type
-        unique_id = self.ATAC_track[['seq_id', 'c_type']].drop_duplicates()
-
-        #Create a DataFrame for all required combinations of seq_id, c_type, and time
-        all_comb = pd.MultiIndex.from_product([unique_id['seq_id'], 
-                                         unique_id['c_type'], 
-                                         self.time_order], 
-                                        names=['seq_id', 'c_type', 'time'])
-        all_comb_df = pd.DataFrame(index=all_comb).reset_index()
-
-        #Merge the all combinaison with the ATAC dataframe
-        self.ATAC_track = pd.merge(all_comb_df, self.ATAC_track, on=['seq_id', 'c_type', 'time'], how='left')
-
-        #Split the dataframe into tensor for fast access
-        self.ATAC_track_idx = list(zip(self.ATAC_track.seq_id, self.ATAC_track.c_type))
-        self.time = self.ATAC_track.time.values
-
-        self.ATAC_track = self.ATAC_track["track"]
-
-        #Replace the nan with zero tracks
-        self.ATAC_track.loc[self.ATAC_track.isna()] = [np.zeros(1024)] * self.ATAC_track.isna().sum()  
-
-        #Transform into a tensor ATAC track
-        self.ATAC_track =  np.stack(self.ATAC_track.values)  
-        self.ATAC_track = torch.from_numpy(self.ATAC_track)
+        ATAC_track, is_defined, idx_seq, c_type = self.load_ATAC_tracks(paths_ATAC_back, chr_include)
+        self.ATAC_track = torch.cat((self.ATAC_track, ATAC_track), 0); self.is_defined = torch.cat((self.is_defined, is_defined), 0); self.idx_seq = torch.cat((self.idx_seq, idx_seq), 0); self.c_type = torch.cat((self.c_type, c_type), 0)
+ """
+        #Define order of c_type for encoding
+        self.unique_c_type = np.sort(np.unique(self.c_type))
 
     def __len__(self):
-        return int(self.ATAC_track.shape[0]/len(self.time_order))
+        return self.ATAC_track.shape[0]
+    
+    def load_sequences(self, path_sequence, chr_include):
+
+        #Open sequences files
+        with open(path_sequence, 'rb') as file:
+            sequences = pickle.load(file)
+
+        #Reset index to be integer
+        sequences.reset_index(drop=True, inplace=True)
+        
+        #Only keep sequences from provided chromosomes
+        sequences = sequences[sequences.chr.isin(chr_include)]
+        sequences = sequences.sequence
+
+        #Encode sequences
+        self.len_seq = len(sequences.iloc[0])
+        sequences = sequences.apply(lambda x: one_hot_encode(x))
+
+        #Store in tensor for faster access
+        sequences_id = sequences.index.to_numpy()
+        sequences = torch.from_numpy(np.stack(sequences.values))
+        sequences = sequences.permute(0,2,1)
+
+        return sequences, sequences_id
+
+    def load_ATAC_tracks(self, paths_ATAC_track:list, chr_include:list):
+        
+        #Define which region are use in split
+        with open(paths_ATAC_track[0], 'rb') as file:
+            chr_track = pd.Series(pickle.load(file))
+        
+        keep_track = chr_track.isin(chr_include)
+
+        with open(paths_ATAC_track[1], 'rb') as file:
+           ATAC_track = pickle.load(file)
+        ATAC_track = ATAC_track[keep_track,:,:]
+        
+        with open(paths_ATAC_track[2], 'rb') as file:
+            is_defined = pickle.load(file)
+        is_defined = is_defined[keep_track,:]
+
+        with open(paths_ATAC_track[3], 'rb') as file:
+            idx_seq = pickle.load(file)
+        idx_seq = idx_seq[keep_track]
+
+        with open(paths_ATAC_track[4], 'rb') as file:
+            c_type = pickle.load(file)
+        c_type = c_type[keep_track]
+
+        return ATAC_track, is_defined, idx_seq, c_type
 
     def __getitem__(self, idx):
-
         print("------------------")
         print(idx)
         start = timer()
-        seq, c_type = self.ATAC_track_idx[idx]
-
-        seq_idx = np.where(self.sequences_id == seq)[0]
+        
+        #Get track and associated encoded sequence input
+        tracks = self.ATAC_track[idx,:,:]
+        
+        seq_idx = self.idx_seq[idx,:]
+        seq_idx = torch.where(self.sequences_id == seq_idx)[0]
         input = self.sequences[seq_idx,:,:] 
-        
-        tracks = self.ATAC_track[idx:idx+4, :]
-        end = timer()
-        print(end - start)
 
-
-        #Order tracks so that always returned in same order
-        #Keep which time point not present so skip during loss computation
-        time = self.time.iloc[idx_input]
-        end = timer()
-        print(end - start)
-        indexes = order_categories(self.time_order, time)
-        end = timer()
-        print(end - start)
-        indexes = [-1 if i is None else i for i in indexes]
-
-        end = timer()
-        print(end - start)
-        print("------------------")
-
-        
-        #Add zero tracks for not defined time point
-        missing_tracks = torch.zeros((4, tracks.shape[1]))
-
-        #Order
-        for idx,i in enumerate(indexes):
-            if i != -1:
-                missing_tracks[idx] = tracks[i,:]
-        
-        tracks = missing_tracks
-        
         end = timer()
         print(end - start)
 
         #Add cell type token to input
         #Repeat one-hot encoded cell type so that shape = seq_len x nb_cells
-        c_type = seq_c_type["c_type"]
+        c_type = self.c_type[idx]
         
         mapping = dict(zip(self.unique_c_type, range(len(self.unique_c_type))))    
         c_type = mapping[c_type]
-        c_type = torch.from_numpy(np.eye(len(self.unique_c_type), dtype=np.float32)[c_type])
+        c_type = torch.eye(len(self.unique_c_type))[c_type]
 
         end = timer()
         print(end - start)
 
-        #Repeat and reshape
         c_type = c_type.tile((input.shape[-1],1)).permute(1,0)[:,:]
         input = torch.cat((input.squeeze(), c_type), dim=0)
 
         end = timer()
         print(end - start)
 
-        return input, tracks, indexes
+        #Get which tracks should be omitted for the loss computation
+        is_defined = self.is_defined[idx, :]
+
+        return input, tracks, is_defined
 
 
 class PeaksDataset_w_bias(Dataset):

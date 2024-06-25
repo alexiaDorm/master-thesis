@@ -74,6 +74,12 @@ del tracks """
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
+paths_ATAC_tracks = ["ATAC_peaks_new.pkl", "is_defined.pkl", "idx_seq.pkl", "chr_seq.pkl", "c_type_track.pkl"]
+paths_ATAC_tracks = [data_dir + x for x in paths_ATAC_tracks]
+paths_ATAC_tracks_back = ["ATAC_peaks_new_back.pkl", "is_defined_back.pkl", "idx_seq_back.pkl", "chr_seq_back.pkl", "c_type_track_back.pkl"]
+paths_ATAC_tracks_back = [data_dir + x for x in paths_ATAC_tracks_back]
+
+
 def train():
 
     #Define chromosome split 
@@ -84,14 +90,14 @@ def train():
 
     #Load the data
     train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
-                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_background_sample.pkl', 
-                                 chr_train, time_order, 20000)
+                                 paths_ATAC_tracks, paths_ATAC_tracks_back, 
+                                 chr_train, 20000)
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
     test_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
-                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_background_sample.pkl', 
-                                 chr_test, time_order, 20000)
+                                 paths_ATAC_tracks, paths_ATAC_tracks_back, 
+                                 chr_test, 20000)
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
 
@@ -119,7 +125,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 25
+    nb_epoch = 1
     model.train() 
 
     for epoch in range(0, nb_epoch):
@@ -127,7 +133,7 @@ def train():
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = [], []
 
-        """ with torch.profiler.profile(
+        with torch.profiler.profile(
         schedule=torch.profiler.schedule(
             wait=2,
             warmup=2,
@@ -135,44 +141,41 @@ def train():
             repeat=1),
         on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/main'),
         with_stack=True
-        ) as profiler: """
-        for i, data in enumerate(train_dataloader):
-            #profiler.step()
+        ) as profiler:
+            for i, data in enumerate(train_dataloader):
+                profiler.step()
 
-            if i >= 1:
-                break
+                if i >= 10:
+                    break
 
-            inputs, tracks, idx_skip = data 
-            inputs = inputs.to(device)
-            tracks = tracks.to(device)
+                inputs, tracks, idx_skip = data 
+                inputs = inputs.to(device)
+                tracks = tracks.to(device)
+
+                optimizer.zero_grad()
+
+                _, profile, count = model(inputs)
+
+                #Compute loss for each head
+                losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
+                KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
+                loss = torch.stack([loss[0] for loss in losses]).nansum()
+
+                loss.backward() 
+                optimizer.step()
+
+                running_loss += loss.item()
+                running_KLD.append(KLD)
+                running_MSE.append(MSE)
+
+                #print every 2000 batch the loss
+                epoch_steps += 1
+                if i % 2000 == 1999:  # print every 2000 mini-batches
+                    print(
+                        "[%d, %5d] loss: %.3f"
+                        % (epoch + 1, i + 1, running_loss / epoch_steps)
+                    )
                 
-            idx_skip = torch.stack(idx_skip)
-            idx_skip = idx_skip != -1
-
-            optimizer.zero_grad()
-
-            _, profile, count = model(inputs)
-
-            #Compute loss for each head
-            losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
-            KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-            loss = torch.stack([loss[0] for loss in losses]).nansum()
-
-            loss.backward() 
-            optimizer.step()
-
-            running_loss += loss.item()
-            running_KLD.append(KLD)
-            running_MSE.append(MSE)
-
-            #print every 2000 batch the loss
-            epoch_steps += 1
-            if i % 2000 == 1999:  # print every 2000 mini-batches
-                print(
-                    "[%d, %5d] loss: %.3f"
-                    % (epoch + 1, i + 1, running_loss / epoch_steps)
-                )
-            
         scheduler.step()
 
         running_KLD = torch.stack(running_KLD)

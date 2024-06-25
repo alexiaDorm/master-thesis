@@ -10,18 +10,23 @@ chr_test = ['6','13','22']
 
 start = timer()
 
-train_dataset = PeaksDataset2(data_dir + 'peaks_seqtest.pkl', data_dir + 'background_GC_matchedt.pkl',
-                                 data_dir + 'ATAC_peakstest.pkl', data_dir + 'ATAC_backgroundtest.pkl', 
-                                 chr_train, time_order, 20000)
+paths_ATAC_tracks = ["ATAC_peaks_new.pkl", "is_defined.pkl", "idx_seq.pkl", "chr_seq.pkl", "c_type_track.pkl"]
+paths_ATAC_tracks = [data_dir + x for x in paths_ATAC_tracks]
+paths_ATAC_tracks_back = ["ATAC_peaks_new_back.pkl", "is_defined_back.pkl", "idx_seq_back.pkl", "chr_seq_back.pkl", "c_type_track_back.pkl"]
+paths_ATAC_tracks_back = [data_dir + x for x in paths_ATAC_tracks_back]
+
+train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched.pkl',
+                                 paths_ATAC_tracks, paths_ATAC_tracks_back, 
+                                 chr_test, 20000)
 train_dataloader = DataLoader(train_dataset, 64,
                         shuffle=True, num_workers=4)
+
+print("All loaded")
 end = timer()
 print(end - start)
-
-import torch
     
 for data in train_dataloader:
     input, tracks, indexes = data
-    indexes = torch.stack(indexes)
+    print(indexes.shape)
 
     break
