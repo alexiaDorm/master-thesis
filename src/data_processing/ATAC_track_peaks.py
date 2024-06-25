@@ -21,10 +21,12 @@ nb_peaks = peaks.shape[0]
 
 idx_seq, c_type = [], []
 for c in c_type:
-    
+     
     bw_files = ['../results/bam_cell_type/' + t +'/' + c  + '_unstranded.bw' for t in TIME_POINT]
+    print(bw_files)
     ATAC_tracks, is_defined = [], []
     for f in bw_files:
+        print(f)
         if os.path.isfile(f):
             
             #Get insertion count
@@ -49,7 +51,7 @@ for c in c_type:
     ATAC_tracks = np.stack(ATAC_tracks)
     is_defined = np.stack(is_defined)
 
-    #Keep sequence idx
+    #Keep sequence idx and cell type
     idx_seq.append(np.arange(0,nb_peaks))
     c_type.append([c]*nb_peaks)
     
