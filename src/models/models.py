@@ -5,7 +5,6 @@ import torch.nn.functional as F
 import pickle
 import numpy as np
 import pandas as pd
-import h5py
 
 class BPNet(nn.Module):
     def __init__(self, nb_conv=8, nb_filters=64, first_kernel=21, rest_kernel=3, profile_kernel_size=75, out_pred_len=1024):
