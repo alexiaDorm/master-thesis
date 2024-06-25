@@ -19,11 +19,10 @@ with open('../results/peaks_seq.pkl', 'rb') as file:
 peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('uint32')
 nb_peaks = peaks.shape[0]
 
-idx_seq, c_type = [], []
 
-print(nb_peaks)
+all_ATAC, all_is_defined, idx_seq, c_type = [], [], [], []
 for c in c_type:
-     
+    print(c)
     bw_files = ['../results/bam_cell_type/' + t +'/' + c  + '_unstranded.bw' for t in TIME_POINT]
     print(bw_files)
     ATAC_tracks, is_defined = [], []
@@ -50,14 +49,14 @@ for c in c_type:
             is_defined.append([False]*nb_peaks)
     
     #Stack the ATAC tracks and is_defined -> shape:(#peaks, 1024, #time)
-    ATAC_tracks = np.stack(ATAC_tracks)
-    is_defined = np.stack(is_defined)
+    all_ATAC.append(np.stack(ATAC_tracks))
+    all_is_defined.append(np.stack(is_defined))
 
     #Keep sequence idx and cell type
     idx_seq.append(np.arange(0,nb_peaks))
     c_type.append([c]*nb_peaks)
     
-    print(ATAC_tracks.shape)
+    print(all_ATAC[0].shape)
     break
 
 
