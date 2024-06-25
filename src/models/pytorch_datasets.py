@@ -149,7 +149,7 @@ class PeaksDataset(Dataset):
 class PeaksDataset2(Dataset):
     """Peaks and background sequences for main model training"""
 
-    def __init__(self, path_sequences_peaks, path_sequences_back, paths_ATAC_peaks, paths_ATAC_back, chr_include, time_order, nb_back):
+    def __init__(self, path_sequences_peaks, path_sequences_back, paths_ATAC_peaks, paths_ATAC_back, chr_include, nb_back):
         """
         Arguments:
             path_sequences_peaks (string): Path to the pickle file with peaks regions sequences
