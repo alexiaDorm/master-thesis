@@ -167,6 +167,8 @@ class PeaksDataset2(Dataset):
         self.ATAC_track, self.is_defined, self.idx_seq, self.c_type = self.load_ATAC_tracks(paths_ATAC_peaks, chr_include)
         
         """ #Load the background ATAC tracks
+        #Sample background regions
+
         sequences, sequences_id = self.load_sequences(path_sequences_back, chr_include)
         self.sequences = torch.cat((self.sequences, sequences), 0); self.sequences_id = torch.cat((self.sequences_id, sequences_id), 0)
 
@@ -237,7 +239,8 @@ class PeaksDataset2(Dataset):
         #Get track and associated encoded sequence input
         tracks = self.ATAC_track[idx,:,:]
         
-        seq_idx = self.idx_seq[idx,:]
+        print(seq_idx.shape)
+        seq_idx = self.idx_seq[idx]
         seq_idx = torch.where(self.sequences_id == seq_idx)[0]
         input = self.sequences[seq_idx,:,:] 
 
