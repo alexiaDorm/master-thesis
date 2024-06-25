@@ -20,6 +20,8 @@ peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('ui
 nb_peaks = peaks.shape[0]
 
 idx_seq, c_type = [], []
+
+print(nb_peaks)
 for c in c_type:
      
     bw_files = ['../results/bam_cell_type/' + t +'/' + c  + '_unstranded.bw' for t in TIME_POINT]
