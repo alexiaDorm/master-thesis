@@ -27,7 +27,6 @@ for c in all_cell_types:
     bw_files = ['../results/bam_cell_type/' + t +'/' + c  + '_unstranded.bw' for t in TIME_POINT]
     ATAC_tracks, is_defined = [], []
     for f in bw_files:
-        print(f)
         if os.path.isfile(f):
             
             #Get insertion count
@@ -57,8 +56,6 @@ for c in all_cell_types:
     chr_seq.append(peaks.chr.values)
     c_type.append([c]*nb_peaks)
     
-    print(all_ATAC[0].shape)
-
 all_ATAC = torch.from_numpy(np.concatenate(all_ATAC, axis=0))
 all_is_defined = torch.from_numpy(np.concatenate(all_is_defined, axis=0))
 idx_seq = torch.from_numpy(np.concatenate(idx_seq, axis=0))
