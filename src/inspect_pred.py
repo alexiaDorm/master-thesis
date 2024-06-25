@@ -9,7 +9,7 @@ import numpy as np
 path_seq = "../results/peaks_seqtest.pkl"
 path_ATAC = "../results/ATAC_peakstest.pkl"
 
-path_model = '../results/model_1e-3.pkl'
+path_model = '../new/model_1e-3.pkl'
 
 all_c_type = ['Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast',
        'Neuronal', 'Somite']
@@ -25,12 +25,12 @@ model = CATAC2(nb_conv=8, nb_filters=64, first_kernel=21,
 model.load_state_dict(torch.load(path_model, map_location=device))
 
 #Load sequence and ATAC
-ATAC = pd.read_pickle(path_ATAC)
-seq_id = ATAC.sample(50).index
+ATAC = pd.read_pickle(path_ATAC).sample(100)
+seq_id = ATAC.index
 
 seq = pd.read_pickle(path_seq).sequence
 
-ATAC = ATAC.loc[seq_id, :]
+#ATAC = ATAC.loc[seq_id, :]
 seq = seq.loc[seq_id]
 
 #On-hot encode the sequences
@@ -40,23 +40,36 @@ seq = torch.tensor(seq).permute(0,2,1)
 #Add cell type encoding
 c_type = [re.findall('[A-Z][^A-Z]*', x)[1] for x in ATAC.pseudo_bulk]
 
+c_types = []
 mapping = dict(zip(all_c_type, range(len(all_c_type))))    
-c_type = mapping[c_type]
-c_type = torch.from_numpy(np.eye(len(all_c_type), dtype=np.float32)[c_type])
-print(c_type.shape)
+for c in c_type:
+    c = mapping[c]
+    c = torch.from_numpy(np.eye(len(all_c_type), dtype=np.float32)[c])
+    c = c.tile((seq.shape[2],1))
+    c_types.append(c)
+
+c_type = torch.stack(c_types).permute(0,2,1)
 
 #Repeat and reshape
-c_type = c_type.tile((input.shape[-1],1)).permute(1,0)[:,:]
-seq = torch.cat((seq.squeeze(), c_type), dim=0)
-print(seq.shape)
+seq = torch.cat((seq.squeeze(), c_type), dim=1)
 
 with torch.no_grad():
     x, profile, count = model(seq)
-    profile = torch.nn.functional.softmax(profile[0])
-    profile = profile * torch.exp(count[0])
+
+    time = [re.findall('[A-Z][^A-Z]*', x)[0] for x in ATAC.pseudo_bulk]
+    time_point = [time_order.index(t) for t in time]
+
+    profile_list = []
+    for i, t in enumerate(time_point):
+        p = torch.nn.functional.softmax(profile[t][i,:][None,:])
+        p = p * torch.exp(count[t][i])
+
+        profile_list.append(p)
+
+    #rofile_list = torch.stack(profile_list)
 
 with open('../results/pred.pkl', 'wb') as file:
-    pickle.dump(profile, file)
+    pickle.dump(profile_list, file)
 
 with open('../results/true.pkl', 'wb') as file:
     pickle.dump(ATAC, file)

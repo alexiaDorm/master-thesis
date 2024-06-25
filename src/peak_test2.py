@@ -122,12 +122,12 @@ def train():
     nb_epoch = 25
     model.train() 
 
-    """ for epoch in range(0, nb_epoch):
+    for epoch in range(0, nb_epoch):
 
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = [], []
 
-        with torch.profiler.profile(
+        """ with torch.profiler.profile(
         schedule=torch.profiler.schedule(
             wait=2,
             warmup=2,
@@ -135,43 +135,43 @@ def train():
             repeat=1),
         on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/main'),
         with_stack=True
-        ) as profiler:
-            for i, data in enumerate(train_dataloader):
-                profiler.step()
+        ) as profiler: """
+        for i, data in enumerate(train_dataloader):
+            #profiler.step()
 
-                if i >= 2 + 2 + 6:
-                    break
+            if i >= 1:
+                break
 
-                inputs, tracks, idx_skip = data 
-                inputs = inputs.to(device)
-                tracks = tracks.to(device)
+            inputs, tracks, idx_skip = data 
+            inputs = inputs.to(device)
+            tracks = tracks.to(device)
                 
-                idx_skip = torch.stack(idx_skip)
-                idx_skip = idx_skip != -1
+            idx_skip = torch.stack(idx_skip)
+            idx_skip = idx_skip != -1
 
-                optimizer.zero_grad()
+            optimizer.zero_grad()
 
-                _, profile, count = model(inputs)
+            _, profile, count = model(inputs)
 
-                #Compute loss for each head
-                losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
-                KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-                loss = torch.stack([loss[0] for loss in losses]).nansum()
+            #Compute loss for each head
+            losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
+            KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
+            loss = torch.stack([loss[0] for loss in losses]).nansum()
 
-                loss.backward() 
-                optimizer.step()
+            loss.backward() 
+            optimizer.step()
 
-                running_loss += loss.item()
-                running_KLD.append(KLD)
-                running_MSE.append(MSE)
+            running_loss += loss.item()
+            running_KLD.append(KLD)
+            running_MSE.append(MSE)
 
-                #print every 2000 batch the loss
-                epoch_steps += 1
-                if i % 2000 == 1999:  # print every 2000 mini-batches
-                    print(
-                        "[%d, %5d] loss: %.3f"
-                        % (epoch + 1, i + 1, running_loss / epoch_steps)
-                    )
+            #print every 2000 batch the loss
+            epoch_steps += 1
+            if i % 2000 == 1999:  # print every 2000 mini-batches
+                print(
+                    "[%d, %5d] loss: %.3f"
+                    % (epoch + 1, i + 1, running_loss / epoch_steps)
+                )
             
         scheduler.step()
 
@@ -189,7 +189,7 @@ def train():
         train_MSE.append(epoch_MSE)
 
         print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
-    """
+
     """ #Evaluate the model on test set after each epoch, save best performing model weights
         val_loss, spear_corr, jsd = 0.0, [], []
         running_KLD, running_MSE = [], []

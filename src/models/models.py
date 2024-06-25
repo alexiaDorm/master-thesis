@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import pickle
 import numpy as np
 import pandas as pd
+import h5py
 
 class BPNet(nn.Module):
     def __init__(self, nb_conv=8, nb_filters=64, first_kernel=21, rest_kernel=3, profile_kernel_size=75, out_pred_len=1024):
@@ -319,9 +320,6 @@ class CATAC2(nn.Module):
         - Body: sequence of convolutional layers with residual skip connections, dilated convolutions, 
         and  ReLU activation functions
 
-        - Cell-specific conv layers :
-            > 
-
         - # pseudo_bulk x Head : 
             > Profile prediction head: a multinomial probability of Tn5 insertion counts at each position 
             in the input sequence, deconvolution layer
@@ -418,3 +416,5 @@ class CATAC2(nn.Module):
             pred_counts.append(count)
 
         return x, pred_profiles, pred_counts
+    
+

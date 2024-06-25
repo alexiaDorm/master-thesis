@@ -11,13 +11,48 @@ import pandas as pd
 from utils_data_preprocessing import get_continuous_wh_window
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
+c_type = ['Neuronal', 'Somite', 'Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast']
 
 with open('../results/peaks_seq.pkl', 'rb') as file:
     peaks = pickle.load(file)
 
 peaks['middle'] = np.round((peaks.end - peaks.start)/2 + peaks.start).astype('uint32')
 
-#Per cell type + dataset createa dataframe with continous track for each peaks
+idx_seq, c_type = [], []
+for c in c_type:
+    
+    bw_files = ['../results/bam_cell_type/' + t +'/' + c '_unstranded.bw' for t in TIME_POINT]
+    ATAC_tracks, is_defined, = [], []
+    for f in bw_files:
+        if os.path.isfile(f):
+            
+            #Get insertion count
+            bw = pyBigWig.open(f)
+            ATAC = peaks.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
+            ATAC = np.stack(ATAC)
+            ATAC_tracks.append(ATAC)
+
+            #The tracks are defined for cell type + time point
+            is_defined.append([True]*peaks.shape[0])
+
+        else: 
+
+            #If cell type not defined for time point, fill with zero tracks
+            ATAC =  np.zeros((peaks.shape[0],1024))
+            ATAC_tracks.append(ATAC)
+
+            #The tracks are NOT defined for cell type + time point
+            is_defined.append([False]*peaks.shape[0])
+    
+    #Stack the ATAC tracks and is_defined -> shape:(#peaks, 1024, #time)
+    ATAC_tracks = np.stack(ATAC_tracks)
+    is_defined = np.stack(is_defined)
+    
+    print(ATAC_tracks.shape)
+    break
+
+
+""" #Per cell type + dataset create dataframe with continous track for each peaks
 for d in TIME_POINT:
 
     total_reads = pd.read_csv('../results/bam_cell_type/' + d + '/total_reads.csv', header=None, index_col=[0])
@@ -71,3 +106,4 @@ with open('../results/ATAC_peaks2.pkl', 'wb') as file:
 ATAC = pd.concat(pd.read_pickle(f) for f in ['../results/ATAC_peaks1.pkl', '../results/ATAC_peaks2.pkl'])
 with open('../results/ATAC_peaks.pkl', 'wb') as file:
             pickle.dump(ATAC, file)
+ """
