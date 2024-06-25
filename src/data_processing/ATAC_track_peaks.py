@@ -59,22 +59,25 @@ for c in all_cell_types:
 all_ATAC = torch.from_numpy(np.concatenate(all_ATAC, axis=0))
 all_is_defined = torch.from_numpy(np.concatenate(all_is_defined, axis=0))
 idx_seq = torch.from_numpy(np.concatenate(idx_seq, axis=0))
-chr_seq = torch.from_numpy(np.concatenate(chr_seq, axis=0))
-c_type = torch.from_numpy(np.concatenate(c_type, axis=0))
+chr_seq = np.concatenate(chr_seq, axis=0)
+c_type = np.concatenate(c_type, axis=0)
 
 with open('../results/ATAC_peaks_new.pkl', 'wb') as file:
     pickle.dump(all_ATAC, file)
-            
+
 with open('../results/is_defined.pkl', 'wb') as file:
     pickle.dump(all_is_defined, file)
 
 with open('../results/idx_seq.pkl', 'wb') as file:
     pickle.dump(idx_seq, file)
+
 with open('../results/chr_seq.pkl', 'wb') as file:
     pickle.dump(chr_seq, file)
 
 with open('../results/c_type_track.pkl', 'wb') as file:
     pickle.dump(c_type, file)
+
+print('ok :)')
 
 #Old way 
 """ #Per cell type + dataset create dataframe with continous track for each peaks
