@@ -11,7 +11,7 @@ import pandas as pd
 from utils_data_preprocessing import get_continuous_wh_window
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
-c_type = ['Neuronal', 'Somite', 'Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast']
+all_cell_types = ['Neuronal', 'Somite', 'Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast']
 
 with open('../results/peaks_seq.pkl', 'rb') as file:
     peaks = pickle.load(file)
@@ -21,10 +21,9 @@ nb_peaks = peaks.shape[0]
 
 
 all_ATAC, all_is_defined, idx_seq, c_type = [], [], [], []
-for c in c_type:
-    print(c)
+for c in all_cell_types:
+
     bw_files = ['../results/bam_cell_type/' + t +'/' + c  + '_unstranded.bw' for t in TIME_POINT]
-    print(bw_files)
     ATAC_tracks, is_defined = [], []
     for f in bw_files:
         print(f)
