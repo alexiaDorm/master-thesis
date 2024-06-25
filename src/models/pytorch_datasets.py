@@ -240,7 +240,9 @@ class PeaksDataset2(Dataset):
         tracks = self.ATAC_track[idx,:,:]
         
         seq_idx = self.idx_seq[idx]
-        seq_idx = torch.where(self.sequences_id == seq_idx)[0]
+        print(seq_idx)
+        print((self.sequences_id == seq_idx).shape)
+        seq_idx = np.where(self.sequences_id == seq_idx)[0]
         input = self.sequences[seq_idx,:,:] 
 
         end = timer()
