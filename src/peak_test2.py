@@ -150,7 +150,7 @@ def train():
 
                 inputs, tracks, idx_skip = data 
                 inputs = inputs.float().to(device)
-                tracks = tracks.to(device)
+                tracks = tracks.float().to(device)
 
                 optimizer.zero_grad()
 

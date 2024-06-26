@@ -39,9 +39,7 @@ class ATACloss_KLD(nn.Module):
         self.MSE = nn.MSELoss(reduction='none')
 
     def forward(self, true_counts, logits, tot_pred, idx_skip):
-
-        print(idx_skip)
-                
+                        
         counts_per_example = torch.sum(true_counts, dim=1)
 
         true_counts_prob = true_counts/ counts_per_example.unsqueeze(-1)
