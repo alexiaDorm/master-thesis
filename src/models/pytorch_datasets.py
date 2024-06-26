@@ -210,7 +210,6 @@ class PeaksDataset2(Dataset):
         #Define which region are use in split
         with open(paths_ATAC_track[0], 'rb') as file:
             chr_track = pd.Series(pickle.load(file))
-        
         keep_track = chr_track.isin(chr_include)
 
         with open(paths_ATAC_track[1], 'rb') as file:
@@ -256,7 +255,7 @@ class PeaksDataset2(Dataset):
 
         c_type = c_type.tile((input.shape[-1],1)).permute(1,0)[:,:]
         #input = torch.cat((input.squeeze(), c_type), dim=0)
-        print(input.shape())
+        print(input.shape)
 
         end = timer()
         print(end - start)
