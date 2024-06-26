@@ -4,7 +4,7 @@ from timeit import default_timer as timer
 import sys
 import pickle
 
-data_dir = "../results/"
+""" data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
 chr_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
@@ -36,11 +36,16 @@ with open('../results/test_dataset.pkl', 'wb') as file:
     pickle.dump(test_dataset, file)
 
 del test_dataset
-
+ """
 with open('../results/train_dataset.pkl', 'rb') as file:
     train_dataset = pickle.load(file)
-with open('../results/test_dataset.pkl', 'rb') as file:
-    test_dataset = pickle.load(file)
+""" with open('../results/test_dataset.pkl', 'rb') as file:
+    test_dataset = pickle.load(file) """
+
+import numpy as np
+test_idx = np.max(train_dataset.sequences_id)
+
+train_dataset.__getitem__(test_idx)
 
 """ train_dataloader = DataLoader(train_dataset, 64,
                         shuffle=True, num_workers=4)

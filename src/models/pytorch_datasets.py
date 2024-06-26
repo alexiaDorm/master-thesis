@@ -168,7 +168,7 @@ class PeaksDataset2(Dataset):
         sequences, sequences_id = self.load_sequences(path_sequences_back, chr_include)
         
         #Add max seq_id of peaks so that it is unique
-        max_seq_id = np.max(self.sequences_id)
+        max_seq_id = np.max(self.sequences_id) + 1
         sequences_id = sequences_id + max_seq_id
 
         self.sequences = torch.cat((self.sequences, sequences), 0); self.sequences_id = np.concatenate((self.sequences_id, sequences_id), 0)
