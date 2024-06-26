@@ -15,6 +15,7 @@ from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
+
 def train():
 
     #Define chromosome split 
@@ -42,7 +43,7 @@ def train():
     nb_pred = len(time_order)
     
     #Initialize model, loss, and optimizer
-    model = CATAC2(nb_conv=nb_conv, nb_filters=2**nb_filters, first_kernel=21, 
+    model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=2**nb_filters, first_kernel=21, 
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=nb_pred)
         
@@ -68,9 +69,10 @@ def train():
         running_KLD, running_MSE = [], []
         for i, data in enumerate(train_dataloader):
 
-            inputs, tracks, idx_skip = data 
+            inputs, tracks, idx_skip, bias = data 
             inputs = inputs.to(device)
             tracks = tracks.to(device)
+            bias = bias.to(device)
             
             idx_skip = torch.stack(idx_skip)
             idx_skip = idx_skip != -1
