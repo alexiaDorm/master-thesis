@@ -36,7 +36,7 @@ for c in all_cell_types:
             
             #Get insertion count
             bw = pyBigWig.open(f)
-            ATAC = nb_reg.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
+            ATAC = back.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
             ATAC = np.stack(ATAC)
             ATAC_tracks.append(ATAC)
 
@@ -58,7 +58,7 @@ for c in all_cell_types:
 
     #Keep sequence idx and cell type
     idx_seq.append(np.arange(0,nb_reg))
-    chr_seq.append(nb_reg.chr.values)
+    chr_seq.append(back.chr.values)
     c_type.append([c]*nb_reg)
     
 all_ATAC = torch.from_numpy(np.concatenate(all_ATAC, axis=0))
