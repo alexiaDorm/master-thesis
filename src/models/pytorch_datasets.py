@@ -243,8 +243,8 @@ class PeaksDataset2(Dataset):
         seq_idx = self.idx_seq[idx].item()
 
         seq_idx = np.where(self.sequences_id == seq_idx)[0]
-        print(seq_idx)
         input = self.sequences[seq_idx,:,:]
+        print(input.shape)
 
         #Add cell type token to input
         #Repeat one-hot encoded cell type so that shape = seq_len x nb_cells
