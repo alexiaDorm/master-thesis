@@ -91,16 +91,16 @@ def train():
     #Load the data
     train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
                                  paths_ATAC_tracks, paths_ATAC_tracks_back, 
-                                 chr_train)
+                                 chr_test)
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
-    test_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
+    """ test_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
                                  paths_ATAC_tracks, paths_ATAC_tracks_back, 
                                  chr_test)
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
-
+ """
     #Initialize model, loss, and optimizer
     nb_conv = 8
     nb_filters = 6
@@ -125,7 +125,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 1
+    nb_epoch = 10
     model.train() 
 
     for epoch in range(0, nb_epoch):
