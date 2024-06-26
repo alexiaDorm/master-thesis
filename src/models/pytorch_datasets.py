@@ -164,13 +164,13 @@ class PeaksDataset2(Dataset):
         self.sequences, self.sequences_id = self.load_sequences(path_sequences_peaks, chr_include)
         self.ATAC_track, self.is_defined, self.idx_seq, self.c_type = self.load_ATAC_tracks(paths_ATAC_peaks, chr_include)
         
-        """ #Load the background ATAC tracks
+        #Load the background ATAC tracks
         sequences, sequences_id = self.load_sequences(path_sequences_back, chr_include)
         self.sequences = torch.cat((self.sequences, sequences), 0); self.sequences_id = torch.cat((self.sequences_id, sequences_id), 0)
 
         ATAC_track, is_defined, idx_seq, c_type = self.load_ATAC_tracks(paths_ATAC_back, chr_include)
         self.ATAC_track = torch.cat((self.ATAC_track, ATAC_track), 0); self.is_defined = torch.cat((self.is_defined, is_defined), 0); self.idx_seq = torch.cat((self.idx_seq, idx_seq), 0); self.c_type = torch.cat((self.c_type, c_type), 0)
- """
+        
         #Define order of c_type for encoding
         self.unique_c_type = np.sort(np.unique(self.c_type))
 
@@ -227,7 +227,7 @@ class PeaksDataset2(Dataset):
         return ATAC_track, is_defined, idx_seq, c_type
 
     def __getitem__(self, idx):
-        
+
         #Get track and associated encoded sequence input
         tracks = self.ATAC_track[idx,:,:]
         
