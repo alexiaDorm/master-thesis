@@ -149,7 +149,7 @@ def train():
                     break
 
                 inputs, tracks, idx_skip = data 
-                inputs = inputs.to(device)
+                inputs = inputs.float().to(device)
                 tracks = tracks.to(device)
 
                 optimizer.zero_grad()
