@@ -19,7 +19,7 @@ paths_ATAC_tracks_back = [data_dir + x for x in paths_ATAC_tracks_back]
 train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched.pkl',
                                  paths_ATAC_tracks, paths_ATAC_tracks_back, 
                                  chr_train)
-print("Train", sys.getsizeof(train_dataset.ATAC_track))
+print("Train", train_dataset.ATAC_track.shape)
 
 """ train_dataloader = DataLoader(train_dataset, 64,
                         shuffle=True, num_workers=4)
