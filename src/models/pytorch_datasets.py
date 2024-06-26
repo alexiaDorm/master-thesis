@@ -227,9 +227,6 @@ class PeaksDataset2(Dataset):
         return ATAC_track, is_defined, idx_seq, c_type
 
     def __getitem__(self, idx):
-        print("------------------")
-        print(idx)
-        start = timer()
         
         #Get track and associated encoded sequence input
         tracks = self.ATAC_track[idx,:,:]
