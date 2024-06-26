@@ -13,7 +13,7 @@ start = timer()
 
 paths_ATAC_tracks = ["chr_seq.pkl", "ATAC_peaks_new.pkl", "is_defined.pkl", "idx_seq.pkl", "c_type_track.pkl"]
 paths_ATAC_tracks = [data_dir + x for x in paths_ATAC_tracks]
-paths_ATAC_tracks_back = ["chr_seq_back.pkl", "ATAC_peaks_new_back.pkl", "is_defined_back.pkl", "idx_seq_back.pkl", "c_type_track_back.pkl"]
+paths_ATAC_tracks_back = ["chr_seq_back.pkl", "ATAC_new_back.pkl", "is_defined_back.pkl", "idx_seq_back.pkl", "c_type_track_back.pkl"]
 paths_ATAC_tracks_back = [data_dir + x for x in paths_ATAC_tracks_back]
 
 train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
