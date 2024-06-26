@@ -240,7 +240,7 @@ class PeaksDataset2(Dataset):
         tracks = self.ATAC_track[idx,:,:]
         
         seq_idx = self.idx_seq[idx]
-        seq_idx = int(np.where(self.sequences_id == seq_idx)[0])
+        seq_idx = np.where(self.sequences_id == seq_idx)[0].item()
         print(self.sequences[0,:,0:10])
         input = self.sequences[seq_idx,:,:]
         print(input.shape)
