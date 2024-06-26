@@ -238,7 +238,7 @@ class PeaksDataset2(Dataset):
         #Get track and associated encoded sequence input
         tracks = self.ATAC_track[idx,:,:]
         
-        seq_idx = self.idx_seq[idx]
+        seq_idx = self.idx_seq[idx].item()
         print(seq_idx)
         print(self.sequences_id[:10])
         print(sum((self.sequences_id == seq_idx)))
