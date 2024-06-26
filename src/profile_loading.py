@@ -17,7 +17,7 @@ paths_ATAC_tracks_back = [data_dir + x for x in paths_ATAC_tracks_back]
 
 train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched.pkl',
                                  paths_ATAC_tracks, paths_ATAC_tracks_back, 
-                                 chr_test, 20000)
+                                 chr_test)
 train_dataloader = DataLoader(train_dataset, 64,
                         shuffle=True, num_workers=4)
 
