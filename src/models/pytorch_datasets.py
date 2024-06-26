@@ -243,6 +243,7 @@ class PeaksDataset2(Dataset):
         seq_idx = self.idx_seq[idx].item()
 
         seq_idx = np.where(self.sequences_id == seq_idx)[0]
+        print(seq_idx)
         input = self.sequences[seq_idx,:,:]
 
         #Add cell type token to input
