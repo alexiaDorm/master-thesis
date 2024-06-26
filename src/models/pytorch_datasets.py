@@ -240,7 +240,8 @@ class PeaksDataset2(Dataset):
         tracks = self.ATAC_track[idx,:,:]
         
         seq_idx = self.idx_seq[idx]
-        seq_idx = np.where(self.sequences_id == seq_idx)[0].item()
+        seq_idx = np.where(self.sequences_id == seq_idx)[0]
+        print(seq_idx)
         print(self.sequences[0,:,0:10])
         input = self.sequences[seq_idx,:,:]
         print(input.shape)
@@ -254,8 +255,7 @@ class PeaksDataset2(Dataset):
         c_type = torch.from_numpy(np.eye(len(self.unique_c_type))[c_type])
 
         c_type = c_type.tile((input.shape[-1],1)).permute(1,0)[:,:]
-
-        input = torch.cat((input.squeeze(), c_type), dim=0)
+        #input = torch.cat((input.squeeze(), c_type), dim=0)
         print(input.shape())
 
         end = timer()
