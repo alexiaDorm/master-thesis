@@ -23,6 +23,9 @@ back = back.sample(30000, random_state=42)
 back['middle'] = np.round((back.end - back.start)/2 + back.start).astype('uint32')
 nb_reg = back.shape[0]
 
+with open('../results/background_GC_matched_sample.pkl', 'wb') as file:
+    pickle.dump(back, file)
+
 all_ATAC, all_is_defined, idx_seq, chr_seq, c_type = [], [], [], [], []
 for c in all_cell_types:
 

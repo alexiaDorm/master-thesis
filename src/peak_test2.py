@@ -157,7 +157,7 @@ def train():
                 _, profile, count = model(inputs)
 
                 #Compute loss for each head
-                losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
+                losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
                 KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
                 loss = torch.stack([loss[0] for loss in losses]).nansum()
 
