@@ -74,33 +74,23 @@ del tracks """
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-paths_ATAC_tracks = ["chr_seq.pkl", "ATAC_peaks_new.pkl", "is_defined.pkl", "idx_seq.pkl", "c_type_track.pkl"]
-paths_ATAC_tracks = [data_dir + x for x in paths_ATAC_tracks]
-paths_ATAC_tracks_back = ["chr_seq_back.pkl", "ATAC_new_back.pkl", "is_defined_back.pkl", "idx_seq_back.pkl", "c_type_track_back.pkl"]
-paths_ATAC_tracks_back = [data_dir + x for x in paths_ATAC_tracks_back]
-
-
 def train():
-
-    #Define chromosome split 
-    chr_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
-    chr_test = ['6','13','22']
 
     batch_size = 64
 
     #Load the data
-    train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
-                                 paths_ATAC_tracks, paths_ATAC_tracks_back, 
-                                 chr_test)
+    with open('../results/train_dataset.pkl', 'rb') as file:
+        train_dataset = pickle.load(file)
+
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
-    """ test_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
-                                 paths_ATAC_tracks, paths_ATAC_tracks_back, 
-                                 chr_test)
+    with open('../results/test_dataset.pkl', 'rb') as file:
+        test_dataset = pickle.load(file)
+    
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
- """
+
     #Initialize model, loss, and optimizer
     nb_conv = 8
     nb_filters = 6
@@ -125,7 +115,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 15
+    nb_epoch = 20
     model.train() 
 
     for epoch in range(0, nb_epoch):
@@ -180,23 +170,20 @@ def train():
 
         print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
 
-    """ #Evaluate the model on test set after each epoch, save best performing model weights
+        #Evaluate the model on test set after each epoch, save best performing model weights
         val_loss, spear_corr, jsd = 0.0, [], []
         running_KLD, running_MSE = [], []
         for i, data in enumerate(test_dataloader):
 
             with torch.no_grad():
                 inputs, tracks, idx_skip = data 
-                inputs = inputs.to(device)
-                tracks = tracks.to(device)
-                
-                idx_skip = torch.stack(idx_skip)
-                idx_skip = idx_skip != -1
+                inputs = inputs.float().to(device)
+                tracks = tracks.float().to(device)
 
                 _, profile, count = model(inputs)
 
                 #Compute loss
-                losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
+                losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
                 KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
                 loss = torch.stack([loss[0] for loss in losses]).nansum()
 
@@ -205,12 +192,12 @@ def train():
                 running_MSE.append(MSE)
 
                 #Compute evaluation metrics: pearson correlation
-                corr =  [counts_metrics(tracks[:,j,:], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
+                corr =  [counts_metrics(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
                 corr = torch.tensor(corr)
                 spear_corr.append(corr)
 
                 #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
-                j = [np.nanmean(profile_metrics(tracks[:,j,:], profile[j], idx_skip[j,:])) for j in range(0,len(profile))]
+                j = [np.nanmean(profile_metrics(tracks[:,:,j], profile[j], count[j], idx_skip[:,j])) for j in range(0,len(profile))]
                 j = torch.tensor(j)
                 jsd.append(j)
 
@@ -231,31 +218,33 @@ def train():
 
         print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
 
-        torch.save(model.state_dict(), '../results/model_1e-3.pkl')
+        #Save every five epoch
+        if (epoch+1)%5 == 0:
+            torch.save(model.state_dict(), '../results/model_1e-3.pkl')
 
-        with open('../results/train_loss_1e-3.pkl', 'wb') as file:
-                pickle.dump(train_loss, file)
+            with open('../results/train_loss_1e-3.pkl', 'wb') as file:
+                    pickle.dump(train_loss, file)
 
-        with open('../results/train_KLD_1e-3.pkl', 'wb') as file:
-                pickle.dump(train_KLD, file)
+            with open('../results/train_KLD_1e-3.pkl', 'wb') as file:
+                    pickle.dump(train_KLD, file)
 
-        with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
-                pickle.dump(train_MSE, file)
+            with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
+                    pickle.dump(train_MSE, file)
 
-        with open('../results/test_KLD_1e-3.pkl', 'wb') as file:
-                pickle.dump(test_KLD, file)
+            with open('../results/test_KLD_1e-3.pkl', 'wb') as file:
+                    pickle.dump(test_KLD, file)
 
-        with open('../results/test_MSE_1e-3.pkl', 'wb') as file:
-                pickle.dump(test_MSE, file)
+            with open('../results/test_MSE_1e-3.pkl', 'wb') as file:
+                    pickle.dump(test_MSE, file)
 
-        with open('../results/corr_1e-3.pkl', 'wb') as file:
-                pickle.dump(corr_test, file)
+            with open('../results/corr_1e-3.pkl', 'wb') as file:
+                    pickle.dump(corr_test, file)
 
-        with open('../results/jsd_1e-3.pkl', 'wb') as file:
-                pickle.dump(jsd_test, file)
+            with open('../results/jsd_1e-3.pkl', 'wb') as file:
+                    pickle.dump(jsd_test, file)
     
     print('Finished Training')
-        """
+
     return model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test
 
 
