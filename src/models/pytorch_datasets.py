@@ -240,15 +240,10 @@ class PeaksDataset2(Dataset):
         tracks = self.ATAC_track[idx,:,:]
         
         seq_idx = self.idx_seq[idx]
-        print('yo')
-        print(seq_idx)
-        print(self.sequences_id)
-        seq_idx = np.where(self.sequences_id == seq_idx)[0]
-        input = self.sequences[seq_idx,:,:] 
+        seq_idx = int(np.where(self.sequences_id == seq_idx)[0])
+        print(self.sequences[0,:,0:10])
+        input = self.sequences[seq_idx,:,:]
         print(input.shape)
-
-        end = timer()
-        print(end - start)
 
         #Add cell type token to input
         #Repeat one-hot encoded cell type so that shape = seq_len x nb_cells
@@ -258,15 +253,10 @@ class PeaksDataset2(Dataset):
         c_type = mapping[c_type]
         c_type = torch.from_numpy(np.eye(len(self.unique_c_type))[c_type])
 
-        print(c_type.shape)
-
-        end = timer()
-        print(end - start)
-
         c_type = c_type.tile((input.shape[-1],1)).permute(1,0)[:,:]
-        print(c_type.shape)
 
-        #input = torch.cat((input.squeeze(), c_type), dim=0)
+        input = torch.cat((input.squeeze(), c_type), dim=0)
+        print(input.shape())
 
         end = timer()
         print(end - start)
