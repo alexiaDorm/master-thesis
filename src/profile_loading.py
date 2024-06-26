@@ -1,6 +1,7 @@
 from models.pytorch_datasets import PeaksDataset2
 from torch.utils.data import DataLoader
 from timeit import default_timer as timer
+import sys
 
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
@@ -17,8 +18,10 @@ paths_ATAC_tracks_back = [data_dir + x for x in paths_ATAC_tracks_back]
 
 train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched.pkl',
                                  paths_ATAC_tracks, paths_ATAC_tracks_back, 
-                                 chr_test)
-train_dataloader = DataLoader(train_dataset, 64,
+                                 chr_train)
+print("Train", sys.getsizeof(object))
+
+""" train_dataloader = DataLoader(train_dataset, 64,
                         shuffle=True, num_workers=4)
 
 print("All loaded")
@@ -31,4 +34,4 @@ for data in train_dataloader:
     print(tracks.shape)
     print(indexes.shape)
 
-    break
+    break """
