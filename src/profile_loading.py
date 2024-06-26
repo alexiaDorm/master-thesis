@@ -27,6 +27,7 @@ print(end - start)
     
 for data in train_dataloader:
     input, tracks, indexes = data
+    print(input.shape)
     print(indexes.shape)
 
     break
