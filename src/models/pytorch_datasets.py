@@ -245,6 +245,7 @@ class PeaksDataset2(Dataset):
         print(self.sequences_id)
         seq_idx = np.where(self.sequences_id == seq_idx)[0]
         input = self.sequences[seq_idx,:,:] 
+        print(input.shape)
 
         end = timer()
         print(end - start)
@@ -255,13 +256,17 @@ class PeaksDataset2(Dataset):
         
         mapping = dict(zip(self.unique_c_type, range(len(self.unique_c_type))))    
         c_type = mapping[c_type]
-        c_type = torch.eye(len(self.unique_c_type))[c_type]
+        c_type = torch.from_numpy(np.eye(len(self.unique_c_type))[c_type])
+
+        print(c_type.shape)
 
         end = timer()
         print(end - start)
 
         c_type = c_type.tile((input.shape[-1],1)).permute(1,0)[:,:]
-        input = torch.cat((input.squeeze(), c_type), dim=0)
+        print(c_type.shape)
+
+        #input = torch.cat((input.squeeze(), c_type), dim=0)
 
         end = timer()
         print(end - start)
