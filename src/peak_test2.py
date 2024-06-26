@@ -125,7 +125,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 10
+    nb_epoch = 15
     model.train() 
 
     for epoch in range(0, nb_epoch):
@@ -133,48 +133,35 @@ def train():
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = [], []
 
-        with torch.profiler.profile(
-        schedule=torch.profiler.schedule(
-            wait=2,
-            warmup=2,
-            active=6,
-            repeat=1),
-        on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/main'),
-        with_stack=True
-        ) as profiler:
-            for i, data in enumerate(train_dataloader):
-                profiler.step()
+        for i, data in enumerate(train_dataloader):
 
-                if i >= 10:
-                    break
+            inputs, tracks, idx_skip = data 
+            inputs = inputs.float().to(device)
+            tracks = tracks.float().to(device)
 
-                inputs, tracks, idx_skip = data 
-                inputs = inputs.float().to(device)
-                tracks = tracks.float().to(device)
+            optimizer.zero_grad()
 
-                optimizer.zero_grad()
+            _, profile, count = model(inputs)
 
-                _, profile, count = model(inputs)
+            #Compute loss for each head
+            losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
+            KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
+            loss = torch.stack([loss[0] for loss in losses]).nansum()
 
-                #Compute loss for each head
-                losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
-                KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-                loss = torch.stack([loss[0] for loss in losses]).nansum()
+            loss.backward() 
+            optimizer.step()
 
-                loss.backward() 
-                optimizer.step()
+            running_loss += loss.item()
+            running_KLD.append(KLD)
+            running_MSE.append(MSE)
 
-                running_loss += loss.item()
-                running_KLD.append(KLD)
-                running_MSE.append(MSE)
-
-                #print every 2000 batch the loss
-                epoch_steps += 1
-                if i % 2000 == 1999:  # print every 2000 mini-batches
-                    print(
-                        "[%d, %5d] loss: %.3f"
-                        % (epoch + 1, i + 1, running_loss / epoch_steps)
-                    )
+            #print every 2000 batch the loss
+            epoch_steps += 1
+            if i % 2000 == 1999:  # print every 2000 mini-batches
+                print(
+                    "[%d, %5d] loss: %.3f"
+                    % (epoch + 1, i + 1, running_loss / epoch_steps)
+                )
                 
         scheduler.step()
 
