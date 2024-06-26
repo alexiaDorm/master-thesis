@@ -149,7 +149,7 @@ class PeaksDataset(Dataset):
 class PeaksDataset2(Dataset):
     """Peaks and background sequences for main model training"""
 
-    def __init__(self, path_sequences_peaks, path_sequences_back, paths_ATAC_peaks, paths_ATAC_back, chr_include, nb_back):
+    def __init__(self, path_sequences_peaks, path_sequences_back, paths_ATAC_peaks, paths_ATAC_back, chr_include):
         """
         Arguments:
             path_sequences_peaks (string): Path to the pickle file with peaks regions sequences
@@ -157,8 +157,6 @@ class PeaksDataset2(Dataset):
             paths_ATAC_peaks (list of strings): Paths to the pickle files of ATAC tracks and corresponding seq_id, c_type, and if track is_defined
             paths_ATAC_back (list of strings): Paths to the pickle files of ATAC tracks and corresponding seq_id, c_type, and if track is_defined
             chr_include (list of string): only keep the sequences on the provided chromosome, used to define train/split
-            time_order (list of string): define order in which the time should be returned 
-            nb_back (int): number of background regions to include in training set
 
         """
 
@@ -167,8 +165,6 @@ class PeaksDataset2(Dataset):
         self.ATAC_track, self.is_defined, self.idx_seq, self.c_type = self.load_ATAC_tracks(paths_ATAC_peaks, chr_include)
         
         """ #Load the background ATAC tracks
-        #Sample background regions
-
         sequences, sequences_id = self.load_sequences(path_sequences_back, chr_include)
         self.sequences = torch.cat((self.sequences, sequences), 0); self.sequences_id = torch.cat((self.sequences_id, sequences_id), 0)
 

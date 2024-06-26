@@ -76,7 +76,7 @@ time_order = ['D8', 'D12', 'D20', 'D22-15']
 
 paths_ATAC_tracks = ["chr_seq.pkl", "ATAC_peaks_new.pkl", "is_defined.pkl", "idx_seq.pkl", "c_type_track.pkl"]
 paths_ATAC_tracks = [data_dir + x for x in paths_ATAC_tracks]
-paths_ATAC_tracks_back = ["chr_seq_back.pkl", "ATAC_peaks_new_back.pkl", "is_defined_back.pkl", "idx_seq_back.pkl", "c_type_track_back.pkl"]
+paths_ATAC_tracks_back = ["chr_seq_back.pkl", "ATAC_new_back.pkl", "is_defined_back.pkl", "idx_seq_back.pkl", "c_type_track_back.pkl"]
 paths_ATAC_tracks_back = [data_dir + x for x in paths_ATAC_tracks_back]
 
 
@@ -91,13 +91,13 @@ def train():
     #Load the data
     train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
                                  paths_ATAC_tracks, paths_ATAC_tracks_back, 
-                                 chr_train, 20000)
+                                 chr_train)
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
     test_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
                                  paths_ATAC_tracks, paths_ATAC_tracks_back, 
-                                 chr_test, 20000)
+                                 chr_test)
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
 
