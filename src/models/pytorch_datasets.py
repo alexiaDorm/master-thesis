@@ -166,9 +166,18 @@ class PeaksDataset2(Dataset):
         
         #Load the background ATAC tracks
         sequences, sequences_id = self.load_sequences(path_sequences_back, chr_include)
+        
+        #Add max seq_id of peaks so that it is unique
+        max_seq_id = np.max(self.sequences_id)
+        sequences_id = sequences_id + max_seq_id
+
         self.sequences = torch.cat((self.sequences, sequences), 0); self.sequences_id = np.concatenate((self.sequences_id, sequences_id), 0)
 
         ATAC_track, is_defined, idx_seq, c_type = self.load_ATAC_tracks(paths_ATAC_back, chr_include)
+
+        #Add max seq_id of peaks so that it is unique
+        idx_seq = idx_seq + max_seq_id
+
         self.ATAC_track = torch.cat((self.ATAC_track, ATAC_track), 0); self.is_defined = torch.cat((self.is_defined, is_defined), 0); self.idx_seq = torch.cat((self.idx_seq, idx_seq), 0); self.c_type = np.concatenate((self.c_type, c_type), 0)
 
         #Define order of c_type for encoding
