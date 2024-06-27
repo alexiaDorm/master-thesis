@@ -244,7 +244,6 @@ class PeaksDataset2(Dataset):
 
         seq_idx = np.where(self.sequences_id == seq_idx)[0]
         input = self.sequences[seq_idx,:,:]
-        print(input.squeeze().shape)
 
         #Add cell type token to input
         #Repeat one-hot encoded cell type so that shape = seq_len x nb_cells
@@ -255,7 +254,6 @@ class PeaksDataset2(Dataset):
         c_type = torch.from_numpy(np.eye(len(self.unique_c_type))[c_type])
 
         c_type = c_type.tile((input.shape[-1],1)).permute(1,0)[:,:]
-        print(c_type.shape)
         input = torch.cat((input.squeeze(), c_type), dim=0)
 
         #Get which tracks should be omitted for the loss computation
