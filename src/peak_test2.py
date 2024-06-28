@@ -9,7 +9,7 @@ import pandas as pd
 
 from models.pytorch_datasets import PeaksDataset2
 from models.models import CATAC2
-from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
+from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
 
 """ #Create subset of data to check model on
 with open('../results/peaks_seq.pkl', 'rb') as file:
@@ -104,8 +104,8 @@ def train():
     model = model.to(device)
 
     weight_MSE, weight_KLD = 2, 1
-    criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
-    #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
+    #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
+    criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -220,27 +220,27 @@ def train():
 
         #Save every five epoch
         if (epoch+1)%5 == 0:
-            torch.save(model.state_dict(), '../results/w_model_1e-3.pkl')
+            torch.save(model.state_dict(), '../results/NLL_model_1e-3.pkl')
 
-            with open('../results/w_train_loss_1e-3.pkl', 'wb') as file:
+            with open('../results/NLL_train_loss_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_loss, file)
 
-            with open('../results/w_train_KLD_1e-3.pkl', 'wb') as file:
+            with open('../results/NLL_train_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_KLD, file)
 
-            with open('../results/w_train_MSE_1e-3.pkl', 'wb') as file:
+            with open('../results/NLL_train_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_MSE, file)
 
-            with open('../results/w_test_KLD_1e-3.pkl', 'wb') as file:
+            with open('../results/NLL_test_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_KLD, file)
 
-            with open('../results/w_test_MSE_1e-3.pkl', 'wb') as file:
+            with open('../results/NLL_test_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_MSE, file)
 
-            with open('../results/w_corr_1e-3.pkl', 'wb') as file:
+            with open('../results/NLL_corr_1e-3.pkl', 'wb') as file:
                     pickle.dump(corr_test, file)
 
-            with open('../results/w_jsd_1e-3.pkl', 'wb') as file:
+            with open('../results/NLL_jsd_1e-3.pkl', 'wb') as file:
                     pickle.dump(jsd_test, file)
     
     print('Finished Training')

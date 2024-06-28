@@ -10,23 +10,28 @@ from scipy.spatial.distance import jensenshannon
 
 #Custom losses functions
 class ATACloss_MNLLL(nn.Module):
-    def __init__(self, weight_MSE=1):
+    def __init__(self, weight_MSE=1, weight_NLL=1):
         super().__init__()
+        self.weight_NLL = weight_NLL
         self.weight_MSE = weight_MSE
-        self.NLL = nn.CrossEntropyLoss()
-        self.MSE = nn.MSELoss(reduction='mean')
+        self.NLL = nn.CrossEntropyLoss(reduction='none')
+        self.MSE = nn.MSELoss(reduction='none')
 
-    def forward(self, true_counts, logits, tot_pred):
-                
+    def forward(self, true_counts, logits, tot_pred, idx_skip):
+                        
         counts_per_example = torch.sum(true_counts, dim=1)
 
         true_counts_prob = true_counts/ counts_per_example.unsqueeze(-1)
         true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division to zero to 0 
 
-        MNLLL = self.NLL(logits, true_counts_prob) * 1000
+        MNLLL = self.NLL(logits, true_counts_prob) * 100
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
-        loss = self.weight_MSE*MSE + MNLLL
+        #Skip idx where track was not defined for loss computation
+        MNLLL = MNLLL[idx_skip,:].sum()
+        MSE = MSE[idx_skip].sum()
+
+        loss = self.weight_MSE*MSE + self.weight_NLL*MNLLL
 
         return loss, MNLLL, MSE
 
