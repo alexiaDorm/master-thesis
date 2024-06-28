@@ -106,7 +106,7 @@ def train():
     weight_MSE, weight_KLD = 2, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
-    lr = 0.05
+    lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
@@ -220,27 +220,27 @@ def train():
 
         #Save every five epoch
         if (epoch+1)%5 == 0:
-            torch.save(model.state_dict(), '../results/model_1e-3.pkl')
+            torch.save(model.state_dict(), '../results/w_model_1e-3.pkl')
 
-            with open('../results/train_loss_5e-2.pkl', 'wb') as file:
+            with open('../results/w_train_loss_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_loss, file)
 
-            with open('../results/train_KLD_5e-2.pkl', 'wb') as file:
+            with open('../results/w_train_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_KLD, file)
 
-            with open('../results/train_MSE_5e-2.pkl', 'wb') as file:
+            with open('../results/w_train_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_MSE, file)
 
-            with open('../results/test_KLD_5e-2.pkl', 'wb') as file:
+            with open('../results/w_test_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_KLD, file)
 
-            with open('../results/test_MSE_5e-2.pkl', 'wb') as file:
+            with open('../results/w_test_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_MSE, file)
 
-            with open('../results/corr_5e-2.pkl', 'wb') as file:
+            with open('../results/w_corr_1e-3.pkl', 'wb') as file:
                     pickle.dump(corr_test, file)
 
-            with open('../results/jsd_5e-2.pkl', 'wb') as file:
+            with open('../results/w_jsd_1e-3.pkl', 'wb') as file:
                     pickle.dump(jsd_test, file)
     
     print('Finished Training')
