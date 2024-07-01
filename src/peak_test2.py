@@ -11,65 +11,6 @@ from models.pytorch_datasets import PeaksDataset2
 from models.models import CATAC2
 from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
 
-""" #Create subset of data to check model on
-with open('../results/peaks_seq.pkl', 'rb') as file:
-    sequences = pickle.load(file)   
-
-sequences.index = sequences.chr.astype("str") + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
-
-with open('../results/ATAC_peaks1.pkl', 'rb') as file:
-    tracks = pickle.load(file)
-
-with open('../results/ATAC_peaks2.pkl', 'rb') as file:
-    tracks = pd.concat([tracks, pickle.load(file)]) 
-
-sequences = sequences.sample(10000, replace=False)
-tracks = tracks.loc[sequences.index]
-
-with open('../results/peaks_seqtest.pkl', 'wb') as file:
-    pickle.dump(sequences, file)
-
-with open('../results/ATAC_peakstest.pkl', 'wb') as file:
-    pickle.dump(tracks, file)
-
-del sequences
-del tracks """
-
-""" #Concatenate ATAC peaks data
-with open('../results/ATAC_peaks1.pkl', 'rb') as file:
-    tracks = pickle.load(file)
-
-with open('../results/ATAC_peaks2.pkl', 'rb') as file:
-    tracks = pd.concat([tracks, pickle.load(file)]) 
-
-with open('../results/ATAC_peaks.pkl', 'wb') as file:
-    pickle.dump(tracks, file)
-
-del tracks
-
-#Sample background regions
-with open('../results/background_GC_matched.pkl', 'rb') as file:
-    sequences = pickle.load(file)   
-sequences.index = sequences.chr + ":" + sequences.start.astype("str") + "-" + sequences.end.astype('str')
-
-with open('../results/ATAC_background1.pkl', 'rb') as file:
-    tracks = pickle.load(file)
-
-with open('../results/ATAC_background2.pkl', 'rb') as file:
-    tracks = pd.concat([tracks, pickle.load(file)]) 
-
-sequences = sequences.sample(20000, replace=False)
-tracks = tracks.loc[sequences.index]
-
-with open('../results/background_GC_matched_sample.pkl', 'wb') as file:
-    pickle.dump(sequences, file)
-
-with open('../results/ATAC_background_sample.pkl', 'wb') as file:
-    pickle.dump(tracks, file) 
-
-del sequences
-del tracks """
-
 #Define training loop
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
@@ -115,7 +56,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 20
+    nb_epoch = 10
     model.train() 
 
     for epoch in range(0, nb_epoch):

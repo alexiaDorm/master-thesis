@@ -28,7 +28,7 @@ class ATACloss_MNLLL(nn.Module):
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
         #Skip idx where track was not defined for loss computation
-        MNLLL = MNLLL[idx_skip,:].sum()
+        MNLLL = MNLLL[idx_skip].sum()
         MSE = MSE[idx_skip].sum()
 
         loss = self.weight_MSE*MSE + self.weight_NLL*MNLLL
