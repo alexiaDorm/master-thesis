@@ -6,7 +6,6 @@ from data_processing.utils_data_preprocessing import one_hot_encode
 
 import pandas as pd
 import pickle
-import re
 import numpy as np
 
 path_seq = "../results/peaks_seq.pkl"
