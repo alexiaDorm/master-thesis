@@ -44,7 +44,7 @@ def train():
         
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 0, 1
+    weight_MSE, weight_KLD = 3, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
@@ -61,14 +61,14 @@ def train():
 
     for epoch in range(0, nb_epoch):
 
-        if epoch == nb_epoch_profile:
+        """ if epoch == nb_epoch_profile:
             for group in optimizer.param_groups:
                 group['lr'] = lr
 
         if epoch > (nb_epoch_profile - 1) and epoch < 10 :
             criterion = ATACloss_KLD(weight_MSE = (epoch - nb_epoch_profile)/5 * 2)
             #criterion = ATACloss_MNLLL(weight_MSE = (epoch - nb_epoch_profile)/5 * 2)
-
+ """
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = [], []
 
@@ -169,27 +169,27 @@ def train():
 
         #Save every five epoch
         if (epoch+1)%5 == 0:
-            torch.save(model.state_dict(), '../results/twoPhase_model_1e-3.pkl')
+            torch.save(model.state_dict(), '../results/w3_model_1e-3.pkl')
 
-            with open('../results/twoPhase_train_loss_1e-3.pkl', 'wb') as file:
+            with open('../results/w3_train_loss_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_loss, file)
 
-            with open('../results/twoPhase_train_KLD_1e-3.pkl', 'wb') as file:
+            with open('../results/w3_train_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_KLD, file)
 
-            with open('../results/twoPhase_train_MSE_1e-3.pkl', 'wb') as file:
+            with open('../results/w3_train_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_MSE, file)
 
-            with open('../results/twoPhase_test_KLD_1e-3.pkl', 'wb') as file:
+            with open('../results/w3_test_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_KLD, file)
 
-            with open('../results/twoPhase_test_MSE_1e-3.pkl', 'wb') as file:
+            with open('../results/w3_test_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_MSE, file)
 
-            with open('../results/twoPhase_corr_1e-3.pkl', 'wb') as file:
+            with open('../results/w3_corr_1e-3.pkl', 'wb') as file:
                     pickle.dump(corr_test, file)
 
-            with open('../results/twoPhase_jsd_1e-3.pkl', 'wb') as file:
+            with open('../results/w3_jsd_1e-3.pkl', 'wb') as file:
                     pickle.dump(jsd_test, file)
     
     print('Finished Training')
