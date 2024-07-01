@@ -42,7 +42,8 @@ for i, data in enumerate(test_dataloader):
 
     for j, t in enumerate(time_order):
         p = torch.nn.functional.softmax(profile[j], dim=1)
-        p = p * torch.exp(count[t])
+        print(p.sum(dim=1))
+        p = p * torch.exp(count[j])
 
         profile_list.append(p)
         tracks_list.append(tracks)
