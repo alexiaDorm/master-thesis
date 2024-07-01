@@ -320,12 +320,10 @@ class PeaksDataset_w_bias(Dataset):
         sequences = sequences[sequences.chr.isin(chr_include)]
         
         #Keep chr + pos dataframe
-        print(sequences.columns)
         sequences.rename(columns={"middle_peak": "middle"}, inplace=True)
-        print(sequences.columns)
 
         positions =  sequences.loc[:,["chr", "middle"]]
-        positions = torch.Tensor(list(positions.values))
+        positions = torch.from_numpy(positions.to_numpy())
 
         #Encode sequences
         sequences = sequences.sequence
