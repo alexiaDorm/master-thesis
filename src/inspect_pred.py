@@ -1,15 +1,17 @@
 import torch
+from torch.utils.data import DataLoader
+
 from models.models import CATAC2
 from data_processing.utils_data_preprocessing import one_hot_encode
+
 import pandas as pd
 import pickle
 import re
 import numpy as np
 
-path_seq = "../results/peaks_seqtest.pkl"
-path_ATAC = "../results/ATAC_peakstest.pkl"
+path_seq = "../results/peaks_seq.pkl"
 
-path_model = '../new/model_1e-3.pkl'
+path_model = '../results/train_res/w_model_1e-3.pkl'
 
 all_c_type = ['Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast',
        'Neuronal', 'Somite']
@@ -24,52 +26,33 @@ model = CATAC2(nb_conv=8, nb_filters=64, first_kernel=21,
         
 model.load_state_dict(torch.load(path_model, map_location=device))
 
-#Load sequence and ATAC
-ATAC = pd.read_pickle(path_ATAC).sample(100)
-seq_id = ATAC.index
+with open('../results/test_dataset.pkl', 'rb') as file:
+    test_dataset = pickle.load(file)
+    
+test_dataloader = DataLoader(test_dataset, 108,
+                        shuffle=True, num_workers=4)
 
-seq = pd.read_pickle(path_seq).sequence
+profile_list, tracks_list = [], []
+for i, data in enumerate(test_dataloader):
+    with torch.no_grad():    
+        inputs, tracks, idx_skip = data 
+        inputs = inputs.float().to(device)
+        tracks = tracks.float().to(device)
 
-#ATAC = ATAC.loc[seq_id, :]
-seq = seq.loc[seq_id]
+        _, profile, count = model(inputs)
 
-#On-hot encode the sequences
-seq = seq.apply(lambda x: one_hot_encode(x))
-seq = torch.tensor(seq).permute(0,2,1)
-
-#Add cell type encoding
-c_type = [re.findall('[A-Z][^A-Z]*', x)[1] for x in ATAC.pseudo_bulk]
-
-c_types = []
-mapping = dict(zip(all_c_type, range(len(all_c_type))))    
-for c in c_type:
-    c = mapping[c]
-    c = torch.from_numpy(np.eye(len(all_c_type), dtype=np.float32)[c])
-    c = c.tile((seq.shape[2],1))
-    c_types.append(c)
-
-c_type = torch.stack(c_types).permute(0,2,1)
-
-#Repeat and reshape
-seq = torch.cat((seq.squeeze(), c_type), dim=1)
-
-with torch.no_grad():
-    x, profile, count = model(seq)
-
-    time = [re.findall('[A-Z][^A-Z]*', x)[0] for x in ATAC.pseudo_bulk]
-    time_point = [time_order.index(t) for t in time]
-
-    profile_list = []
-    for i, t in enumerate(time_point):
-        p = torch.nn.functional.softmax(profile[t][i,:][None,:])
-        p = p * torch.exp(count[t][i])
+    for j, t in enumerate(time_order):
+        p = torch.nn.functional.softmax(profile[j], dim=1)
+        p = p * torch.exp(count[t])
 
         profile_list.append(p)
+        tracks_list.append(tracks)
 
-    #rofile_list = torch.stack(profile_list)
+    if i == 5:
+        break
 
 with open('../results/pred.pkl', 'wb') as file:
     pickle.dump(profile_list, file)
 
 with open('../results/true.pkl', 'wb') as file:
-    pickle.dump(ATAC, file)
+    pickle.dump(tracks_list, file)

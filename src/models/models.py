@@ -353,12 +353,12 @@ class CATAC2(nn.Module):
                 ))
         
         #Profile prediction heads
-        #self.profile_global_pool = nn.AdaptiveAvgPool1d(1)
+        self.profile_global_pool = nn.AdaptiveAvgPool1d(1)
 
         self.profile_heads = nn.ModuleList() 
         for i in range(self.nb_pred):
-            #self.profile_heads.append(nn.Linear(self.nb_filters, self.out_pred_len))
-            self.profile_heads.append(nn.Conv1d(self.nb_filters, 1, kernel_size=1))
+            self.profile_heads.append(nn.Linear(self.nb_filters, self.out_pred_len))
+            #self.profile_heads.append(nn.Conv1d(self.nb_filters, 1, kernel_size=1))
 
         #Total count prediction heads
         self.count_global_pool = nn.AdaptiveAvgPool1d(1)
@@ -392,20 +392,20 @@ class CATAC2(nn.Module):
         pred_profiles = []
         for i, p in enumerate(self.profile_heads):
             
-            """ #Apply global average poolling
+            #Apply global average poolling
             profile = self.profile_global_pool(pred_x[i])  
             profile = profile.squeeze()
 
             #Apply linear layer
-            profile = p(profile) """
+            profile = p(profile)
 
-            profile = p(pred_x[i])
+            """ profile = p(pred_x[i])
 
             #Crop and flatten the representation
             cropsize = int((profile.size(2)/2) - (self.out_pred_len/2))
             profile = profile[:,:, cropsize:-cropsize]
             profile = profile.squeeze()
-
+ """
             pred_profiles.append(profile)
         
         #Total count head
