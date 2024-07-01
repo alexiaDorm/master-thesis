@@ -289,7 +289,7 @@ class PeaksDataset_w_bias(Dataset):
         sequences_id = sequences_id + max_seq_id
 
         self.sequences = torch.cat((self.sequences, sequences), 0); self.sequences_id = np.concatenate((self.sequences_id, sequences_id), 0)
-        self.positions = torch.cat((self.positions, positions), 0)
+        self.positions = np.concatenate((self.positions, positions), 0)
         
         ATAC_track, is_defined, idx_seq, c_type = self.load_ATAC_tracks(paths_ATAC_back, chr_include)
 
@@ -323,7 +323,7 @@ class PeaksDataset_w_bias(Dataset):
         sequences.rename(columns={"middle_peak": "middle"}, inplace=True)
 
         positions =  sequences.loc[:,["chr", "middle"]]
-        positions = torch.from_numpy(positions.to_numpy())
+        positions = positions.to_numpy()
 
         #Encode sequences
         sequences = sequences.sequence
