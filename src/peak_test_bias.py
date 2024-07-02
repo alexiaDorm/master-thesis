@@ -7,33 +7,28 @@ import pickle
 import numpy as np
 import pandas as pd
 
-from models.pytorch_datasets import PeaksDataset2
+from models.pytorch_datasets import PeaksDataset_w_bias
 from models.models import CATAC_w_bias
-from models.eval_metrics import ATACloss_KLD, counts_metrics, profile_metrics
+from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
 
 #Define training loop
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-
 def train():
-
-    #Define chromosome split 
-    chr_train = ['1','2','3','4','5','7','8','9','10','11','12','14','15','16','17','18','19','20','21','X','Y']
-    chr_test = ['6','13','22']
 
     batch_size = 64
 
     #Load the data
-    train_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
-                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_background_sample.pkl', 
-                                 chr_train, time_order, 20000)
+    with open('../results/train_dataset.pkl', 'rb') as file:
+        train_dataset = pickle.load(file)
+
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
-    test_dataset = PeaksDataset2(data_dir + 'peaks_seq.pkl', data_dir + 'background_GC_matched_sample.pkl',
-                                 data_dir + 'ATAC_peaks.pkl', data_dir + 'ATAC_background_sample.pkl', 
-                                 chr_test, time_order, 20000)
+    with open('../results/test_dataset.pkl', 'rb') as file:
+        test_dataset = pickle.load(file)
+    
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4)
 
@@ -49,7 +44,7 @@ def train():
         
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 1, 1
+    weight_MSE, weight_KLD = 2, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
@@ -61,28 +56,27 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 25
+    nb_epoch = 15
     model.train() 
+
     for epoch in range(0, nb_epoch):
 
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = [], []
+
         for i, data in enumerate(train_dataloader):
 
-            inputs, tracks, idx_skip, bias = data 
-            inputs = inputs.to(device)
-            tracks = tracks.to(device)
-            bias = bias.to(device)
-            
-            idx_skip = torch.stack(idx_skip)
-            idx_skip = idx_skip != -1
+            inputs, tracks, idx_skip, tn5_bias = data 
+            inputs = inputs.float().to(device)
+            tracks = tracks.float().to(device)
+            tn5_bias = tn5_bias.float().to(device)
 
             optimizer.zero_grad()
 
-            _, profile, count = model(inputs)
+            _, profile, count = model(inputs, tn5_bias)
 
             #Compute loss for each head
-            losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
+            losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
             KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
             loss = torch.stack([loss[0] for loss in losses]).nansum()
 
@@ -100,7 +94,7 @@ def train():
                     "[%d, %5d] loss: %.3f"
                     % (epoch + 1, i + 1, running_loss / epoch_steps)
                 )
-            
+                
         scheduler.step()
 
         running_KLD = torch.stack(running_KLD)
@@ -124,17 +118,15 @@ def train():
         for i, data in enumerate(test_dataloader):
 
             with torch.no_grad():
-                inputs, tracks, idx_skip = data 
-                inputs = inputs.to(device)
-                tracks = tracks.to(device)
-                
-                idx_skip = torch.stack(idx_skip)
-                idx_skip = idx_skip != -1
+                inputs, tracks, idx_skip, tn5_bias = data 
+                inputs = inputs.float().to(device)
+                tracks = tracks.float().to(device)
+                tn5_bias = tn5_bias.float().to(device)
 
                 _, profile, count = model(inputs)
 
                 #Compute loss
-                losses = [criterion(tracks[:,j,:], profile[j], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
+                losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
                 KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
                 loss = torch.stack([loss[0] for loss in losses]).nansum()
 
@@ -143,12 +135,12 @@ def train():
                 running_MSE.append(MSE)
 
                 #Compute evaluation metrics: pearson correlation
-                corr =  [counts_metrics(tracks[:,j,:], count[j], idx_skip[j,:]) for j in range(0,len(profile))]
+                corr =  [counts_metrics(tracks[:,:,j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
                 corr = torch.tensor(corr)
                 spear_corr.append(corr)
 
                 #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
-                j = [np.nanmean(profile_metrics(tracks[:,j,:], profile[j], idx_skip[j,:])) for j in range(0,len(profile))]
+                j = [np.nanmean(profile_metrics(tracks[:,:,j], profile[j], idx_skip[:,j])) for j in range(0,len(profile))]
                 j = torch.tensor(j)
                 jsd.append(j)
 
@@ -169,7 +161,31 @@ def train():
 
         print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
 
+        #Save every five epoch
+        if (epoch+1)%5 == 0:
+            torch.save(model.state_dict(), '../results/wbias_model_1e-3.pkl')
 
+            with open('../results/wbias_train_loss_1e-3.pkl', 'wb') as file:
+                    pickle.dump(train_loss, file)
+
+            with open('../results/wbias_train_KLD_1e-3.pkl', 'wb') as file:
+                    pickle.dump(train_KLD, file)
+
+            with open('../results/wbias_train_MSE_1e-3.pkl', 'wb') as file:
+                    pickle.dump(train_MSE, file)
+
+            with open('../results/wbias_test_KLD_1e-3.pkl', 'wb') as file:
+                    pickle.dump(test_KLD, file)
+
+            with open('../results/wbias_test_MSE_1e-3.pkl', 'wb') as file:
+                    pickle.dump(test_MSE, file)
+
+            with open('../results/wbias_corr_1e-3.pkl', 'wb') as file:
+                    pickle.dump(corr_test, file)
+
+            with open('../results/wbias_jsd_1e-3.pkl', 'wb') as file:
+                    pickle.dump(jsd_test, file)
+    
     print('Finished Training')
 
     return model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test
@@ -180,25 +196,3 @@ print(device)
 
 model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train()
 
-torch.save(model.state_dict(), '../results/model_1e-3.pkl')
-
-with open('../results/train_loss_1e-3.pkl', 'wb') as file:
-        pickle.dump(train_loss, file)
-
-with open('../results/train_KLD_1e-3.pkl', 'wb') as file:
-        pickle.dump(train_KLD, file)
-
-with open('../results/train_MSE_1e-3.pkl', 'wb') as file:
-        pickle.dump(train_MSE, file)
-
-with open('../results/test_KLD_1e-3.pkl', 'wb') as file:
-        pickle.dump(test_KLD, file)
-
-with open('../results/test_MSE_1e-3.pkl', 'wb') as file:
-        pickle.dump(test_MSE, file)
-
-with open('../results/corr_1e-3.pkl', 'wb') as file:
-        pickle.dump(corr_test, file)
-
-with open('../results/jsd_1e-3.pkl', 'wb') as file:
-        pickle.dump(jsd_test, file)

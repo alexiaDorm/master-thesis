@@ -4,7 +4,6 @@ from torch.utils.data import Dataset
 import pickle
 import numpy as np
 import pandas as pd
-import re
 import h5py
 
 from timeit import default_timer as timer
@@ -399,8 +398,10 @@ class PeaksDataset_w_bias(Dataset):
         is_defined = self.is_defined[idx, :]
 
         #Get tn5 bias to add
+        pos =  self.positions[seq_idx,:]
+        tn5_bias = self.tn5_bias[("chr"+pos[0])][(pos[1]-512):(pos[1]+512+1)]
+        tn5_bias = torch.from_numpy(tn5_bias)
 
-
-        return input, tracks, is_defined
+        return input, tracks, is_defined, tn5_bias
 
 
