@@ -169,27 +169,27 @@ def train():
 
         #Save every five epoch
         if (epoch+1)%5 == 0:
-            torch.save(model.state_dict(), '../results/w2_model_1e-3.pkl')
+            torch.save(model.state_dict(), '../results/w2concat_model_1e-3.pkl')
 
-            with open('../results/w2_train_loss_1e-3.pkl', 'wb') as file:
+            with open('../results/w2concat_train_loss_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_loss, file)
 
-            with open('../results/w2_train_KLD_1e-3.pkl', 'wb') as file:
+            with open('../results/w2concat_train_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_KLD, file)
 
-            with open('../results/w2_train_MSE_1e-3.pkl', 'wb') as file:
+            with open('../results/w2concat_train_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_MSE, file)
 
-            with open('../results/w2_test_KLD_1e-3.pkl', 'wb') as file:
+            with open('../results/w2concat_test_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_KLD, file)
 
-            with open('../results/w2_test_MSE_1e-3.pkl', 'wb') as file:
+            with open('../results/w2concat_test_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_MSE, file)
 
-            with open('../results/w2_corr_1e-3.pkl', 'wb') as file:
+            with open('../results/w2concat_corr_1e-3.pkl', 'wb') as file:
                     pickle.dump(corr_test, file)
 
-            with open('../results/w2_jsd_1e-3.pkl', 'wb') as file:
+            with open('../results/w2concat_jsd_1e-3.pkl', 'wb') as file:
                     pickle.dump(jsd_test, file)
     
     print('Finished Training')
