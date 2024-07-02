@@ -64,50 +64,38 @@ def train():
         running_loss, epoch_steps = 0.0, 0
         running_KLD, running_MSE = [], []
 
-        with torch.profiler.profile(
-        schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
-        on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/bias'),
-        record_shapes=True,
-        profile_memory=True,
-        with_stack=True
-        )  as prof:
-                for i, data in enumerate(train_dataloader):
-                
-                        if i > 10:
-                                break
+        for i, data in enumerate(train_dataloader):
                         
-                        prof.step()
+                prof.step()
 
-                        inputs, tracks, idx_skip, tn5_bias = data 
-                        inputs = inputs.float().to(device)
-                        tracks = tracks.float().to(device)
-                        tn5_bias = tn5_bias.float().to(device)
+                inputs, tracks, idx_skip, tn5_bias = data 
+                inputs = inputs.float().to(device)
+                tracks = tracks.float().to(device)
+                tn5_bias = tn5_bias.float().to(device)
 
-                        optimizer.zero_grad()
+                optimizer.zero_grad()
 
-                        _, profile, count = model(inputs, tn5_bias)
+                _, profile, count = model(inputs, tn5_bias)
 
-                        #Compute loss for each head
-                        losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
-                        KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-                        loss = torch.stack([loss[0] for loss in losses]).nansum()
+                #Compute loss for each head
+                losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
+                KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
+                loss = torch.stack([loss[0] for loss in losses]).nansum()
 
-                        loss.backward() 
-                        optimizer.step()
+                loss.backward() 
+                optimizer.step()
 
-                        running_loss += loss.item()
-                        running_KLD.append(KLD)
-                        running_MSE.append(MSE)
+                running_loss += loss.item()
+                running_KLD.append(KLD)
+                running_MSE.append(MSE)
 
-                        #print every 2000 batch the loss
-                        epoch_steps += 1
-                        if i % 2000 == 1999:  # print every 2000 mini-batches
-                                print(
-                                "[%d, %5d] loss: %.3f"
-                                % (epoch + 1, i + 1, running_loss / epoch_steps)
-                                )
-                
-        break
+                #print every 2000 batch the loss
+                epoch_steps += 1
+                if i % 2000 == 1999:  # print every 2000 mini-batches
+                        print(
+                        "[%d, %5d] loss: %.3f"
+                        % (epoch + 1, i + 1, running_loss / epoch_steps)
+                        )
         scheduler.step()
 
         running_KLD = torch.stack(running_KLD)
@@ -136,7 +124,7 @@ def train():
                 tracks = tracks.float().to(device)
                 tn5_bias = tn5_bias.float().to(device)
 
-                _, profile, count = model(inputs)
+                _, profile, count = model(inputs, tn5_bias)
 
                 #Compute loss
                 losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
