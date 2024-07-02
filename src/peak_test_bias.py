@@ -83,8 +83,6 @@ def train():
                         tracks = tracks.float().to(device)
                         tn5_bias = tn5_bias.float().to(device)
 
-                        print(tn5_bias.shape)
-
                         optimizer.zero_grad()
 
                         _, profile, count = model(inputs, tn5_bias)
