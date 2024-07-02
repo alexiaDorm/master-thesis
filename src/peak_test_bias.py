@@ -66,8 +66,6 @@ def train():
 
         for i, data in enumerate(train_dataloader):
                         
-                prof.step()
-
                 inputs, tracks, idx_skip, tn5_bias = data 
                 inputs = inputs.float().to(device)
                 tracks = tracks.float().to(device)
