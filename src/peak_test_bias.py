@@ -20,13 +20,13 @@ def train():
     batch_size = 64
 
     #Load the data
-    with open('../results/train_dataset.pkl', 'rb') as file:
+    with open('../results/train_dataset_bias.pkl', 'rb') as file:
         train_dataset = pickle.load(file)
 
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4)
 
-    with open('../results/test_dataset.pkl', 'rb') as file:
+    with open('../results/test_dataset_bias.pkl', 'rb') as file:
         test_dataset = pickle.load(file)
     
     test_dataloader = DataLoader(test_dataset, 108,
