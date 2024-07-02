@@ -365,7 +365,8 @@ class CATAC2(nn.Module):
             if self.profile_conv:
                 self.profile_heads.append(nn.Conv1d(self.nb_filters, 1, kernel_size=1))
             else:
-                self.profile_heads.append(nn.Linear(self.size_final_conv, self.out_pred_len))
+                #self.profile_heads.append(nn.Linear(self.size_final_conv, self.out_pred_len))
+                self.profile_heads.append(nn.Linear(self.size_final_conv*self.nb_filters, self.out_pred_len))
 
         #Total count prediction heads
         self.count_global_pool = nn.AdaptiveAvgPool1d(1)
@@ -409,7 +410,8 @@ class CATAC2(nn.Module):
             
             else: 
                 #Apply global average poolling
-                profile = self.profile_global_pool(pred_x[i].permute(0,2,1))  
+                #profile = self.profile_global_pool(pred_x[i].permute(0,2,1))  
+                profile = pred_x[i].flatten(1,2)
                 profile = profile.squeeze()
 
                 #Apply linear layer
@@ -542,7 +544,7 @@ class CATAC_w_bias(nn.Module):
         for i, p in enumerate(self.profile_heads):
                 
             #Apply global average poolling
-            profile = self.profile_global_pool(pred_x[i].permute(0,2,1))  
+            profile = self.profile_global_pool(pred_x[i].permute(0,2,1)) 
             profile = profile.squeeze()
 
             #Concatenate total tn5 bias
