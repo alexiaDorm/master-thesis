@@ -10,7 +10,7 @@ import numpy as np
 
 path_seq = "../results/peaks_seq.pkl"
 
-path_model = '../results/train_res/w_model_1e-3.pkl'
+path_model = '../results/train_res/w2_model_1e-3.pkl'
 
 all_c_type = ['Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast',
        'Neuronal', 'Somite']
