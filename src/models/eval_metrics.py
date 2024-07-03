@@ -69,48 +69,22 @@ def counts_metrics(tracks, counts_pred, idx_skip):
 
     corr_tot = spearmanr(counts_pred, counts_per_seq)[0]
 
-    return corr_tot
-
-#Use to normlaize the JSD
-def jsd_min_max_bounds(profile):
-
-    #Uniform distribution
-    uniform_profile = np.ones(len(profile)) * (1.0 / len(profile))
+    return corr_tot    
     
-    #Tracks as prob 
-    profile_prob = profile/profile.sum()
 
-    max_jsd = jensenshannon(profile_prob.cpu().detach(), uniform_profile)
-
-    return 0, max_jsd
-
-def normalized_min_max(value, min, max):
-    norm = (value - min) / (max - min)
-
-    return norm 
 
 #Compute the Jensen-Shannon divergence between observed and predicted profiles
-def profile_metrics(tracks, profile_pred, idx_skip, pseudocount=0.001):
-    
-    #Convert logits to prob
-    profile_prob = F.softmax(profile_pred, dim=1)
+def profile_metrics(tracks, profile_pred, idx_skip):
 
-    jsd = []
-    for idx,t in enumerate(tracks):
+    counts_per_example = torch.sum(tracks[idx_skip,:], dim=1)
+    true_counts_prob = tracks[idx_skip,:]/ counts_per_example.unsqueeze(-1)
+    true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division to zero to 0 
 
-        if idx_skip[idx]:
-        
-            #Compute Jensen-Shannon divergence + normalize it
-            t = t.cpu()
-            curr_jsd = jensenshannon(t/(pseudocount+np.nansum(t)), profile_prob[idx,:].cpu().detach())
-            min_jsd, max_jsd = jsd_min_max_bounds(t)
+    profile_pred = F.softmax(profile_pred[idx_skip,:], dim=1)
 
-            curr_jsd = normalized_min_max(curr_jsd, min_jsd, max_jsd)
+    M = 0.5*(true_counts_prob + profile_pred)
 
-            jsd.append(curr_jsd)
-        
-        else:
-            jsd.append(np.nan)
+    jsd = 0.5* (F.kl_div(F.log_softmax(true_counts_prob, dim=1), M, reduction="batchmean") + F.kl_div(F.log_softmax(profile_pred, dim=1), M, reduction="batchmean"))
 
     return jsd
 
