@@ -44,7 +44,7 @@ def train():
         
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 2, 1
+    weight_MSE, weight_KLD = 2.5, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
@@ -56,7 +56,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 15
+    nb_epoch = 50
     model.train() 
 
     for epoch in range(0, nb_epoch):
