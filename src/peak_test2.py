@@ -44,7 +44,7 @@ def train():
         
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 2, 1
+    weight_MSE, weight_KLD = 2.5, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
@@ -56,7 +56,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch, nb_epoch_profile = 15, 5
+    nb_epoch, nb_epoch_profile = 50, 5
     model.train() 
 
     for epoch in range(0, nb_epoch):
@@ -169,27 +169,27 @@ def train():
 
         #Save every five epoch
         if (epoch+1)%5 == 0:
-            torch.save(model.state_dict(), '../results/w2concat_model_1e-3.pkl')
+            torch.save(model.state_dict(), '../results/w25_model_1e-3.pkl')
 
-            with open('../results/w2concat_train_loss_1e-3.pkl', 'wb') as file:
+            with open('../results/w25_train_loss_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_loss, file)
 
-            with open('../results/w2concat_train_KLD_1e-3.pkl', 'wb') as file:
+            with open('../results/w25_train_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_KLD, file)
 
-            with open('../results/w2concat_train_MSE_1e-3.pkl', 'wb') as file:
+            with open('../results/w25_train_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(train_MSE, file)
 
-            with open('../results/w2concat_test_KLD_1e-3.pkl', 'wb') as file:
+            with open('../results/w25_test_KLD_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_KLD, file)
 
-            with open('../results/w2concat_test_MSE_1e-3.pkl', 'wb') as file:
+            with open('../results/w25_test_MSE_1e-3.pkl', 'wb') as file:
                     pickle.dump(test_MSE, file)
 
-            with open('../results/w2concat_corr_1e-3.pkl', 'wb') as file:
+            with open('../results/w25_corr_1e-3.pkl', 'wb') as file:
                     pickle.dump(corr_test, file)
 
-            with open('../results/w2concat_jsd_1e-3.pkl', 'wb') as file:
+            with open('../results/w25_jsd_1e-3.pkl', 'wb') as file:
                     pickle.dump(jsd_test, file)
     
     print('Finished Training')
