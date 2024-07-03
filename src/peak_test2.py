@@ -1,5 +1,6 @@
 from tqdm import tqdm
 import torch
+import random
 from torch.utils.data import DataLoader
 import torch.optim.lr_scheduler as lr_scheduler
 
@@ -10,6 +11,11 @@ import pandas as pd
 from models.pytorch_datasets import PeaksDataset2
 from models.models import CATAC2
 from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
+
+seed = 42
+torch.manual_seed(seed)
+random.seed(seed)
+np.random.seed(seed)
 
 #Define training loop
 data_dir = "../results/"

@@ -461,7 +461,7 @@ class CATAC_w_bias(nn.Module):
         nb_pred: int (default 4)
             number of ATAC tracks to predict
 
-        profile_conv: bool (default 4)
+        profile_conv: bool (default False)
             if convolution for profile prediction, if not adaptative pooling and dense linear layer instead
 
         Model Architecture 

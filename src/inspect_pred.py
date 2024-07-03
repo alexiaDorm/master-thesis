@@ -45,7 +45,8 @@ for i, data in enumerate(test_dataloader):
         p = p * torch.exp(count[j])
 
         profile_list.append(p)
-        tracks_list.append(tracks)
+    
+    tracks_list.append(tracks)
 
     if i == 5:
         break
