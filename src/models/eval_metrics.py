@@ -86,5 +86,5 @@ def profile_metrics(tracks, profile_pred, idx_skip):
 
     jsd = 0.5* (F.kl_div(F.log_softmax(true_counts_prob, dim=1), M, reduction="batchmean") + F.kl_div(F.log_softmax(profile_pred, dim=1), M, reduction="batchmean"))
 
-    return jsd
+    return jsd.cpu()
 
