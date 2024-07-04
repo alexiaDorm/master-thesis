@@ -268,7 +268,7 @@ def train_w_bias(trial, save_prefix, device, save=False):
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 50
+    nb_epoch = 10
     model.train() 
 
     for epoch in range(0, nb_epoch):
