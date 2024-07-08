@@ -1,6 +1,6 @@
 from deeplift.dinuc_shuffle import dinuc_shuffle
 from deeplift.visualization import viz_sequence
-from captum.attr import IntegratedGradients
+#from captum.attr import IntegratedGradients
 
 import shap
 
