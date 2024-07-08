@@ -3,6 +3,8 @@ import pandas as pd
 import torch
 import glob
 import pickle
+import matplotlib.pyplot as plt
+from fpdf import FPDF
 
 from interpretation.synthetic_seq_analysis import generate_motif, generate_seq
 from interpretation.interpret import compute_importance_score_c_type, compute_importance_score_bias, visualize_sequence_imp
@@ -61,6 +63,9 @@ for i, t in enumerate(time_point):
         defined_c_type = all_c_type
 
     unique_TF = np.unique(metadata.TF_name)
+
+    pdf = FPDF()
+    pdf.add_page()
     
     #For c_type compute score + save full view + zoom attribution map in tmp directory with TF name + c_type in name file 
     for c in defined_c_type:
@@ -68,16 +73,34 @@ for i, t in enumerate(time_point):
         #Compute attribution scores
         _, _, proj_score = compute_importance_score_c_type(model, path_seq, device, c, all_c_type, i)
 
-        for TF in unique_TF:
-            idx_seq = np.where(metadata.TF_name == TF)
+        for TF_name in unique_TF:
+            pdf.cell(75, 10, TF_name, 0, 2, 'C')
+            idx_seq = np.where(metadata.TF_name == TF_name)
             
             for j,idx in enumerate(idx_seq):
+                
                 #Plot sequence overall
-                
-                
+                save_fig = "../results/synthetic_results/tmp.png"
+                visualize_sequence_imp(proj_score[[idx],:4,:] ,0, 4096)
+                plt.savefig(save_fig); plt.show()
+                pdf.image(save_fig, x = None, y = None, w = 0, h = 0, type = '', link = '')
+
                 #Plot zoom on motif
                 pos_motif = metadata.idx[idx]
-                visualize_sequence_imp(proj_score[[0],:4,:] ,1700, 1800)
+                visualize_sequence_imp(proj_score[[idx],:4,:] , pos_motif, pos_motif+12)
+                plt.savefig(save_fig); plt.show()
+                pdf.image(save_fig, x = None, y = None, w = 0, h = 0, type = '', link = '')
+            
+            break
+
+        break
+    
+    pdf.output('"../results/synthetic_results/test.pdf', 'F')
+    break
+
+
+            
+
 
 
             

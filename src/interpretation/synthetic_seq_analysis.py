@@ -37,6 +37,3 @@ def generate_seq(GC_content, motif, len_seq, pred_len):
     seq = seq[:insert_idx] + motif + seq[insert_idx:]
 
     return seq, insert_idx
-
-#Generate report
-#--------------------------------------------

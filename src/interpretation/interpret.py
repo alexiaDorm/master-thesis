@@ -8,6 +8,8 @@ import torch
 import pandas as pd
 import numpy as np
 import math
+import matplotlib.pyplot as plt
+
 from keras.models import load_model
 
 from data_processing.utils_data_preprocessing import one_hot_encode
@@ -240,13 +242,23 @@ def compute_integrated_gradient(model, path_sequence, device, c_type, all_c_type
 
 #Visualization
 #--------------------------------------------
+default_colors = {0:'green', 1:'blue', 2:'orange', 3:'red'}
+default_plot_funcs = {0:plot_a, 1:plot_c, 2:plot_g, 3:plot_t}
+
 def visualize_sequence_imp(proj_scores, idx_start, idx_end):
     
     for idx, dinuc_shuff_explanation in enumerate(proj_scores):
-        print("Scores for example", idx)
+        #print("Scores for example", idx)
 
-        viz_sequence.plot_weights(
-            dinuc_shuff_explanation[:,idx_start:idx_end], subticks_frequency=20,
-        )
+        fig = plt.figure(figsize=(20,2))
+        ax = fig.add_subplot(111) 
+
+        viz_sequence.plot_weights_given_ax(ax=ax, array=dinuc_shuff_explanation[:,idx_start:idx_end],
+        height_padding_factor=0.2,
+        length_padding=1,
+        subticks_frequency=20,
+        colors=default_colors,
+        plot_funcs=default_plot_funcs,
+        highlight={})
 
 
