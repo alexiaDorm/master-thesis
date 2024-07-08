@@ -1,5 +1,6 @@
 from deeplift.dinuc_shuffle import dinuc_shuffle
 from deeplift.visualization import viz_sequence
+
 #from captum.attr import IntegratedGradients
 
 import shap
@@ -243,7 +244,7 @@ def compute_integrated_gradient(model, path_sequence, device, c_type, all_c_type
 #Visualization
 #--------------------------------------------
 default_colors = {0:'green', 1:'blue', 2:'orange', 3:'red'}
-default_plot_funcs = {0:plot_a, 1:plot_c, 2:plot_g, 3:plot_t}
+default_plot_funcs = {0:viz_sequence.plot_a, 1:viz_sequence.plot_c, 2:viz_sequence.plot_g, 3:viz_sequence.plot_t}
 
 def visualize_sequence_imp(proj_scores, idx_start, idx_end):
     
