@@ -13,17 +13,17 @@ from keras.models import load_model
 from data_processing.utils_data_preprocessing import one_hot_encode
 
 
-def compute_shap_score(model ,seq, back):
+def compute_shap_score(model ,seq, back, idx_time):
     back = back.permute(0,2,1)
     seq = torch.from_numpy(seq).permute(1,0)[None,:,:]
     
     explainer = shap.DeepExplainer(
-        model, back)
+        model, back, idx_time)
     raw_scores = explainer.shap_values(seq)
     
     return raw_scores
 
-def compute_importance_score(model, path_sequence, device):
+def compute_importance_score(model, path_sequence, idx_time, device):
 
     #Load the model and sequenece to predict
     model.to(device)
@@ -36,7 +36,7 @@ def compute_importance_score(model, path_sequence, device):
     background = [dinuc_shuffle(s, num_shufs=20) for s in seq]
 
     #Compute importance score for each base of sequences
-    shap_scores = [compute_shap_score(model,s,torch.from_numpy(background[i])) for i,s in enumerate(seq)]
+    shap_scores = [compute_shap_score(model,s,torch.from_numpy(background[i]), idx_time) for i,s in enumerate(seq)]
 
     #Reshape the sequeneces and scores
     seq = np.stack(seq.to_numpy())
@@ -50,7 +50,7 @@ def compute_importance_score(model, path_sequence, device):
 
     return seq, shap_scores, proj_score
 
-def compute_importance_score_c_type(model, path_sequence, device, c_type, all_c_type):
+def compute_importance_score_c_type(model, path_sequence, device, c_type, all_c_type, idx_time):
 
     #Load the model and sequenece to predict
     model.to(device)
@@ -75,7 +75,7 @@ def compute_importance_score_c_type(model, path_sequence, device, c_type, all_c_
     background = [np.concatenate((b,c_type), axis=2) for b in background]
 
     #Compute importance score for each base of sequences
-    shap_scores = [compute_shap_score(model,s,torch.from_numpy(background[i])) for i,s in enumerate(seq)]
+    shap_scores = [compute_shap_score(model,s,torch.from_numpy(background[i]), idx_time) for i,s in enumerate(seq)]
 
     #Reshape the sequeneces and scores
     seq = torch.from_numpy(np.stack(seq)).permute(0,2,1)
@@ -148,17 +148,17 @@ def compute_tn5_bias(model, seq, len_pred=1024):
 
     return pred_bias[None,:]
 
-def compute_shap_score_bias(model ,seq, back, tn5_bias):
+def compute_shap_score_bias(model ,seq, back, tn5_bias, idx_time):
     back = back.permute(0,2,1)
     seq = torch.from_numpy(seq).permute(1,0)[None,:,:]
 
     explainer = shap.DeepExplainer(
-        model, [back, tn5_bias.tile((back.shape[0],1))])
+        model, [back, tn5_bias.tile((back.shape[0],1))], idx_time)
     raw_scores = explainer.shap_values([seq, tn5_bias])
     
     return raw_scores[0]
 
-def compute_importance_score_bias(model, model_bias_path, path_sequence, device, c_type, all_c_type):
+def compute_importance_score_bias(model, model_bias_path, path_sequence, device, c_type, all_c_type, idx_time):
 
     #Load the model and sequenece to predict
     model.to(device)
@@ -187,7 +187,7 @@ def compute_importance_score_bias(model, model_bias_path, path_sequence, device,
     background = [np.concatenate((b,c_type), axis=2) for b in background]
 
     #Compute importance score for each base of sequences
-    shap_scores = [compute_shap_score_bias(model,s,torch.from_numpy(background[i]), torch.from_numpy(tn5_bias[i])) for i,s in enumerate(seq)]
+    shap_scores = [compute_shap_score_bias(model,s,torch.from_numpy(background[i]), torch.from_numpy(tn5_bias[i], idx_time)) for i,s in enumerate(seq)]
 
     #Reshape the sequences and scores
     seq = torch.from_numpy(np.stack(seq)).permute(0,2,1)

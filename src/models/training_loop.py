@@ -234,7 +234,7 @@ def train_w_bias(trial, save_prefix, device, save=False):
                         shuffle=True, num_workers=4)
 
     #Initialize hyperparameters of model
-    nb_conv = trial.suggest_int("nb_conv", 4, 9)
+    nb_conv = trial.suggest_int("nb_conv", 4, 8)
     nb_filters = 2**trial.suggest_int("nb_conv", 5, 7)
     nb_pred = 4    
     
@@ -254,7 +254,7 @@ def train_w_bias(trial, save_prefix, device, save=False):
         
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 2.5, 1
+    weight_MSE, weight_KLD = 2, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True)

@@ -1,7 +1,7 @@
 from models.training_loop import train_w_bias
 import torch
 import optuna
-import joblib
+#import joblib
 
 import random 
 import numpy as np
@@ -22,7 +22,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="minimize")
-    joblib.dump(study, "study.pkl")
+    #joblib.dump(study, "study.pkl")
 
     #Resume study
     #study = joblib.load("study.pkl")

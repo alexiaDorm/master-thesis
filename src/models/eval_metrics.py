@@ -3,10 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
-from torch.distributions.multinomial import Multinomial
 
 from scipy.stats import spearmanr
-from scipy.spatial.distance import jensenshannon
 
 #Custom losses functions
 class ATACloss_MNLLL(nn.Module):
