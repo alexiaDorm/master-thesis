@@ -67,6 +67,7 @@ for i, t in enumerate(time_point):
 
     pdf = FPDF()
     pdf.add_page()
+    pdf.set_font("Arial", "B",8)
     
     #For c_type compute score + save full view + zoom attribution map in tmp directory with TF name + c_type in name file 
     for c in defined_c_type:
