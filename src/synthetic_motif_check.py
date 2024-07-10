@@ -14,7 +14,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 #Create synthetic sequennces
 #--------------------------------------------
-motif_files, n = glob.glob("../data/TF_motif/*.xlsx"), 3
+motif_files, n = glob.glob("../data/TF_motif/*.xlsx"), 2
 rng = np.random.default_rng(42)
 
 syn_seq, idx_motif, TF_name = [], [], []
@@ -29,16 +29,16 @@ for f in motif_files:
 
 df = pd.DataFrame({"idx":idx_motif, "TF_name": TF_name})
 
-with open('../results/more_synthetic_sequences.pkl', 'wb') as file:
+with open('../results/synthetic_results/synthetic_sequences.pkl', 'wb') as file:
     pickle.dump(syn_seq, file)
 
-with open('../results/more_synthetic_sequences_metadata.pkl', 'wb') as file:
+with open('../results/synthetic_results/synthetic_sequences_metadata.pkl', 'wb') as file:
     pickle.dump(df, file)
 
 #Compute importance score using shap DeepExplainer
 #--------------------------------------------
-path_model = '../results/train_res/wbias_model.pkl'
-path_seq = '../data/more_synthetic_sequences.pkl'
+path_model = '../results/train_res/wbias_model_1e-3.pkl'
+path_seq = '../results/synthetic_results/synthetic_sequences.pkl'
 
 all_c_type = ['Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast',
        'Neuronal', 'Somite']
