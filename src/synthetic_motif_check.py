@@ -14,7 +14,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 #Create synthetic sequennces
 #--------------------------------------------
-motif_files, n = glob.glob("../data/TF_motif/*.xlsx"), 2
+""" motif_files, n = glob.glob("../data/TF_motif/*.xlsx"), 2
 rng = np.random.default_rng(42)
 
 syn_seq, idx_motif, TF_name = [], [], []
@@ -33,7 +33,7 @@ with open('../results/synthetic_results/synthetic_sequences.pkl', 'wb') as file:
     pickle.dump(syn_seq, file)
 
 with open('../results/synthetic_results/synthetic_sequences_metadata.pkl', 'wb') as file:
-    pickle.dump(df, file)
+    pickle.dump(df, file) """
 
 #Compute importance score using shap DeepExplainer
 #--------------------------------------------
@@ -45,7 +45,7 @@ all_c_type = ['Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast',
 time_point = ["D8", "D12", "D20", "D22"]
 
 #Load the model
-model = CATAC2(nb_conv=8, nb_filters=64, first_kernel=21, 
+model = CATAC_w_bias(nb_conv=8, nb_filters=64, first_kernel=21, 
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=4)
         
