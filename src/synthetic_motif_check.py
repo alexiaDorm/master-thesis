@@ -4,7 +4,7 @@ import torch
 import glob
 import pickle
 import matplotlib.pyplot as plt
-from fpdf import FPDF
+#from fpdf import FPDF
 
 from interpretation.synthetic_seq_analysis import generate_motif, generate_seq
 from interpretation.interpret import compute_importance_score_c_type, compute_importance_score_bias, visualize_sequence_imp
@@ -14,7 +14,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 #Create synthetic sequennces
 #--------------------------------------------
-motif_files, n = glob.glob("../data/TF_motif/*.xlsx"), 5
+motif_files, n = glob.glob("../data/TF_motif/*.xlsx"), 3
 rng = np.random.default_rng(42)
 
 syn_seq, idx_motif, TF_name = [], [], []
@@ -29,13 +29,13 @@ for f in motif_files:
 
 df = pd.DataFrame({"idx":idx_motif, "TF_name": TF_name})
 
-with open('../results/synthetic_results/synthetic_sequences.pkl', 'wb') as file:
+with open('../results/more_synthetic_sequences.pkl', 'wb') as file:
     pickle.dump(syn_seq, file)
 
-with open('../results/synthetic_results/synthetic_sequences_metadata.pkl', 'wb') as file:
+with open('../results/more_synthetic_sequences_metadata.pkl', 'wb') as file:
     pickle.dump(df, file)
 
-#Compute importance score using shap DeepExplainer
+""" #Compute importance score using shap DeepExplainer
 #--------------------------------------------
 path_model = '../results/train_res/wbias_model.pkl'
 path_seq = '../data/more_synthetic_sequences.pkl'
@@ -109,3 +109,4 @@ for i, t in enumerate(time_point):
 
 
 
+ """

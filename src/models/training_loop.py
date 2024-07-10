@@ -33,7 +33,7 @@ def train_wo_bias(trial, save_prefix, device, save = False):
 
     #Initialize hyperparameters of model
     nb_conv = trial.suggest_int("nb_conv", 4, 9)
-    nb_filters = 2**trial.suggest_int("nb_conv", 5, 7)
+    nb_filters = 2**trial.suggest_int("nb_filters", 5, 7)
     nb_pred = 4    
     
     first_kernel = 21 #trial.suggest_int("first_kernel", 3, 25)
@@ -235,7 +235,7 @@ def train_w_bias(trial, save_prefix, device, save=False):
 
     #Initialize hyperparameters of model
     nb_conv = trial.suggest_int("nb_conv", 4, 8)
-    nb_filters = 2**trial.suggest_int("nb_conv", 5, 7)
+    nb_filters = 2**trial.suggest_int("nb_filters", 5, 7)
     nb_pred = 4    
     
     first_kernel = 21 #trial.suggest_int("first_kernel", 10, 25)
@@ -374,7 +374,7 @@ def train_w_bias(trial, save_prefix, device, save=False):
 
         # Handle pruning based on the intermediate value.
         if trial.should_prune():
-            raise optuna.exceptions.TrialPruned()
+            return test_loss[-1]
 
         print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
 

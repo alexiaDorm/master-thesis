@@ -190,7 +190,7 @@ def compute_importance_score_bias(model, model_bias_path, path_sequence, device,
     background = [np.concatenate((b,c_type), axis=2) for b in background]
 
     #Compute importance score for each base of sequences
-    shap_scores = [compute_shap_score_bias(model,s,torch.from_numpy(background[i]), torch.from_numpy(tn5_bias[i], idx_time)) for i,s in enumerate(seq)]
+    shap_scores = [compute_shap_score_bias(model,s,torch.from_numpy(background[i]), torch.from_numpy(tn5_bias[i]), idx_time) for i,s in enumerate(seq)]
 
     #Reshape the sequences and scores
     seq = torch.from_numpy(np.stack(seq)).permute(0,2,1)
