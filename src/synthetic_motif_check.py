@@ -71,7 +71,7 @@ for i, t in enumerate(time_point):
     for c in defined_c_type:
 
         #Compute attribution scores
-        _, _, proj_score = compute_importance_score_c_type(model, path_seq, device, c, all_c_type, i)
+        _, _, proj_score = compute_importance_score_bias(model, path_seq, device, c, all_c_type, i)
 
         for TF_name in unique_TF:
             pdf.cell(75, 10, TF_name, 0, 2, 'C')
