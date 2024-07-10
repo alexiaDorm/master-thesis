@@ -1,6 +1,6 @@
-from shap.explainers._deep.deep_tf import TFDeepExplainer
+#from shap.explainers._deep.deep_tf import TFDeepExplainer
+from shap.explainers.explainer import Explainer, TFDeepExplainer
 from shap.explainers._deep.misc import standard_combine_mult_and_diffref
-from shap.explainers.explainer import Explainer
 
 import numpy as np
 import warnings
