@@ -53,7 +53,7 @@ model.load_state_dict(torch.load(path_model, map_location=torch.device('cpu')))
 
 
 with open('../results/synthetic_results/synthetic_sequences_metadata.pkl', 'rb') as file:
-    metadata = pickle.open(file)
+    metadata = pickle.load(file)
 
 for i, t in enumerate(time_point):
 
