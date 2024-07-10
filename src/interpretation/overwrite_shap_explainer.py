@@ -5,6 +5,10 @@ import warnings
 from distutils.version import LooseVersion
 torch = None
 
+def standard_combine_mult_and_diffref(mult, orig_inp, bg_data):
+    to_return = [(mult[l]*(orig_inp[l] - bg_data[l])).mean(0)
+                 for l in range(len(orig_inp))]
+    return to_return
 
 class DeepExplainer(shap.Explainer):
     """ Meant to approximate SHAP values for deep learning models.
@@ -20,7 +24,7 @@ class DeepExplainer(shap.Explainer):
 
     def __init__(self, model, data, idx_time,
                  session=None, learning_phase_flags=None,
-                 combine_mult_and_diffref=shap.standard_combine_mult_and_diffref):
+                 combine_mult_and_diffref=standard_combine_mult_and_diffref):
         """ An explainer object for a differentiable model using a given background dataset.
 
         Note that the complexity of the method scales linearly with the number of background data
