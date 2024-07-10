@@ -4,7 +4,7 @@ import torch
 import glob
 import pickle
 import matplotlib.pyplot as plt
-#from fpdf import FPDF
+from fpdf import FPDF
 
 from interpretation.synthetic_seq_analysis import generate_motif, generate_seq
 from interpretation.interpret import compute_importance_score_c_type, compute_importance_score_bias, visualize_sequence_imp
@@ -35,7 +35,7 @@ with open('../results/more_synthetic_sequences.pkl', 'wb') as file:
 with open('../results/more_synthetic_sequences_metadata.pkl', 'wb') as file:
     pickle.dump(df, file)
 
-""" #Compute importance score using shap DeepExplainer
+#Compute importance score using shap DeepExplainer
 #--------------------------------------------
 path_model = '../results/train_res/wbias_model.pkl'
 path_seq = '../data/more_synthetic_sequences.pkl'
@@ -109,4 +109,3 @@ for i, t in enumerate(time_point):
 
 
 
- """
