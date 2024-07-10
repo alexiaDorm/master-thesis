@@ -244,34 +244,13 @@ def compute_integrated_gradient(model, path_sequence, device, c_type, all_c_type
 
 #Visualization
 #--------------------------------------------
-#Overwrite deeplift function so that no plt.show at end function
-default_colors = {0:'green', 1:'blue', 2:'orange', 3:'red'}
-default_plot_funcs = {0:viz_sequence.plot_a, 1:viz_sequence.plot_c, 2:viz_sequence.plot_g, 3:viz_sequence.plot_t}
-
-def plot_weights(array,
-                 figsize=(20,2),
-                 height_padding_factor=0.2,
-                 length_padding=1.0,
-                 subticks_frequency=1.0,
-                 colors=default_colors,
-                 plot_funcs=default_plot_funcs,
-                 highlight={}):
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(111) 
-    viz_sequence.plot_weights_given_ax(ax=ax, array=array,
-        height_padding_factor=height_padding_factor,
-        length_padding=length_padding,
-        subticks_frequency=subticks_frequency,
-        colors=colors,
-        plot_funcs=plot_funcs,
-        highlight=highlight)
 
 def visualize_sequence_imp(proj_scores, idx_start, idx_end):
     
     for idx, dinuc_shuff_explanation in enumerate(proj_scores):
         #print("Scores for example", idx)
 
-        plot_weights(
+        viz_sequence.plot_weights(
             dinuc_shuff_explanation[:,idx_start:idx_end], subticks_frequency=20,
         )
 
