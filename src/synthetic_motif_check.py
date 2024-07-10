@@ -51,6 +51,7 @@ model = CATAC_w_bias(nb_conv=8, nb_filters=64, first_kernel=21,
         
 model.load_state_dict(torch.load(path_model, map_location=torch.device('cpu')))
 
+path_model_bias = "../data/Tn5_NN_model.h5"
 
 with open('../results/synthetic_results/synthetic_sequences_metadata.pkl', 'rb') as file:
     metadata = pickle.load(file)
@@ -71,7 +72,7 @@ for i, t in enumerate(time_point):
     for c in defined_c_type:
 
         #Compute attribution scores
-        _, _, proj_score = compute_importance_score_bias(model, path_seq, device, c, all_c_type, i)
+        _, _, proj_score = compute_importance_score_bias(model, path_model_bias, path_seq, device, c, all_c_type, i)
 
         for TF_name in unique_TF:
             pdf.cell(75, 10, TF_name, 0, 2, 'C')
