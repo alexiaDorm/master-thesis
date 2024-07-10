@@ -147,7 +147,7 @@ class DeepExplainer(shap.Explainer):
 class PyTorchDeepExplainer(shap.Explainer):
 
     def __init__(self, model, data, idx_time,
-                  combine_mult_and_diffref=shap.standard_combine_mult_and_diffref):
+                  combine_mult_and_diffref=standard_combine_mult_and_diffref):
         """
         Parameters
         ----------
