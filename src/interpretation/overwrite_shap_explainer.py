@@ -1,6 +1,4 @@
-#from shap.explainers._deep.deep_tf import TFDeepExplainer
-from shap.explainers.explainer import Explainer, TFDeepExplainer
-from shap.explainers._deep.misc import standard_combine_mult_and_diffref
+import shap
 
 import numpy as np
 import warnings
@@ -8,7 +6,7 @@ from distutils.version import LooseVersion
 torch = None
 
 
-class DeepExplainer(Explainer):
+class DeepExplainer(shap.Explainer):
     """ Meant to approximate SHAP values for deep learning models.
 
     This is an enhanced version of the DeepLIFT algorithm (Deep SHAP) where, similar to Kernel SHAP, we
@@ -22,7 +20,7 @@ class DeepExplainer(Explainer):
 
     def __init__(self, model, data, idx_time,
                  session=None, learning_phase_flags=None,
-                 combine_mult_and_diffref=standard_combine_mult_and_diffref):
+                 combine_mult_and_diffref=shap.standard_combine_mult_and_diffref):
         """ An explainer object for a differentiable model using a given background dataset.
 
         Note that the complexity of the method scales linearly with the number of background data
@@ -96,7 +94,7 @@ class DeepExplainer(Explainer):
                 framework = 'tensorflow'
 
         if framework == 'tensorflow':
-            self.explainer = TFDeepExplainer(model=model, data=data,
+            self.explainer = shap.TFDeepExplainer(model=model, data=data,
                 session=session, learning_phase_flags=learning_phase_flags,
                 combine_mult_and_diffref=combine_mult_and_diffref)
         elif framework == 'pytorch':
@@ -142,10 +140,10 @@ class DeepExplainer(Explainer):
                                           output_rank_order,
                                           progress_message=progress_message)
 
-class PyTorchDeepExplainer(Explainer):
+class PyTorchDeepExplainer(shap.Explainer):
 
     def __init__(self, model, data, idx_time,
-                  combine_mult_and_diffref=standard_combine_mult_and_diffref):
+                  combine_mult_and_diffref=shap.standard_combine_mult_and_diffref):
         """
         Parameters
         ----------
