@@ -4,6 +4,7 @@ from deeplift.visualization import viz_sequence
 #from captum.attr import IntegratedGradients
 
 import shap
+from interpretation.overwrite_shap_explainer import DeepExplainer
 
 import torch
 import pandas as pd
@@ -20,7 +21,7 @@ def compute_shap_score(model ,seq, back, idx_time):
     back = back.permute(0,2,1)
     seq = torch.from_numpy(seq).permute(1,0)[None,:,:]
     
-    explainer = shap.DeepExplainer(
+    explainer = DeepExplainer(
         model, back, idx_time)
     raw_scores = explainer.shap_values(seq)
     
@@ -155,7 +156,7 @@ def compute_shap_score_bias(model ,seq, back, tn5_bias, idx_time):
     back = back.permute(0,2,1)
     seq = torch.from_numpy(seq).permute(1,0)[None,:,:]
 
-    explainer = shap.DeepExplainer(
+    explainer = DeepExplainer(
         model, [back, tn5_bias.tile((back.shape[0],1))], idx_time)
     raw_scores = explainer.shap_values([seq, tn5_bias])
     
