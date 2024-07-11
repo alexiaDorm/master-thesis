@@ -249,7 +249,7 @@ def visualize_sequence_imp(proj_scores, idx_start, idx_end):
     for i in range(0, proj_scores.shape[0]):
         #print("Scores for example", idx)
         viz_sequence.plot_weights(
-            proj_scores[i,:,int(idx_start[i]):int(idx_end[i])], subticks_frequency=20,
+            proj_scores[i,:,int(idx_start):int(idx_end)], subticks_frequency=20,
         )
 
 
