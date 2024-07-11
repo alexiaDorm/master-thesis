@@ -21,6 +21,8 @@ np.random.seed(seed)
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
+save_prefix = "MNLL"
+
 def train():
 
     batch_size = 64
@@ -40,19 +42,19 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 6
+    nb_filters = 64
     nb_pred = len(time_order)
     
     #Initialize model, loss, and optimizer
-    model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=2**nb_filters, first_kernel=21, 
+    model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=21, 
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=nb_pred)
         
     model = model.to(device)
 
     weight_MSE, weight_KLD = 2, 1
-    criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
-    #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
+    #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
+    criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -62,7 +64,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 70
+    nb_epoch = 25
     model.train() 
 
     for epoch in range(0, nb_epoch):
@@ -93,13 +95,13 @@ def train():
                 running_KLD.append(KLD)
                 running_MSE.append(MSE)
 
-                #print every 2000 batch the loss
+                """ #print every 2000 batch the loss
                 epoch_steps += 1
                 if i % 2000 == 1999:  # print every 2000 mini-batches
                         print(
                         "[%d, %5d] loss: %.3f"
                         % (epoch + 1, i + 1, running_loss / epoch_steps)
-                        )
+                        ) """
         scheduler.step()
 
         running_KLD = torch.stack(running_KLD)
@@ -115,7 +117,7 @@ def train():
         train_KLD.append(epoch_KLD)
         train_MSE.append(epoch_MSE)
 
-        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
+        #print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
 
         #Evaluate the model on test set after each epoch, save best performing model weights
         val_loss, spear_corr, jsd = 0.0, [], []
@@ -164,32 +166,33 @@ def train():
         corr_test.append(spear_corr/len(test_dataloader))
         jsd_test.append(jsd/len(test_dataloader))
 
-        print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
+        #print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
 
         #Save every five epoch
         if (epoch+1)%5 == 0:
-            torch.save(model.state_dict(), '../results/wbias_model.pkl')
+            torch.save(model.state_dict(), '../results/' + save_prefix + '_model.pkl')
 
-            with open('../results/wbias_train_loss.pkl', 'wb') as file:
-                    pickle.dump(train_loss, file)
+            with open('../results/' + save_prefix + '_train_loss.pkl', 'wb') as file:
+                pickle.dump(train_loss, file)
 
-            with open('../results/wbias_train_KLD.pkl', 'wb') as file:
-                    pickle.dump(train_KLD, file)
+            with open('../results/' + save_prefix + '_train_KLD.pkl', 'wb') as file:
+                pickle.dump(train_KLD, file)
 
-            with open('../results/wbias_train_MSE.pkl', 'wb') as file:
-                    pickle.dump(train_MSE, file)
+            with open('../results/' + save_prefix + '_train_MSE.pkl', 'wb') as file:
+                pickle.dump(train_MSE, file)
 
-            with open('../results/wbias_test_KLD.pkl', 'wb') as file:
-                    pickle.dump(test_KLD, file)
+            with open('../results/' + save_prefix + '_test_KLD.pkl', 'wb') as file:
+                pickle.dump(test_KLD, file)
 
-            with open('../results/wbias_test_MSE.pkl', 'wb') as file:
-                    pickle.dump(test_MSE, file)
+            with open('../results/' + save_prefix + '_test_MSE.pkl', 'wb') as file:
+                pickle.dump(test_MSE, file)
 
-            with open('../results/wbias_corr.pkl', 'wb') as file:
-                    pickle.dump(corr_test, file)
+            with open('../results/' + save_prefix + '_corr.pkl', 'wb') as file:
+                pickle.dump(corr_test, file)
 
-            with open('../results/wbias_jsd.pkl', 'wb') as file:
-                    pickle.dump(jsd_test, file)
+            with open('../results/' + save_prefix + '_jsd.pkl', 'wb') as file:
+                pickle.dump(jsd_test, file)
+    
     
     print('Finished Training')
 
