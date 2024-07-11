@@ -247,11 +247,11 @@ def compute_integrated_gradient(model, path_sequence, device, c_type, all_c_type
 
 def visualize_sequence_imp(proj_scores, idx_start, idx_end):
     
-    for idx, dinuc_shuff_explanation in enumerate(proj_scores):
+    for i in range(proj_scores.shape[0]):
         #print("Scores for example", idx)
 
         viz_sequence.plot_weights(
-            dinuc_shuff_explanation[:,idx_start:idx_end], subticks_frequency=20,
+            proj_scores[i,:,idx_start:idx_end], subticks_frequency=20,
         )
 
 

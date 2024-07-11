@@ -299,13 +299,13 @@ def train_w_bias(trial, save_prefix, device, save=False):
                 running_KLD.append(KLD)
                 running_MSE.append(MSE)
 
-                #print every 2000 batch the loss
+                """ #print every 2000 batch the loss
                 epoch_steps += 1
                 if i % 2000 == 1999:  # print every 2000 mini-batches
                         print(
                         "[%d, %5d] loss: %.3f"
                         % (epoch + 1, i + 1, running_loss / epoch_steps)
-                        )
+                        ) """
         scheduler.step()
 
         running_KLD = torch.stack(running_KLD)
@@ -321,7 +321,7 @@ def train_w_bias(trial, save_prefix, device, save=False):
         train_KLD.append(epoch_KLD)
         train_MSE.append(epoch_MSE)
 
-        print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
+        #print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
 
         #Evaluate the model on test set after each epoch, save best performing model weights
         val_loss, spear_corr, jsd = 0.0, [], []
@@ -376,7 +376,7 @@ def train_w_bias(trial, save_prefix, device, save=False):
         if trial.should_prune():
             return test_loss[-1]
 
-        print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
+        #print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
 
         if save:
             #Save every five epoch
@@ -404,6 +404,6 @@ def train_w_bias(trial, save_prefix, device, save=False):
                 with open('../results/' + save_prefix + '_jsd.pkl', 'wb') as file:
                         pickle.dump(jsd_test, file)
     
-    print('Finished Training')
+    #print('Finished Training')
 
     return model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test
