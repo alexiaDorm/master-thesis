@@ -162,11 +162,10 @@ def compute_shap_score_bias(model ,seq, back, tn5_bias, idx_time):
     
     return raw_scores[0]
 
-def compute_importance_score_bias(model, model_bias_path, path_sequence, device, c_type, all_c_type, idx_time):
+def compute_importance_score_bias(model, model_bias_path, seq, device, c_type, all_c_type, idx_time):
 
     #Load the model and sequenece to predict
     model.to(device)
-    seq = pd.Series(pd.read_pickle(path_sequence))
 
     #Compute tn5 bias for seq
     model_bias = load_model(model_bias_path)    
@@ -250,7 +249,7 @@ def visualize_sequence_imp(proj_scores, idx_start, idx_end):
     for i in range(0, proj_scores.shape[0]):
         #print("Scores for example", idx)
         viz_sequence.plot_weights(
-            proj_scores[i,:,idx_start:idx_end], subticks_frequency=20,
+            proj_scores[i,:,int(idx_start[i]):int(idx_end[i])], subticks_frequency=20,
         )
 
 
