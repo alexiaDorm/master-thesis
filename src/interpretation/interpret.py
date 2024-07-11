@@ -247,7 +247,7 @@ def compute_integrated_gradient(model, path_sequence, device, c_type, all_c_type
 
 def visualize_sequence_imp(proj_scores, idx_start, idx_end):
     
-    for i in range(proj_scores.shape[0]):
+    for i in range(0, proj_scores.shape[0]):
         #print("Scores for example", idx)
 
         print(proj_scores[i,:,idx_start:idx_end].shape)
