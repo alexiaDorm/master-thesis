@@ -21,7 +21,7 @@ np.random.seed(seed)
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "less_filters"
+save_prefix = "more_filters"
 
 def train():
 
@@ -42,7 +42,7 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 32
+    nb_filters = 128
     nb_pred = len(time_order)
     
     #Initialize model, loss, and optimizer
