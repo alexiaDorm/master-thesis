@@ -115,9 +115,9 @@ def train():
         running_MSE = torch.stack(running_MSE)
         running_MSE = torch.nansum(running_MSE, dim=0)
 
-        epoch_loss = running_loss / len(train_dataloader)
-        epoch_KLD = running_KLD / len(train_dataloader)
-        epoch_MSE = running_MSE / len(train_dataloader)
+        epoch_loss = running_loss / len(train_dataset)
+        epoch_KLD = running_KLD / len(train_dataset)
+        epoch_MSE = running_MSE / len(train_dataset)
 
         train_loss.append(epoch_loss)
         train_KLD.append(epoch_KLD)
@@ -165,9 +165,9 @@ def train():
         jsd = torch.stack(jsd)
         jsd = torch.nansum(jsd, dim=0)
 
-        test_loss.append(val_loss /len(test_dataloader))
-        test_KLD.append(running_KLD/len(test_dataloader))
-        test_MSE.append(running_MSE/len(test_dataloader))
+        test_loss.append(val_loss /len(test_dataset))
+        test_KLD.append(running_KLD/len(test_dataset))
+        test_MSE.append(running_MSE/len(test_dataset))
         corr_test.append(spear_corr/len(test_dataloader))
         jsd_test.append(jsd/len(test_dataloader))
 

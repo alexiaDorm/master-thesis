@@ -120,9 +120,9 @@ def train_wo_bias(trial, save_prefix, device, save = False):
         running_MSE = torch.stack(running_MSE)
         running_MSE = torch.nansum(running_MSE, dim=0)
 
-        epoch_loss = running_loss / len(train_dataloader)
-        epoch_KLD = running_KLD / len(train_dataloader)
-        epoch_MSE = running_MSE / len(train_dataloader)
+        epoch_loss = running_loss / len(train_dataset)
+        epoch_KLD = running_KLD / len(train_dataset)
+        epoch_MSE = running_MSE / len(train_dataset)
 
         train_loss.append(epoch_loss)
         train_KLD.append(epoch_KLD)
@@ -170,9 +170,9 @@ def train_wo_bias(trial, save_prefix, device, save = False):
         jsd = torch.stack(jsd)
         jsd = torch.nansum(jsd, dim=0)
 
-        test_loss.append(val_loss /len(test_dataloader))
-        test_KLD.append(running_KLD/len(test_dataloader))
-        test_MSE.append(running_MSE/len(test_dataloader))
+        test_loss.append(val_loss /len(test_dataset))
+        test_KLD.append(running_KLD/len(test_dataset))
+        test_MSE.append(running_MSE/len(test_dataset))
         corr_test.append(spear_corr/len(test_dataloader))
         jsd_test.append(jsd/len(test_dataloader))
 
@@ -235,11 +235,11 @@ def train_w_bias(trial, save_prefix, device, save=False):
 
     #Initialize hyperparameters of model
     nb_conv = trial.suggest_int("nb_conv", 4, 8)
-    nb_filters = 2**trial.suggest_int("nb_filters", 5, 7)
+    nb_filters = trial.suggest_int("nb_filters", 32, 100)
     nb_pred = 4    
     
-    first_kernel = 21 #trial.suggest_int("first_kernel", 10, 25)
-    rest_kernel = 3 #trial.suggest_int("rest_kernel", 2, 10)
+    first_kernel = trial.suggest_int("first_kernel", 10, 25)
+    rest_kernel = trial.suggest_int("rest_kernel", 2, 10)
 
     size_final_conv = 4096 - (first_kernel - 1)
     cropped = [2**l for l in range(0,nb_conv-1)] * (2*(rest_kernel-1))
