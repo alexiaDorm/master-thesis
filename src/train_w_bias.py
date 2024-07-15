@@ -44,11 +44,17 @@ def train():
     nb_conv = 6
     nb_filters = 64
     nb_pred = len(time_order)
+
+    size_final_conv = 4096 - (21 - 1)
+    cropped = [2**l for l in range(0,nb_conv-1)] * (2*(3-1))
+
+    for c in cropped:
+        size_final_conv -= c
     
     #Initialize model, loss, and optimizer
     model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=21, 
                       rest_kernel=3, out_pred_len=1024, 
-                      nb_pred=nb_pred)
+                      nb_pred=nb_pred, size_final_conv=size_final_conv)
         
     model = model.to(device)
 
