@@ -21,7 +21,7 @@ np.random.seed(seed)
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "more_filters"
+save_prefix = "less_conv"
 
 def train():
 
@@ -41,8 +41,8 @@ def train():
                         shuffle=True, num_workers=4)
 
     #Initialize model, loss, and optimizer
-    nb_conv = 8
-    nb_filters = 128
+    nb_conv = 6
+    nb_filters = 64
     nb_pred = len(time_order)
     
     #Initialize model, loss, and optimizer
