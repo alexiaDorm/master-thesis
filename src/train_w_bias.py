@@ -41,7 +41,7 @@ def train():
                         shuffle=True, num_workers=4)
 
     #Initialize model, loss, and optimizer
-    nb_conv = 6
+    nb_conv = 8
     nb_filters = 256
     nb_pred = len(time_order)
 
