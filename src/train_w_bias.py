@@ -21,7 +21,7 @@ np.random.seed(seed)
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "moremore_conv"
+save_prefix = "256"
 
 def train():
 
