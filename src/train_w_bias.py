@@ -21,7 +21,7 @@ np.random.seed(seed)
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "less_conv"
+save_prefix = "moremore_conv"
 
 def train():
 
@@ -42,7 +42,7 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 6
-    nb_filters = 64
+    nb_filters = 256
     nb_pred = len(time_order)
 
     size_final_conv = 4096 - (21 - 1)
