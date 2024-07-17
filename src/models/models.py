@@ -363,7 +363,7 @@ class CATAC2(nn.Module):
         self.profile_heads = nn.ModuleList() 
         for i in range(self.nb_pred):
             if self.profile_conv:
-                self.profile_heads.append(nn.Conv1d(self.nb_filters, 1, kernel_size=1))
+                self.profile_heads.append(nn.Conv1d(self.nb_filters, 1, kernel_size=75))
             else:
                 self.profile_heads.append(nn.Linear(self.size_final_conv, self.out_pred_len))
                 #self.profile_heads.append(nn.Linear(self.size_final_conv*self.nb_filters, self.out_pred_len))
@@ -439,7 +439,7 @@ class CATAC_w_bias(nn.Module):
     def __init__(self, nb_conv=8, nb_filters=64, first_kernel=21, rest_kernel=3, out_pred_len=1024, nb_pred=4, size_final_conv=3568):
 
         super().__init__()
-        """ Main model with cell type token and dense layer instead of convolution
+        """ Main model with cell type token
         
         Parameters
         -----------
@@ -500,7 +500,7 @@ class CATAC_w_bias(nn.Module):
         
         for i in range (1,self.nb_conv):
             self.convlayers.append(nn.Sequential(
-                nn.Conv1d(in_channels=self.nb_filters,out_channels=self.nb_filters,kernel_size=self.rest_kernel,dilation=2**i),
+                nn.Conv1d(in_channels=self.nb_filters, out_channels=self.nb_filters, kernel_size=self.rest_kernel, dilation=2**i),
                 nn.ReLU()
                 ))
         
@@ -509,7 +509,9 @@ class CATAC_w_bias(nn.Module):
 
         self.profile_heads = nn.ModuleList() 
         for i in range(self.nb_pred):
-            self.profile_heads.append(nn.Linear(self.size_final_conv+self.out_pred_len, self.out_pred_len))
+            #self.profile_heads.append(nn.Linear(self.size_final_conv+self.out_pred_len, self.out_pred_len))
+            self.profile_heads.append(nn.Conv1d(self.nb_filters + 1, 1, kernel_size=75))
+
 
         #Total count prediction heads
         self.count_global_pool = nn.AdaptiveAvgPool1d(1)
@@ -544,14 +546,26 @@ class CATAC_w_bias(nn.Module):
         for i, p in enumerate(self.profile_heads):
                 
             #Apply global average poolling
-            profile = self.profile_global_pool(pred_x[i].permute(0,2,1)) 
-            profile = profile.squeeze()
+            #profile = self.profile_global_pool(pred_x[i].permute(0,2,1)) 
+            #profile = profile.squeeze()
 
             #Concatenate total tn5 bias
-            profile = torch.cat((profile, tn5_bias), 1)
+            #profile = torch.cat((profile, tn5_bias), 1)
 
             #Apply linear layer
+            #profile = p(profile)
+
+            #Concatenate the padded tn5 bias
+            pad_size = int((pred_x[i].size(2)/2) - (self.out_pred_len/2))
+            profile = torch.cat((pred_x[i], F.pad(tn5_bias,(pad_size,pad_size))[:,None,:]),1)
+
+            #Apply final convolution
             profile = p(profile)
+
+            #Crop and flatten the representation
+            cropsize = int((profile.size(2)/2) - (self.out_pred_len/2))
+            profile = profile[:,:, cropsize:-cropsize]
+            profile = profile.squeeze()
 
             pred_profiles.append(profile)
         
