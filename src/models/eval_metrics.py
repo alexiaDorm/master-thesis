@@ -19,8 +19,8 @@ class ATACloss_MNLLL(nn.Module):
                         
         counts_per_example = torch.sum(true_counts, dim=1)
 
-        true_counts_prob = true_counts/ counts_per_example.unsqueeze(-1)
-        true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division to zero to 0 
+        true_counts_prob = true_counts/ counts_per_example.unsqueeze(1)
+        true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division by zero to 0 
 
         MNLLL = self.NLL(logits, true_counts_prob) * 100
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
@@ -45,17 +45,17 @@ class ATACloss_KLD(nn.Module):
                         
         counts_per_example = torch.sum(true_counts, dim=1)
 
-        true_counts_prob = true_counts/ counts_per_example.unsqueeze(-1)
+        true_counts_prob = true_counts/ counts_per_example.unsqueeze(1)
         true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division to zero to 0 
 
         KLD = self.KLD(nn.functional.log_softmax(logits, dim=1), true_counts_prob)
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
         #Skip idx where track was not defined for loss computation
-        KLD = KLD[idx_skip,:].sum()
-        MSE = MSE[idx_skip].sum()
+        KLD = (KLD* idx_skip.unsqueeze(1).expand(KLD.size())).sum(dim=1).sum(dim=0)
+        MSE = (MSE*idx_skip).sum(dim=0)
 
-        loss = self.weight_MSE*MSE + self.weight_KLD*KLD
+        loss = (self.weight_MSE*MSE + self.weight_KLD*KLD).sum()
 
         return loss, KLD, MSE
 

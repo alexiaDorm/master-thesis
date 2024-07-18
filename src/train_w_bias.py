@@ -105,16 +105,14 @@ def train():
                     _, profile, count = model(inputs, tn5_bias)
 
                     #Compute loss for each head
-                    losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
-                    #KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-                    #loss = torch.stack([loss[0] for loss in losses]).nansum()
+                    loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
                     #loss.backward() 
                     #optimizer.step()
 
                     #running_loss += loss.item()
-                    #running_KLD.append(KLD)
-                    #running_MSE.append(MSE)
+                    #running_KLD.append(KLD.detach())
+                    #running_MSE.append(MSE.detach())
 
                     """ #print every 2000 batch the loss
                     epoch_steps += 1
