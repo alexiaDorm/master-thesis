@@ -111,9 +111,9 @@ def train():
                     loss.backward() 
                     optimizer.step()
 
-                    running_loss += loss.item()
-                    running_KLD.append(KLD.detach())
-                    running_MSE.append(MSE.detach())
+                    #running_loss += loss.item()
+                    #running_KLD.append(KLD.detach())
+                    #running_MSE.append(MSE.detach())
 
                     """ #print every 2000 batch the loss
                     epoch_steps += 1
