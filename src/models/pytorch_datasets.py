@@ -399,7 +399,7 @@ class PeaksDataset_w_bias(Dataset):
 
         #Get tn5 bias to add
         pos =  self.positions[seq_idx,:][0]
-        tn5_bias = self.tn5_bias[pos[0]][(pos[1]-512):(pos[1]+512)]
+        tn5_bias = self.tn5_bias[pos[0]][(pos[1]-2048):(pos[1]+2048)]
         tn5_bias = torch.from_numpy(tn5_bias)
 
         return input, tracks, is_defined, tn5_bias

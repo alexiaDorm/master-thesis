@@ -73,44 +73,56 @@ def train():
     nb_epoch = 25
     model.train() 
 
-    for epoch in range(0, nb_epoch):
+    with torch.profiler.profile(
+        schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
+        on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/resnet18'),
+        record_shapes=True,
+        profile_memory=True,
+        with_stack=True
+    ) as prof:
+        for epoch in range(0, nb_epoch):
 
-        running_loss, epoch_steps = 0.0, 0
-        running_KLD, running_MSE = [], []
+            running_loss, epoch_steps = 0.0, 0
+            running_KLD, running_MSE = [], []
 
-        for i, data in enumerate(train_dataloader):
-                        
-                inputs, tracks, idx_skip, tn5_bias = data 
-                inputs = inputs.float().to(device)
-                tracks = tracks.float().to(device)
-                tn5_bias = tn5_bias.float().to(device)
+            for i, data in enumerate(train_dataloader):
+                    
+                    prof.step()  # Need to call this at each step to notify profiler of steps' boundary.
+                    if i >= 1 + 1 + 3:
+                        break
+                            
+                    inputs, tracks, idx_skip, tn5_bias = data 
+                    inputs = inputs.float().to(device)
+                    tracks = tracks.float().to(device)
+                    tn5_bias = tn5_bias.float().to(device)
 
-                optimizer.zero_grad()
+                    optimizer.zero_grad()
 
-                _, profile, count = model(inputs, tn5_bias)
+                    _, profile, count = model(inputs, tn5_bias)
 
-                #Compute loss for each head
-                losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
-                KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-                loss = torch.stack([loss[0] for loss in losses]).nansum()
+                    #Compute loss for each head
+                    losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
+                    KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
+                    loss = torch.stack([loss[0] for loss in losses]).nansum()
 
-                loss.backward() 
-                optimizer.step()
+                    loss.backward() 
+                    optimizer.step()
 
-                running_loss += loss.item()
-                running_KLD.append(KLD)
-                running_MSE.append(MSE)
+                    running_loss += loss.item()
+                    running_KLD.append(KLD)
+                    running_MSE.append(MSE)
 
-                """ #print every 2000 batch the loss
-                epoch_steps += 1
-                if i % 2000 == 1999:  # print every 2000 mini-batches
-                        print(
-                        "[%d, %5d] loss: %.3f"
-                        % (epoch + 1, i + 1, running_loss / epoch_steps)
-                        ) """
-        scheduler.step()
+                    """ #print every 2000 batch the loss
+                    epoch_steps += 1
+                    if i % 2000 == 1999:  # print every 2000 mini-batches
+                            print(
+                            "[%d, %5d] loss: %.3f"
+                            % (epoch + 1, i + 1, running_loss / epoch_steps)
+                            ) """
+            scheduler.step()
+            break
 
-        running_KLD = torch.stack(running_KLD)
+        """ running_KLD = torch.stack(running_KLD)
         running_KLD = torch.nansum(running_KLD, dim=0)
         running_MSE = torch.stack(running_MSE)
         running_MSE = torch.nansum(running_MSE, dim=0)
@@ -200,7 +212,7 @@ def train():
                 pickle.dump(jsd_test, file)
     
     
-    print('Finished Training')
+    print('Finished Training') """
 
     return model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test
 
