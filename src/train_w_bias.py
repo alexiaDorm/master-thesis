@@ -73,7 +73,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 25
+    nb_epoch = 24
     model.train() 
 
     for epoch in range(0, nb_epoch):
@@ -169,8 +169,8 @@ def train():
 
         #print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
 
-        #Save every five epoch
-        if (epoch+1)%5 == 0:
+        #Save every three epoch
+        if (epoch+1)%3 == 0:
             torch.save(model.state_dict(), '../results/' + save_prefix + '_model.pkl')
 
             with open('../results/' + save_prefix + '_train_loss.pkl', 'wb') as file:
