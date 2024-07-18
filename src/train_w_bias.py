@@ -88,7 +88,8 @@ def train():
             running_loss, epoch_steps = 0, 0
             running_KLD, running_MSE = torch.zeros((1,4), device=device), torch.zeros((1,4), device=device)
 
-            for i, data in enumerate(train_dataloader):
+            #for i, data in enumerate(train_dataloader):
+            for i in range(0,100):
                     
                     prof.step()  # Need to call this at each step to notify profiler of steps' boundary.
                     if i >= 1 + 3 + 5:
