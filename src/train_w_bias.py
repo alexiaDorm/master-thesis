@@ -94,25 +94,31 @@ def train():
                     if i >= 1 + 3 + 5:
                         break
                             
-                    inputs, tracks, idx_skip, tn5_bias = data 
-                    inputs = inputs.to(device)
-                    tracks = tracks.float().to(device)
-                    idx_skip = idx_skip.float().to(device)
-                    tn5_bias = tn5_bias.to(device)
+                    """ inputs, tracks, idx_skip, tn5_bias = data 
+                    inputs = inputs.to(device, dtype=torch.float32)
+                    tracks = tracks.to(device, dtype=torch.float32)
+                    idx_skip = idx_skip.to(device, dtype=torch.float32)
+                    tn5_bias = tn5_bias.to(device, dtype=torch.float32) """
+
+                    
+                    inputs = torch.randn(32, 4096, 4).abs().to(device, dtype=torch.float32)
+                    tracks = torch.randn(32, 1024, 4).abs().to(device, dtype=torch.float32)
+                    idx_skip = (torch.randn(32, 4) > 0.9).to(device, dtype=torch.float32)
+                    tn5_bias = torch.randn(32, 4096).abs().to(device, dtype=torch.float32)
 
                     optimizer.zero_grad()
 
-                    #_, profile, count = model(inputs, tn5_bias)
+                    _, profile, count = model(inputs, tn5_bias)
 
                     #Compute loss for each head
-                    #loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
+                    loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
-                    #loss.backward() 
-                    #optimizer.step()
+                    loss.backward() 
+                    optimizer.step()
 
-                    #running_loss += loss.item()
-                    #running_KLD = torch.cat((running_KLD, KLD[None,:]))
-                    #running_MSE = torch.cat((running_MSE, MSE[None,:]))
+                    running_loss += loss.item()
+                    running_KLD = torch.cat((running_KLD, KLD[None,:]))
+                    running_MSE = torch.cat((running_MSE, MSE[None,:]))
 
                     """ #print every 2000 batch the loss
                     epoch_steps += 1

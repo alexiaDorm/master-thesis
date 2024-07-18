@@ -47,7 +47,7 @@ class BiasDataset(Dataset):
         
         self.ATAC_track_seq = self.ATAC_track.index.to_numpy()
         self.ATAC_track = self.ATAC_track.iloc[:,0]
-        self.ATAC_track = torch.from_numpy(np.array(self.ATAC_track.values.tolist())).type(torch.float32)
+        self.ATAC_track = torch.from_numpy(np.array(self.ATAC_track.values.tolist()))
 
 
     def __len__(self):
@@ -295,7 +295,7 @@ class PeaksDataset_w_bias(Dataset):
         #Add max seq_id of peaks so that it is unique
         idx_seq = idx_seq + max_seq_id
 
-        self.ATAC_track = torch.cat((self.ATAC_track, ATAC_track), 0).float(); self.is_defined = torch.cat((self.is_defined, is_defined), 0); self.idx_seq = torch.cat((self.idx_seq, idx_seq), 0); self.c_type = np.concatenate((self.c_type, c_type), 0)
+        self.ATAC_track = torch.cat((self.ATAC_track, ATAC_track), 0); self.is_defined = torch.cat((self.is_defined, is_defined), 0); self.idx_seq = torch.cat((self.idx_seq, idx_seq), 0); self.c_type = np.concatenate((self.c_type, c_type), 0)
 
         #Define order of c_type for encoding
         self.unique_c_type = np.sort(np.unique(self.c_type))
@@ -392,7 +392,7 @@ class PeaksDataset_w_bias(Dataset):
         c_type = torch.from_numpy(np.eye(len(self.unique_c_type))[c_type])
 
         c_type = c_type.tile((input.shape[-1],1)).permute(1,0)[:,:]
-        input = torch.cat((input.squeeze(), c_type), dim=0).type(torch.float)
+        input = torch.cat((input.squeeze(), c_type), dim=0)
 
         #Get which tracks should be omitted for the loss computation
         is_defined = self.is_defined[idx, :]
@@ -400,7 +400,7 @@ class PeaksDataset_w_bias(Dataset):
         #Get tn5 bias to add
         pos =  self.positions[seq_idx,:][0]
         tn5_bias = self.tn5_bias[pos[0]][(pos[1]-2048):(pos[1]+2048)]
-        tn5_bias = torch.from_numpy(tn5_bias).type(torch.float)
+        tn5_bias = torch.from_numpy(tn5_bias)
 
         return input, tracks, is_defined, tn5_bias
 
