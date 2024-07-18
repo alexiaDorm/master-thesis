@@ -531,15 +531,11 @@ class CATAC_w_bias(nn.Module):
             conv_x = layer(x)
 
             #Crop output previous layer to size of current 
-            x_len = x.size(2); conv_x_len = conv_x.size(2)
-            cropsize = (x_len - conv_x_len) // 2
-            x = x[:, :, cropsize:-cropsize] 
+            cropsize = (x.size(2) - conv_x.size(2)) // 2
 
             #Skipped connection
-            x = conv_x + x   
+            x = conv_x + x[:, :, cropsize:-cropsize]   
     
-        pred_x = [x]*self.nb_pred
-
         #Profile head
         #-----------------------------------------------
         pred_profiles = []
@@ -555,20 +551,14 @@ class CATAC_w_bias(nn.Module):
             #Apply linear layer
             #profile = p(profile)
 
-            #Concatenate the padded tn5 bias
+            #Concatenate the padded tn5 bias, Apply final convolution
 
-            cropsize = (4096 - pred_x[i].size(2)) // 2
-            profile = torch.cat((pred_x[i], tn5_bias[:,None,cropsize:-cropsize]),1)
-
-            #Apply final convolution
-            profile = p(profile)
+            cropsize = (4096 - x.size(2)) // 2
+            profile = p(torch.cat((x, tn5_bias[:,None,cropsize:-cropsize]),1))
 
             #Crop and flatten the representation
             cropsize = int((profile.size(2)/2) - (self.out_pred_len/2))
-            profile = profile[:,:, cropsize:-cropsize]
-            profile = profile.squeeze()
-
-            pred_profiles.append(profile)
+            pred_profiles.append(profile[:,:, cropsize:-cropsize].squeeze())
         
         #Total count head
         #-----------------------------------------------
@@ -577,15 +567,9 @@ class CATAC_w_bias(nn.Module):
         for i, c in enumerate(self.count_heads):
             
             #Apply global average poolling
-            count = self.count_global_pool(pred_x[i])  
-            count = count.squeeze()
+            count = self.count_global_pool(x).squeeze()
 
-            #Concatenate total tn5 bias
-            count = torch.cat((count, total_bias), 1)
-
-            #Apply linear layer
-            count = c(count)
-
-            pred_counts.append(count)
+            #Concatenate total tn5 bias, Apply linear layer
+            pred_counts.append(c(torch.cat((count, total_bias), 1)))
 
         return x, pred_profiles, pred_counts

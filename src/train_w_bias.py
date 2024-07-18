@@ -17,6 +17,8 @@ torch.manual_seed(seed)
 random.seed(seed)
 np.random.seed(seed)
 
+torch.backends.cudnn.allow_tf32 = True
+
 #Define training loop
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
@@ -25,7 +27,7 @@ save_prefix = "256"
 
 def train():
 
-    batch_size = 64
+    batch_size = 128
 
     #Load the data
     with open('../results/train_dataset_bias.pkl', 'rb') as file:
@@ -42,7 +44,7 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 64
+    nb_filters = 256
     nb_pred = len(time_order)
 
     size_final_conv = 4096 - (21 - 1)
@@ -96,7 +98,8 @@ def train():
                     tracks = tracks.float().to(device)
                     tn5_bias = tn5_bias.float().to(device)
 
-                    optimizer.zero_grad()
+                    for param in model.parameters():
+                        param.grad = None
 
                     _, profile, count = model(inputs, tn5_bias)
 
