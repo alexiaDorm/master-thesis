@@ -102,7 +102,7 @@ def train():
                     tn5_bias = tn5_bias.to(device, dtype=torch.float32) """
 
                     
-                    inputs = torch.randn(32, 4096, 4).abs().to(device, dtype=torch.float32)
+                    inputs = torch.randn(32, 11, 4096).abs().to(device, dtype=torch.float32)
                     tracks = torch.randn(32, 1024, 4).abs().to(device, dtype=torch.float32)
                     idx_skip = (torch.randn(32, 4) > 0.9).to(device, dtype=torch.float32)
                     tn5_bias = torch.randn(32, 4096).abs().to(device, dtype=torch.float32)
