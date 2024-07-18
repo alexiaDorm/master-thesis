@@ -102,7 +102,7 @@ def train():
                     for param in model.parameters():
                         param.grad = None
 
-                    #_, profile, count = model(inputs, tn5_bias)
+                    _, profile, count = model(inputs, tn5_bias)
 
                     #Compute loss for each head
                     #losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
