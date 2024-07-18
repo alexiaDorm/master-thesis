@@ -100,8 +100,8 @@ def train():
             optimizer.step()
 
             running_loss += loss.item()
-            running_KLD += KLD.detach()
-            running_MSE += MSE.detach()
+            running_KLD += KLD.detach().cpu()
+            running_MSE += MSE.detach().cpu()
 
                     
             """ #print every 2000 batch the loss
