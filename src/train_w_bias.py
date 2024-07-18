@@ -106,10 +106,10 @@ def train():
                     _, profile, count = model(inputs, tn5_bias)
 
                     #Compute loss for each head
-                    loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
+                    #loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
-                    loss.backward() 
-                    optimizer.step()
+                    #loss.backward() 
+                    #optimizer.step()
 
                     #running_loss += loss.item()
                     #running_KLD.append(KLD.detach())
