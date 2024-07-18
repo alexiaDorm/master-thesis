@@ -95,24 +95,24 @@ def train():
                         break
                             
                     inputs, tracks, idx_skip, tn5_bias = data 
-                    inputs = inputs.float().to(device)
-                    tracks = tracks.float().to(device)
-                    tn5_bias = tn5_bias.float().to(device)
+                    inputs = inputs.to(device)
+                    tracks = tracks.to(device)
+                    tn5_bias = tn5_bias.to(device)
 
                     for param in model.parameters():
                         param.grad = None
 
-                    _, profile, count = model(inputs, tn5_bias)
+                    #_, profile, count = model(inputs, tn5_bias)
 
                     #Compute loss for each head
-                    losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
+                    #losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
                     #KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
-                    loss = torch.stack([loss[0] for loss in losses]).nansum()
+                    #loss = torch.stack([loss[0] for loss in losses]).nansum()
 
-                    loss.backward() 
-                    optimizer.step()
+                    #loss.backward() 
+                    #optimizer.step()
 
-                    running_loss += loss.item()
+                    #running_loss += loss.item()
                     #running_KLD.append(KLD)
                     #running_MSE.append(MSE)
 
