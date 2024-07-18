@@ -76,7 +76,7 @@ def train():
     model.train() 
 
     with torch.profiler.profile(
-        schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
+        schedule=torch.profiler.schedule(wait=1, warmup=3, active=5, repeat=1),
         on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/resnet18'),
         record_shapes=True,
         profile_memory=True,
@@ -90,7 +90,7 @@ def train():
             for i, data in enumerate(train_dataloader):
                     
                     prof.step()  # Need to call this at each step to notify profiler of steps' boundary.
-                    if i >= 1 + 1 + 3:
+                    if i >= 1 + 3 + 5:
                         break
                             
                     inputs, tracks, idx_skip, tn5_bias = data 
