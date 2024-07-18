@@ -78,7 +78,7 @@ def train():
 
     for epoch in range(0, nb_epoch):
 
-        running_loss = torch.zeros((1), device=device)
+        running_loss = torch.zeros((1))
         running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
         for i, data in enumerate(train_dataloader):
                     
@@ -142,7 +142,6 @@ def train():
                 loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
                 val_loss += loss.item()
-                running_loss += loss.item()
                 running_KLD += KLD.detach()
                 running_MSE += MSE.detach()
 
