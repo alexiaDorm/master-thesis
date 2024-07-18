@@ -42,7 +42,7 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 256
+    nb_filters = 64
     nb_pred = len(time_order)
 
     size_final_conv = 4096 - (21 - 1)
