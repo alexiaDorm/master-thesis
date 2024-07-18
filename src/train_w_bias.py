@@ -117,9 +117,9 @@ def train():
                     loss.backward() 
                     optimizer.step()
 
-                    running_loss += loss.item()
-                    running_KLD = torch.cat((running_KLD, KLD[None,:]))
-                    running_MSE = torch.cat((running_MSE, MSE[None,:]))
+                    #running_loss += loss.item()
+                    #running_KLD = torch.cat((running_KLD, KLD[None,:]))
+                    #running_MSE = torch.cat((running_MSE, MSE[None,:]))
 
                     """ #print every 2000 batch the loss
                     epoch_steps += 1
