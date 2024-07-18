@@ -18,6 +18,7 @@ random.seed(seed)
 np.random.seed(seed)
 
 torch.backends.cudnn.allow_tf32 = True
+torch.backends.cudnn.benchmark = True
 
 #Define training loop
 data_dir = "../results/"
@@ -105,15 +106,15 @@ def train():
 
                     #Compute loss for each head
                     losses = [criterion(tracks[:,:,j], profile[j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
-                    KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
+                    #KLD = torch.stack([loss[1] for loss in losses]).detach();  MSE = torch.stack([loss[2] for loss in losses]).detach()
                     loss = torch.stack([loss[0] for loss in losses]).nansum()
 
                     loss.backward() 
                     optimizer.step()
 
                     running_loss += loss.item()
-                    running_KLD.append(KLD)
-                    running_MSE.append(MSE)
+                    #running_KLD.append(KLD)
+                    #running_MSE.append(MSE)
 
                     """ #print every 2000 batch the loss
                     epoch_steps += 1
