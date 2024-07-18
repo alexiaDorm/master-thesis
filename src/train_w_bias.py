@@ -85,7 +85,7 @@ def train():
     ) as prof:
         for epoch in range(0, nb_epoch):
 
-            running_loss, epoch_steps = torch.zeros(1, device=device), 0
+            running_loss, epoch_steps = 0, 0
             running_KLD, running_MSE = torch.zeros((1,4), device=device), torch.zeros((1,4), device=device)
 
             for i, data in enumerate(train_dataloader):
@@ -105,14 +105,14 @@ def train():
                     _, profile, count = model(inputs, tn5_bias)
 
                     #Compute loss for each head
-                    loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
+                    #loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
-                    loss.backward() 
-                    optimizer.step()
+                    #loss.backward() 
+                    #optimizer.step()
 
-                    running_loss += loss
-                    running_KLD = torch.cat((running_KLD, KLD[None,:]))
-                    running_MSE = torch.cat((running_MSE, MSE[None,:]))
+                    #running_loss += loss.item()
+                    #running_KLD = torch.cat((running_KLD, KLD[None,:]))
+                    #running_MSE = torch.cat((running_MSE, MSE[None,:]))
 
                     """ #print every 2000 batch the loss
                     epoch_steps += 1
