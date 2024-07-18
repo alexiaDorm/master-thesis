@@ -96,8 +96,8 @@ def train():
                             
                     inputs, tracks, idx_skip, tn5_bias = data 
                     inputs = inputs.to(device)
-                    tracks = tracks.to(device)
-                    idx_skip = idx_skip.to(device)
+                    tracks = tracks.float().to(device)
+                    idx_skip = idx_skip.float().to(device)
                     tn5_bias = tn5_bias.to(device)
 
                     for param in model.parameters():
