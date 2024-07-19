@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "256"
+save_prefix = "128"
 
 def train():
 
@@ -45,7 +45,7 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 256
+    nb_filters = 128
     nb_pred = len(time_order)
 
     size_final_conv = 4096 - (21 - 1)
@@ -73,7 +73,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 24
+    nb_epoch = 6
     model.train() 
 
     for epoch in range(0, nb_epoch):
@@ -82,7 +82,8 @@ def train():
         running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
         for i, data in enumerate(train_dataloader):
                     
-                            
+            if i > 1:
+                break              
             inputs, tracks, idx_skip, tn5_bias = data 
             inputs = inputs.to(device, dtype=torch.float32)
             tracks = tracks.to(device, dtype=torch.float32)
@@ -128,6 +129,9 @@ def train():
         val_loss, spear_corr, jsd = torch.zeros((1)), [], []
         running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
         for i, data in enumerate(test_dataloader):
+            
+            if i > 1:
+                break 
 
             with torch.no_grad():
                 inputs, tracks, idx_skip, tn5_bias = data 
@@ -169,7 +173,7 @@ def train():
         #print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
 
         #Save every three epoch
-        if (epoch+1)%3 == 0:
+        if (epoch+1)%5 == 0:
             torch.save(model.state_dict(), '../results/' + save_prefix + '_model.pkl')
 
             with open('../results/' + save_prefix + '_train_loss.pkl', 'wb') as file:
