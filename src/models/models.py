@@ -575,4 +575,4 @@ class CATAC_w_bias(nn.Module):
             #Concatenate total tn5 bias, Apply linear layer
             pred_counts[i] = c(torch.cat((count, total_bias), 1)).squeeze()
 
-        return x, pred_profiles, pred_counts
+        return x, pred_profiles.permute(1,2,0), pred_counts.permute(1,0)
