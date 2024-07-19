@@ -538,7 +538,10 @@ class CATAC_w_bias(nn.Module):
     
         #Profile head
         #-----------------------------------------------
-        pred_profiles = []
+        cropsize = (4096 - x.size(2)) //2
+        tn5_bias = tn5_bias[:,None,cropsize:-cropsize]
+
+        pred_profiles = torch.empty((self.nb_pred, x.size(0), self.out_pred_len), device = x.device, dtype=torch.float32)
         for i, p in enumerate(self.profile_heads):
                 
             #Apply global average poolling
@@ -552,24 +555,24 @@ class CATAC_w_bias(nn.Module):
             #profile = p(profile)
 
             #Concatenate the padded tn5 bias, Apply final convolution
-
-            cropsize = (4096 - x.size(2)) // 2
-            profile = p(torch.cat((x, tn5_bias[:,None,cropsize:-cropsize]),1))
+            profile = p(torch.cat((x, tn5_bias),1))
 
             #Crop and flatten the representation
             cropsize = int((profile.size(2)/2) - (self.out_pred_len/2))
-            pred_profiles.append(profile[:,:, cropsize:-cropsize].squeeze())
+            pred_profiles[i] = profile[:,:, cropsize:-cropsize].squeeze()
         
         #Total count head
         #-----------------------------------------------
-        pred_counts = []
-        total_bias = tn5_bias.sum(dim=1)[:,None]
+        cropsize = (tn5_bias.size(1) - self.out_pred_len) // 2
+        total_bias = tn5_bias[:,cropsize:-cropsize].squeeze().sum(dim=1).unsqueeze(1) 
+
+        pred_counts = torch.empty((self.nb_pred, x.size(0)), device = x.device, dtype=torch.float32)
         for i, c in enumerate(self.count_heads):
             
             #Apply global average poolling
             count = self.count_global_pool(x).squeeze()
 
             #Concatenate total tn5 bias, Apply linear layer
-            pred_counts.append(c(torch.cat((count, total_bias), 1)))
+            pred_counts[i] = c(torch.cat((count, total_bias), 1)).squeeze()
 
-        return x, torch.stack(pred_profiles, dim=-1), torch.stack(pred_counts, dim=-1)
+        return x, pred_profiles, pred_counts
