@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "512"
+save_prefix = "128"
 
 def train():
 
@@ -45,7 +45,7 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 512
+    nb_filters = 128
     nb_pred = len(time_order)
 
     size_final_conv = 4096 - (21 - 1)
@@ -86,7 +86,7 @@ def train():
             inputs, tracks, idx_skip, tn5_bias = data 
             inputs = inputs.to(device, dtype=torch.float32)
             tracks = tracks.to(device, dtype=torch.float32)
-            idx_skip = idx_skip.to(device, dtype=torch.ByteTensor)
+            idx_skip = idx_skip.to(device)
             tn5_bias = tn5_bias.to(device, dtype=torch.float32)
 
             optimizer.zero_grad()
@@ -133,7 +133,7 @@ def train():
                 inputs, tracks, idx_skip, tn5_bias = data 
                 inputs = inputs.to(device, dtype=torch.float32)
                 tracks = tracks.to(device, dtype=torch.float32)
-                idx_skip = idx_skip.to(device, dtype=torch.ByteTensor)
+                idx_skip = idx_skip.to(device)
                 tn5_bias = tn5_bias.to(device, dtype=torch.float32)
 
                 _, profile, count = model(inputs, tn5_bias)
