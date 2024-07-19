@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128"
+save_prefix = "256"
 
 def train():
 
@@ -45,7 +45,7 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 128
+    nb_filters = 256
     nb_pred = len(time_order)
 
     size_final_conv = 4096 - (21 - 1)
@@ -76,125 +76,137 @@ def train():
     nb_epoch = 24
     model.train() 
 
-    for epoch in range(0, nb_epoch):
+    with torch.profiler.profile(
+        schedule=torch.profiler.schedule(wait=1, warmup=3, active=5, repeat=1),
+        on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/resnet18'),
+        record_shapes=True,
+        profile_memory=True,
+        with_stack=True
+    ) as prof:
+        for epoch in range(0, nb_epoch):
 
-        running_loss = torch.zeros((1))
-        running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
-        for i, data in enumerate(train_dataloader):
-                    
-                            
-            inputs, tracks, idx_skip, tn5_bias = data 
-            inputs = inputs.to(device, dtype=torch.float32)
-            tracks = tracks.to(device, dtype=torch.float32)
-            idx_skip = idx_skip.to(device, dtype=torch.float32)
-            tn5_bias = tn5_bias.to(device, dtype=torch.float32)
+            running_loss = torch.zeros((1))
+            running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
+            for i, data in enumerate(train_dataloader):
 
-            optimizer.zero_grad()
-
-            _, profile, count = model(inputs, tn5_bias)
-
-            #Compute loss for each head
-            loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
-
-            loss.backward() 
-            optimizer.step()
-
-            running_loss += loss.item()
-            running_KLD += KLD.detach().cpu()
-            running_MSE += MSE.detach().cpu()
-
-                    
-            """ #print every 2000 batch the loss
-            epoch_steps += 1
-            if i % 2000 == 1999:  # print every 2000 mini-batches
-                print(
-                    "[%d, %5d] loss: %.3f"
-                    % (epoch + 1, i + 1, running_loss / epoch_steps)
-                    ) """
-        
-        scheduler.step()
-
-        epoch_loss = running_loss / len(train_dataset)
-        epoch_KLD = running_KLD / len(train_dataset)
-        epoch_MSE = running_MSE / len(train_dataset)
-
-        train_loss.append(epoch_loss)
-        train_KLD.append(epoch_KLD)
-        train_MSE.append(epoch_MSE)
-
-        #print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
-
-        #Evaluate the model on test set after each epoch, save best performing model weights
-        val_loss, spear_corr, jsd = torch.zeros((1)), [], []
-        running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
-        for i, data in enumerate(test_dataloader):
-
-            with torch.no_grad():
+                prof.step()  # Need to call this at each step to notify profiler of steps' boundary.
+                if i >= 1 + 3 + 5:
+                        break
+                        
+                                
                 inputs, tracks, idx_skip, tn5_bias = data 
                 inputs = inputs.to(device, dtype=torch.float32)
                 tracks = tracks.to(device, dtype=torch.float32)
                 idx_skip = idx_skip.to(device, dtype=torch.float32)
                 tn5_bias = tn5_bias.to(device, dtype=torch.float32)
 
+                optimizer.zero_grad()
+
                 _, profile, count = model(inputs, tn5_bias)
 
-                #Compute loss
+                #Compute loss for each head
                 loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
-                val_loss += loss.item()
+                loss.backward() 
+                optimizer.step()
+
+                running_loss += loss.item()
                 running_KLD += KLD.detach().cpu()
                 running_MSE += MSE.detach().cpu()
 
-                #Compute evaluation metrics: pearson correlation
-                corr =  [counts_metrics(tracks[:,:,j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
-                corr = torch.tensor(corr)
-                spear_corr.append(corr)
+                        
+                """ #print every 2000 batch the loss
+                epoch_steps += 1
+                if i % 2000 == 1999:  # print every 2000 mini-batches
+                    print(
+                        "[%d, %5d] loss: %.3f"
+                        % (epoch + 1, i + 1, running_loss / epoch_steps)
+                        ) """
+            
+            scheduler.step()
+            break
 
-                #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
-                j = [np.nanmean(profile_metrics(tracks[:,:,j], profile[j], idx_skip[:,j])) for j in range(0,len(profile))]
-                j = torch.tensor(j)
-                jsd.append(j)
+            epoch_loss = running_loss / len(train_dataset)
+            epoch_KLD = running_KLD / len(train_dataset)
+            epoch_MSE = running_MSE / len(train_dataset)
 
-        spear_corr = torch.stack(spear_corr)
-        spear_corr = torch.nansum(spear_corr, dim=0)
-        jsd = torch.stack(jsd)
-        jsd = torch.nansum(jsd, dim=0)
+            train_loss.append(epoch_loss)
+            train_KLD.append(epoch_KLD)
+            train_MSE.append(epoch_MSE)
 
-        test_loss.append(val_loss /len(test_dataset))
-        test_KLD.append(running_KLD/len(test_dataset))
-        test_MSE.append(running_MSE/len(test_dataset))
-        corr_test.append(spear_corr/len(test_dataloader))
-        jsd_test.append(jsd/len(test_dataloader))
+            #print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
 
-        #print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
+            #Evaluate the model on test set after each epoch, save best performing model weights
+            val_loss, spear_corr, jsd = torch.zeros((1)), [], []
+            running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
+            for i, data in enumerate(test_dataloader):
 
-        #Save every three epoch
-        if (epoch+1)%3 == 0:
-            torch.save(model.state_dict(), '../results/' + save_prefix + '_model.pkl')
+                with torch.no_grad():
+                    inputs, tracks, idx_skip, tn5_bias = data 
+                    inputs = inputs.to(device, dtype=torch.float32)
+                    tracks = tracks.to(device, dtype=torch.float32)
+                    idx_skip = idx_skip.to(device, dtype=torch.float32)
+                    tn5_bias = tn5_bias.to(device, dtype=torch.float32)
 
-            with open('../results/' + save_prefix + '_train_loss.pkl', 'wb') as file:
-                pickle.dump(train_loss, file)
+                    _, profile, count = model(inputs, tn5_bias)
 
-            with open('../results/' + save_prefix + '_train_KLD.pkl', 'wb') as file:
-                pickle.dump(train_KLD, file)
+                    #Compute loss
+                    loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
-            with open('../results/' + save_prefix + '_train_MSE.pkl', 'wb') as file:
-                pickle.dump(train_MSE, file)
+                    val_loss += loss.item()
+                    running_KLD += KLD.detach().cpu()
+                    running_MSE += MSE.detach().cpu()
 
-            with open('../results/' + save_prefix + '_test_KLD.pkl', 'wb') as file:
-                pickle.dump(test_KLD, file)
+                    #Compute evaluation metrics: pearson correlation
+                    corr =  [counts_metrics(tracks[:,:,j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
+                    corr = torch.tensor(corr)
+                    spear_corr.append(corr)
 
-            with open('../results/' + save_prefix + '_test_MSE.pkl', 'wb') as file:
-                pickle.dump(test_MSE, file)
+                    #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
+                    j = [np.nanmean(profile_metrics(tracks[:,:,j], profile[j], idx_skip[:,j])) for j in range(0,len(profile))]
+                    j = torch.tensor(j)
+                    jsd.append(j)
 
-            with open('../results/' + save_prefix + '_corr.pkl', 'wb') as file:
-                pickle.dump(corr_test, file)
+            spear_corr = torch.stack(spear_corr)
+            spear_corr = torch.nansum(spear_corr, dim=0)
+            jsd = torch.stack(jsd)
+            jsd = torch.nansum(jsd, dim=0)
 
-            with open('../results/' + save_prefix + '_jsd.pkl', 'wb') as file:
-                pickle.dump(jsd_test, file)
-    
-    
-    print('Finished Training')
+            test_loss.append(val_loss /len(test_dataset))
+            test_KLD.append(running_KLD/len(test_dataset))
+            test_MSE.append(running_MSE/len(test_dataset))
+            corr_test.append(spear_corr/len(test_dataloader))
+            jsd_test.append(jsd/len(test_dataloader))
+
+            #print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
+
+            #Save every three epoch
+            if (epoch+1)%3 == 0:
+                torch.save(model.state_dict(), '../results/' + save_prefix + '_model.pkl')
+
+                with open('../results/' + save_prefix + '_train_loss.pkl', 'wb') as file:
+                    pickle.dump(train_loss, file)
+
+                with open('../results/' + save_prefix + '_train_KLD.pkl', 'wb') as file:
+                    pickle.dump(train_KLD, file)
+
+                with open('../results/' + save_prefix + '_train_MSE.pkl', 'wb') as file:
+                    pickle.dump(train_MSE, file)
+
+                with open('../results/' + save_prefix + '_test_KLD.pkl', 'wb') as file:
+                    pickle.dump(test_KLD, file)
+
+                with open('../results/' + save_prefix + '_test_MSE.pkl', 'wb') as file:
+                    pickle.dump(test_MSE, file)
+
+                with open('../results/' + save_prefix + '_corr.pkl', 'wb') as file:
+                    pickle.dump(corr_test, file)
+
+                with open('../results/' + save_prefix + '_jsd.pkl', 'wb') as file:
+                    pickle.dump(jsd_test, file)
+        
+        
+        print('Finished Training')
 
     return model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test
 
