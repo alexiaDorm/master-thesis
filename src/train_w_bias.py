@@ -150,12 +150,12 @@ def train():
                 running_MSE += MSE.detach().cpu()
 
                 #Compute evaluation metrics: pearson correlation
-                corr =  [counts_metrics(tracks[:,:,j], count[j], idx_skip[:,j]) for j in range(0,profile.size(-1))]
+                corr =  [counts_metrics(tracks[:,:,j], count[:,j], idx_skip[:,j]) for j in range(0,profile.size(-1))]
                 corr = torch.tensor(corr)
                 spear_corr.append(corr)
 
                 #Compute the Jensen-Shannon divergence distance between actual read profile and predicted profile 
-                j = [np.nanmean(profile_metrics(tracks[:,:,j], profile[j], idx_skip[:,j])) for j in range(0,profile.size(-1))]
+                j = [np.nanmean(profile_metrics(tracks[:,:,j], profile[:,j], idx_skip[:,j])) for j in range(0,profile.size(-1))]
                 j = torch.tensor(j)
                 jsd.append(j)
 
