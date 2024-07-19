@@ -142,8 +142,8 @@ def train():
                 loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
                 val_loss += loss.item()
-                running_KLD += KLD.detach()
-                running_MSE += MSE.detach()
+                running_KLD += KLD.detach().cpu()
+                running_MSE += MSE.detach().cpu()
 
                 #Compute evaluation metrics: pearson correlation
                 corr =  [counts_metrics(tracks[:,:,j], count[j], idx_skip[:,j]) for j in range(0,len(profile))]
