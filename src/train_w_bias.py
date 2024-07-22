@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "256"
+save_prefix = "256_MNLL"
 
 def train():
 
@@ -62,8 +62,8 @@ def train():
     model = model.to(device)
 
     weight_MSE, weight_KLD = 2, 1
-    criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
-    #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
+    #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
+    criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
