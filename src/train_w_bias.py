@@ -82,9 +82,7 @@ def train():
         running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
         for i, data in enumerate(train_dataloader):
 
-            if i > 1:
-                break
-                                 
+                     
             inputs, tracks, idx_skip, tn5_bias = data 
             inputs = inputs.to(device, dtype=torch.float32)
             tracks = tracks.to(device, dtype=torch.float32)
@@ -131,9 +129,7 @@ def train():
         running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
         for i, data in enumerate(test_dataloader):
             
-            if i > 1:
-                break
-
+           
             with torch.no_grad():
                 inputs, tracks, idx_skip, tn5_bias = data 
                 inputs = inputs.to(device, dtype=torch.float32)
