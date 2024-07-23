@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "256_MNLL"
+save_prefix = "128"
 
 def train():
 
@@ -40,12 +40,12 @@ def train():
     with open('../results/test_dataset_bias.pkl', 'rb') as file:
         test_dataset = pickle.load(file)
      
-    test_dataloader = DataLoader(test_dataset, 108,
+    test_dataloader = DataLoader(test_dataset, 128,
                         shuffle=True, num_workers=4, pin_memory=True)
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 256
+    nb_filters = 128
     nb_pred = len(time_order)
 
     size_final_conv = 4096 - (21 - 1)
@@ -62,8 +62,8 @@ def train():
     model = model.to(device)
 
     weight_MSE, weight_KLD = 1, 1
-    #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
-    criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
+    criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
+    #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
