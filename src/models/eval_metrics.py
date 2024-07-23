@@ -22,15 +22,16 @@ class ATACloss_MNLLL(nn.Module):
         true_counts_prob = true_counts/ counts_per_example.unsqueeze(1)
         true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division by zero to 0 
 
-        MNLLL = self.NLL(logits, true_counts_prob) * 100
+        MNLLL = self.NLL(logits, true_counts_prob) * 10
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
         #Skip idx where track was not defined for loss computation
-        MNLLL = MNLLL[idx_skip].sum()
-        MSE = MSE[idx_skip].sum()
 
-        loss = self.weight_MSE*MSE + self.weight_NLL*MNLLL
+        MNLLL = (MNLLL* idx_skip).sum(dim=0)
+        MSE = (MSE*idx_skip).sum(dim=0)
 
+        loss = (self.weight_MSE*MSE + self.weight_NLL*MNLLL).sum()
+        
         return loss, MNLLL, MSE
 
 class ATACloss_KLD(nn.Module):
@@ -69,7 +70,6 @@ def counts_metrics(tracks, counts_pred, idx_skip):
 
     return corr_tot    
     
-
 
 #Compute the Jensen-Shannon divergence between observed and predicted profiles
 def profile_metrics(tracks, profile_pred, idx_skip):
