@@ -54,7 +54,7 @@ for t in TIME_POINT:
         -b ../data/bias_model/ENCSR868FGK_bias_fold_0.h5 \
         -o ../results/chrombpnet_model/'
 
-        print(cmd_chromBPnet)
+        subprocess.run(cmd_chromBPnet, shell=True)
 
         break
 
