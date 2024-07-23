@@ -235,11 +235,11 @@ def train_w_bias(trial, save_prefix, device, save=False):
 
     #Initialize hyperparameters of model
     nb_conv = trial.suggest_int("nb_conv", 4, 10)
-    nb_filters = trial.suggest_int("nb_filters", 64, 512)
+    nb_filters = trial.suggest_int("nb_filters", 100, 500)
     nb_pred = 4    
     
-    first_kernel = trial.suggest_int("first_kernel", 10, 25)
-    rest_kernel = trial.suggest_int("rest_kernel", 2, 10)
+    first_kernel = trial.suggest_int("first_kernel", 5, 25)
+    rest_kernel = trial.suggest_int("rest_kernel", 3, 10)
 
     size_final_conv = 4096 - (first_kernel - 1)
     cropped = [2**l for l in range(0,nb_conv-1)] * (2*(rest_kernel-1))
