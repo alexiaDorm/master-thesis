@@ -40,6 +40,8 @@ for t in TIME_POINT:
     chrom_sizes_file =  '../results/bam_cell_type/' + t + '/sizes.genome'
 
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
+    print(splitted_files)
+    break
     for f in splitted_files:
 
         print("Removing scaffold chromosomes")
