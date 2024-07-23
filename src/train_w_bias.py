@@ -45,7 +45,7 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 128
+    nb_filters = 256
     nb_pred = len(time_order)
 
     size_final_conv = 4096 - (21 - 1)
@@ -62,8 +62,8 @@ def train():
     model = model.to(device)
 
     weight_MSE, weight_KLD = 1, 1
-    #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
-    criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
+    criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
+    #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
