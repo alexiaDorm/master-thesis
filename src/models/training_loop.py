@@ -234,7 +234,7 @@ def train_w_bias(trial, save_prefix, device, save=False):
                         shuffle=True, num_workers=4)
 
     #Initialize hyperparameters of model
-    nb_conv = trial.suggest_int("nb_conv", 4, 8)
+    nb_conv = trial.suggest_int("nb_conv", 4, 10)
     nb_filters = trial.suggest_int("nb_filters", 64, 512)
     nb_pred = 4    
     
