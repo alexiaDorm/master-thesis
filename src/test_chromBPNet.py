@@ -12,11 +12,10 @@ with open('../results/peaks_seq.pkl', 'rb') as file:
 peaks = peaks[["chr","start","end"]] 
 #peaks.loc[:,"chr"] = ["chr" + x for x in peaks.chr]
 peaks["name"] = "noname"; peaks["score"] = 0; peaks["strand"] = "."
-peaks["thickStart"] = peaks.start; peaks["thickEnd"] = peaks.end
 peaks["random1"] = 0; peaks["random2"] = 0; peaks["random3"] = 0
 peaks["summit"] = peaks.end - peaks.start
 
-peaks.to_csv('../results/peaks.bed', sep="\t", index=False, header=False)
+peaks.to_csv('../results/peaks.bed', sep="\t", header=False)
 
 del peaks
 
@@ -27,11 +26,10 @@ with open('../results/background_GC_matched.pkl', 'rb') as file:
 back = back[["chr","start","end"]] 
 #back.loc[:,"chr"] = ["chr" + x for x in back.chr]
 back["name"] = "noname"; back["score"] = 0; back["strand"] = "."
-back["thickStart"] = back.start; back["thickEnd"] = back.end
 back["random1"] = 0; back["random2"] = 0; back["random3"] = 0
 back["summit"] = back.end - back.start
 
-back.to_csv('../results/neg_reg.bed', sep="\t", index=False, header=False)
+back.to_csv('../results/neg_reg.bed', sep="\t", header=False)
 
 del back
 
@@ -40,8 +38,6 @@ for t in TIME_POINT:
     chrom_sizes_file =  '../results/bam_cell_type/' + t + '/sizes.genome'
 
     splitted_files = glob.glob('../results/bam_cell_type/' + t + '/*.bam')
-    print(splitted_files)
-    break
     for f in splitted_files:
 
         print("Removing scaffold chromosomes")
