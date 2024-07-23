@@ -4,7 +4,6 @@ import pandas as pd
 import pickle
 
 TIME_POINT = ["D20"]
-bias_model_path = "../data/bias_models/ATAC/ENCSR868FGK_bias_fold_0.h5"
 
 #Reformat bed file with peaks to have required 10 colummns
 with open('../results/peaks_seq.pkl', 'rb') as file:

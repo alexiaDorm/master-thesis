@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128_1e2"
+save_prefix = "128"
 
 def train():
 
@@ -81,9 +81,6 @@ def train():
         running_loss = torch.zeros((1), device=device)
         running_KLD, running_MSE = torch.zeros((4), device=device), torch.zeros((4), device=device)
         for i, data in enumerate(train_dataloader):
-
-            if i > 1:
-                break
                      
             inputs, tracks, idx_skip, tn5_bias = data 
             inputs = inputs.to(device, dtype=torch.float32)
@@ -124,13 +121,11 @@ def train():
         train_KLD.append(epoch_KLD)
         train_MSE.append(epoch_MSE)
 
-        break
-
         #print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
 
         #Evaluate the model on test set after each epoch, save best performing model weights
-        val_loss, spear_corr, jsd = torch.zeros((1)), [], []
-        running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
+        val_loss, spear_corr, jsd = torch.zeros((1), device=device), [], []
+        running_KLD, running_MSE = torch.zeros((4), device=device), torch.zeros((4), device=device)
         for i, data in enumerate(test_dataloader):
             
            
@@ -146,9 +141,9 @@ def train():
                 #Compute loss
                 loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
-                val_loss += loss.item()
-                running_KLD += KLD.cpu()
-                running_MSE += MSE.cpu()
+                val_loss += loss
+                running_KLD += KLD
+                running_MSE += MSE
 
                 #Compute evaluation metrics: pearson correlation
                 corr =  [counts_metrics(tracks[:,:,j], count[:,j], idx_skip[:,j]) for j in range(0,profile.size(-1))]
@@ -165,9 +160,9 @@ def train():
         jsd = torch.stack(jsd)
         jsd = torch.nansum(jsd, dim=0)
 
-        test_loss.append(val_loss /len(test_dataset))
-        test_KLD.append(running_KLD/len(test_dataset))
-        test_MSE.append(running_MSE/len(test_dataset))
+        test_loss.append(val_loss.cpu() /len(test_dataset))
+        test_KLD.append(running_KLD.cpu()/len(test_dataset))
+        test_MSE.append(running_MSE.cpu()/len(test_dataset))
         corr_test.append(spear_corr/len(test_dataloader))
         jsd_test.append(jsd/len(test_dataloader))
 
