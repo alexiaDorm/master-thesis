@@ -56,4 +56,6 @@ for t in TIME_POINT:
 
         print(cmd_chromBPnet)
 
+        break
+
     
