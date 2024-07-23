@@ -1,7 +1,6 @@
 from models.training_loop import train_w_bias
 import torch
 import optuna
-#import joblib
 
 import random 
 import numpy as np
@@ -22,12 +21,8 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="minimize", pruner=optuna.pruners.WilcoxonPruner(p_threshold=0.1))
-    #joblib.dump(study, "study.pkl")
 
-    #Resume study
-    #study = joblib.load("study.pkl")
-
-    study.optimize(objective, n_trials=2)
+    study.optimize(objective, n_trials=25)
 
     pruned_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED]
     complete_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]

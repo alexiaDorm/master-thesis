@@ -538,8 +538,8 @@ class CATAC_w_bias(nn.Module):
     
         #Profile head
         #-----------------------------------------------
-        cropsize = (4096 - x.size(2)) //2
-        tn5_bias = tn5_bias[:,None,cropsize:-cropsize]
+        #cropsize = (4096 - self.out_pred_len) //2
+        #tn5_bias = tn5_bias[:,cropsize:-cropsize]
 
         pred_profiles = torch.empty((self.nb_pred, x.size(0), self.out_pred_len), device = x.device, dtype=torch.float32)
         for i, p in enumerate(self.profile_heads):
@@ -552,8 +552,7 @@ class CATAC_w_bias(nn.Module):
             profile = torch.cat((profile, tn5_bias), 1)
 
             #Apply linear layer
-            profile = p(profile)
-            pred_profiles[i]
+            pred_profiles[i] = p(profile)
 
             #Concatenate the padded tn5 bias, Apply final convolution
             #profile = p(torch.cat((x, tn5_bias),1))
