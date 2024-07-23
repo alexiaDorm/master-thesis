@@ -39,7 +39,7 @@ def train():
 
     with open('../results/test_dataset_bias.pkl', 'rb') as file:
         test_dataset = pickle.load(file)
-    
+     
     test_dataloader = DataLoader(test_dataset, 108,
                         shuffle=True, num_workers=4, pin_memory=True)
 
@@ -78,10 +78,12 @@ def train():
 
     for epoch in range(0, nb_epoch):
 
-        running_loss = torch.zeros((1))
-        running_KLD, running_MSE = torch.zeros((4)), torch.zeros((4))
+        running_loss = torch.zeros((1), device=device)
+        running_KLD, running_MSE = torch.zeros((4), device=device), torch.zeros((4), device=device)
         for i, data in enumerate(train_dataloader):
 
+            if i > 1:
+                break
                      
             inputs, tracks, idx_skip, tn5_bias = data 
             inputs = inputs.to(device, dtype=torch.float32)
@@ -99,9 +101,9 @@ def train():
             loss.backward() 
             optimizer.step()
 
-            running_loss += loss.item()
-            running_KLD += KLD.detach().cpu()
-            running_MSE += MSE.detach().cpu()
+            running_loss += loss.detach()
+            running_KLD += KLD.detach()
+            running_MSE += MSE.detach()
 
                     
             """ #print every 2000 batch the loss
@@ -114,13 +116,15 @@ def train():
         
         scheduler.step()
 
-        epoch_loss = running_loss / len(train_dataset)
-        epoch_KLD = running_KLD / len(train_dataset)
-        epoch_MSE = running_MSE / len(train_dataset)
+        epoch_loss = running_loss.cpu() / len(train_dataset)
+        epoch_KLD = running_KLD.cpu() / len(train_dataset)
+        epoch_MSE = running_MSE.cpu() / len(train_dataset)
 
         train_loss.append(epoch_loss)
         train_KLD.append(epoch_KLD)
         train_MSE.append(epoch_MSE)
+
+        break
 
         #print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
 
@@ -143,8 +147,8 @@ def train():
                 loss, KLD, MSE  = criterion(tracks, profile, count, idx_skip)
 
                 val_loss += loss.item()
-                running_KLD += KLD.detach().cpu()
-                running_MSE += MSE.detach().cpu()
+                running_KLD += KLD.cpu()
+                running_MSE += MSE.cpu()
 
                 #Compute evaluation metrics: pearson correlation
                 corr =  [counts_metrics(tracks[:,:,j], count[:,j], idx_skip[:,j]) for j in range(0,profile.size(-1))]
