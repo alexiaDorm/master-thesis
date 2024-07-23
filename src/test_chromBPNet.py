@@ -42,7 +42,7 @@ for t in TIME_POINT:
 
         print("Removing scaffold chromosomes")
         cmd_remove_scaff = "samtools view -b " + f + " $(echo {1..22} X Y)  > ../results/bam_cell_type/output.bam"
-        #subprocess.run(cmd_remove_scaff, shell=True)
+        subprocess.run(cmd_remove_scaff, shell=True)
 
         cmd_chromBPnet = 'chrombpnet pipeline \
         -ibam ../results/bam_cell_type/output.bam \
