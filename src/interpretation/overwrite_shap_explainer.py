@@ -1,4 +1,5 @@
 import shap
+from shap.explainers._explainer import Explainer
 
 import numpy as np
 import warnings
@@ -10,7 +11,7 @@ def standard_combine_mult_and_diffref(mult, orig_inp, bg_data):
                  for l in range(len(orig_inp))]
     return to_return
 
-class DeepExplainer(shap.Explainer):
+class DeepExplainer(Explainer):
     """ Meant to approximate SHAP values for deep learning models.
 
     This is an enhanced version of the DeepLIFT algorithm (Deep SHAP) where, similar to Kernel SHAP, we
@@ -144,7 +145,7 @@ class DeepExplainer(shap.Explainer):
                                           output_rank_order,
                                           progress_message=progress_message)
 
-class PyTorchDeepExplainer(shap.Explainer):
+class PyTorchDeepExplainer(Explainer):
 
     def __init__(self, model, data, idx_time,
                   combine_mult_and_diffref=standard_combine_mult_and_diffref):
