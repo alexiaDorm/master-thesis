@@ -520,7 +520,7 @@ class CATAC_w_bias(nn.Module):
         for i in range(self.nb_pred):
             self.count_heads.append(nn.Linear(self.nb_filters+1,1))
         
-    def forward(self,x, tn5_bias):
+    def forward(self, x, tn5_bias):
         
         #Residual + Dilated convolution layers
         #-----------------------------------------------

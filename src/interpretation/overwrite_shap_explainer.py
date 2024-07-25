@@ -233,7 +233,7 @@ class PyTorchDeepExplainer(shap.Explainer):
         self.num_outputs = 1
         with torch.no_grad():
             outputs = model(*sample_data)
-            outputs = outputs[2][self.idx_time]
+            outputs = outputs[2][:,self.idx_time].unsqueeze(-1)
 
             # also get the device everything is running on
             self.device = outputs.device
@@ -288,7 +288,7 @@ class PyTorchDeepExplainer(shap.Explainer):
         self.model.zero_grad()
         X = [x.requires_grad_() for x in inputs]
         outputs = self.model(*X)
-        outputs = outputs[2][self.idx_time]
+        outputs = outputs[2][:,self.idx_time].unsqueeze(-1)
 
         selected = [val for val in outputs[:, idx]]
         if self.interim:
