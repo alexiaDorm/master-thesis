@@ -50,9 +50,9 @@ for t in TIME_POINT:
         -g ../data/hg38_nochr.fa \
         -c ' + chrom_sizes_file + ' \
         -p ../results/peaks.bed \
-        -n ../results/neg_reg.bed \
+        -n ../results/peaks.bed \
         -fl ../data/fold_0.json \
-        -b ../data/bias_model/ENCSR868FGK_bias_fold_0.h5 \
+        -b ../data/bias_models/ATAC/ENCSR868FGK_bias_fold_0.h5 \
         -o ../results/chrombpnet_model/'
 
         subprocess.run(cmd_chromBPnet, shell=True)
