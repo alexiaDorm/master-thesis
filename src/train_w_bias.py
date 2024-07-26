@@ -89,7 +89,7 @@ def train():
 
             if epoch >= (nb_epoch_profile - 1) and ((epoch + 1) < 14) :
                 #criterion = ATACloss_KLD(weight_MSE = (epoch + 2 - (nb_epoch_profile))/5)
-                criterion = ATACloss_MNLLL(weight_MSE = (epoch - nb_epoch_profile)/5)
+                criterion = ATACloss_MNLLL(weight_MSE = (epoch + 2 - (nb_epoch_profile))/5)
                      
             inputs, tracks, idx_skip, tn5_bias = data 
             inputs = inputs.to(device, dtype=torch.float32)
