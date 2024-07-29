@@ -37,3 +37,20 @@ def generate_seq(GC_content, motif, len_seq, pred_len):
     seq = seq[:insert_idx] + motif + seq[insert_idx:]
 
     return seq, insert_idx
+
+def generate_seq_tn5(GC_content, len_seq, motif):
+    #Randomly generate a DNA sequence with given GC content and length
+    n = round(GC_content * len_seq)
+    GC_nucl = list(set('GC'))
+    AT_nucl = list(set('AT'))
+
+    seq = [np.random.choice(GC_nucl) for _ in range(n)]
+    seq += [np.random.choice(AT_nucl) for _ in range(len_seq - n)]
+    np.random.shuffle(seq)
+    seq = ''.join(seq)
+
+    #Insert motif in middle sequence
+    insert_idx = len_seq//2 - len(motif)//2
+    seq = seq[len(motif)//2 :insert_idx] + motif + seq[insert_idx:-len(motif)//2]
+    
+    return seq
