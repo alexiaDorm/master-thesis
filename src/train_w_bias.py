@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128_k8"
+save_prefix = "128_k15"
 
 def train():
 
@@ -55,7 +55,7 @@ def train():
         size_final_conv -= c
     
     #Initialize model, loss, and optimizer
-    model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=8, 
+    model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=15, 
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=nb_pred, size_final_conv=size_final_conv)
         
