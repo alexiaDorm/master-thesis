@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128_5"
+save_prefix = "128_15"
 
 def train():
 
@@ -47,7 +47,7 @@ def train():
     nb_conv = 8
     nb_filters = 128
     nb_pred = len(time_order)
-    first_kernel = 5
+    first_kernel = 15
 
     size_final_conv = 4096 - (first_kernel - 1)
     cropped = [2**l for l in range(0,nb_conv-1)] * (2*(3-1))
