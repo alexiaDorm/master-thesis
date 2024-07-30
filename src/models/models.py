@@ -577,6 +577,9 @@ class CATAC_w_bias(nn.Module):
 
         return x, pred_profiles.permute(1,2,0), pred_counts.permute(1,0)
 
+    def first_filter_output(self, x):
+        return self.convlayers[0](x)
+
 class CATAC_wo_bias(nn.Module):
     def __init__(self, nb_conv=8, nb_filters=64, first_kernel=21, rest_kernel=3, out_pred_len=1024, nb_pred=4, size_final_conv=3568):
 
