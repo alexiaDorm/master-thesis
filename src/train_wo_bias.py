@@ -54,7 +54,7 @@ def train():
         size_final_conv -= c
     
     #Initialize model, loss, and optimizer
-    model = CATAC_wo_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=15, 
+    model = CATAC_wo_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=21, 
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=nb_pred, size_final_conv=size_final_conv)
         
