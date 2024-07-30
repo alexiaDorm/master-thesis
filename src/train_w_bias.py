@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128_15"
+save_prefix = "128_5e-4"
 
 def train():
 
@@ -47,7 +47,7 @@ def train():
     nb_conv = 8
     nb_filters = 128
     nb_pred = len(time_order)
-    first_kernel = 15
+    first_kernel = 21
 
     size_final_conv = 4096 - (first_kernel - 1)
     cropped = [2**l for l in range(0,nb_conv-1)] * (2*(3-1))
@@ -65,7 +65,7 @@ def train():
     weight_MSE, weight_KLD = 0, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
-    lr = 0.001
+    lr = 0.0005
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
