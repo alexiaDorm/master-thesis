@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "64_10"
+save_prefix = "128_MNLL"
 
 def train():
 
@@ -44,8 +44,8 @@ def train():
                         shuffle=True, num_workers=4, pin_memory=True)
 
     #Initialize model, loss, and optimizer
-    nb_conv = 10
-    nb_filters = 64
+    nb_conv = 8
+    nb_filters = 128
     nb_pred = len(time_order)
     first_kernel = 21
 
@@ -62,9 +62,9 @@ def train():
         
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 0, 1
-    criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
-    #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
+    weight_MSE, weight_KLD = 1, 1
+    #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
+    criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -75,7 +75,6 @@ def train():
     corr_test, jsd_test = [], []
 
     nb_epoch = 40
-    nb_epoch_profile = 10
     model.train() 
 
     for epoch in range(0, nb_epoch):
@@ -83,14 +82,6 @@ def train():
         running_loss = torch.zeros((1), device=device)
         running_KLD, running_MSE = torch.zeros((4), device=device), torch.zeros((4), device=device)
         for i, data in enumerate(train_dataloader):
-
-            if epoch == nb_epoch_profile:
-                for group in optimizer.param_groups:
-                    group['lr'] = lr
-
-            if epoch >= (nb_epoch_profile - 1) and ((epoch + 1) < 14) :
-                criterion = ATACloss_KLD(weight_MSE = (epoch + 2 - (nb_epoch_profile))/5)
-                #criterion = ATACloss_MNLLL(weight_MSE = (epoch + 2 - (nb_epoch_profile))/5)
                      
             inputs, tracks, idx_skip, tn5_bias = data 
             inputs = inputs.to(device, dtype=torch.float32)
