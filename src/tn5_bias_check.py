@@ -52,7 +52,7 @@ np.savez('../results/encod_seq_bias.npz', seq_bias[:,:4,:])
 np.savez('../results/seq_scores_bias.npz', scores_bias[:,:4,:], proj_score_bias[:,:4,:])
 
 #NO Bias
-seq_wobias, scores_wobias, proj_score_wobias = compute_importance_score_wobias(model_bias, path_model_bias, seq, device, "Myogenic", all_c_type, 2)
+seq_wobias, scores_wobias, proj_score_wobias = compute_importance_score_wobias(model_wobias, seq, device, "Myogenic", all_c_type, 2)
 np.savez('../results/encod_seq_wobias.npz', seq_wobias[:,:4,:])
 np.savez('../results/seq_scores_wobias.npz', scores_wobias[:,:4,:], proj_score_wobias[:,:4,:])
 
