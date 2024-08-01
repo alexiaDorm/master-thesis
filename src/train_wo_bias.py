@@ -60,7 +60,7 @@ def train():
         
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 0, 1
+    weight_MSE, weight_KLD = 1, 1
     criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     lr = 0.001
 
@@ -72,7 +72,6 @@ def train():
     corr_test, jsd_test = [], []
 
     nb_epoch = 40
-    nb_epoch_profile = 10
     model.train() 
 
     for epoch in range(0, nb_epoch):
@@ -81,14 +80,6 @@ def train():
         running_KLD, running_MSE = torch.zeros((4), device=device), torch.zeros((4), device=device)
         for i, data in enumerate(train_dataloader):
 
-            if epoch == nb_epoch_profile:
-                for group in optimizer.param_groups:
-                    group['lr'] = lr
-
-            if epoch >= (nb_epoch_profile - 1) and ((epoch + 1) < 14) :
-                criterion = ATACloss_KLD(weight_MSE = (epoch + 2 - (nb_epoch_profile))/5)
-                #criterion = ATACloss_MNLLL(weight_MSE = (epoch + 2 - (nb_epoch_profile))/5)
-                     
             inputs, tracks, idx_skip = data 
             inputs = inputs.to(device, dtype=torch.float32)
             tracks = tracks.to(device, dtype=torch.float32)
@@ -117,8 +108,6 @@ def train():
         train_loss.append(epoch_loss)
         train_KLD.append(epoch_KLD)
         train_MSE.append(epoch_MSE)
-
-        #print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
 
         #Evaluate the model on test set after each epoch, save best performing model weights
         val_loss, spear_corr, jsd = torch.zeros((1), device=device), [], []
