@@ -706,3 +706,6 @@ class CATAC_wo_bias(nn.Module):
             pred_counts[i] = c(count).squeeze()
 
         return x, pred_profiles.permute(1,2,0), pred_counts.permute(1,0)
+    
+    def first_filter_output(self, x):
+        return self.convlayers[0](x)
