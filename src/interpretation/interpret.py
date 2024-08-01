@@ -1,7 +1,7 @@
 from deeplift.dinuc_shuffle import dinuc_shuffle
 from deeplift.visualization import viz_sequence
 
-#from captum.attr import IntegratedGradients
+#from captum.attr import DeepLift, IntegratedGradients
 
 import shap
 from interpretation.overwrite_shap_explainer import DeepExplainer
@@ -162,6 +162,16 @@ def compute_shap_score_bias(model ,seq, back, tn5_bias, idx_time):
     
     return raw_scores[0]
 
+def compute_shap_score_wobias(model, seq, back, idx_time):
+    back = back.permute(0,2,1)
+    seq = torch.from_numpy(seq).permute(1,0)[None,:,:]
+
+    explainer = DeepExplainer(
+        model, back, idx_time)
+    raw_scores = explainer.shap_values(seq)
+    
+    return raw_scores[0]
+
 def compute_importance_score_bias(model, model_bias_path, seq, device, c_type, all_c_type, idx_time):
 
     #Load the model and sequenece to predict
@@ -202,42 +212,78 @@ def compute_importance_score_bias(model, model_bias_path, seq, device, c_type, a
 
     return seq, shap_scores, proj_score
 
-#Integrated gradient 
-#--------------------------------------------
-def compute_integrated_gradient(model, path_sequence, device, c_type, all_c_type):
-    
-    #Load the model to device and sequences to predict
+def compute_importance_score_wobias(model, seq, device, c_type, all_c_type, idx_time):
+
+    #Load the model and sequenece to predict
     model.to(device)
-    seq = pd.Series(pd.read_pickle(path_sequence))
-    
+
     #On-hot encode the sequences
     seq = seq.apply(lambda x: one_hot_encode(x))
+    
+    #Create shuffled sequences for background
+    background = [dinuc_shuffle(s, num_shufs=20) for s in seq]
 
     #Add cell type encoding
     mapping = dict(zip(all_c_type, range(len(all_c_type))))    
     c_type = mapping[c_type]
     c_type = torch.from_numpy(np.eye(len(all_c_type), dtype=np.float32)[c_type])
+
+    #Repeat and reshape
     c_type = c_type.tile((seq[0].shape[0],1))
+    seq = [np.concatenate((s,c_type), axis=1) for s in seq]
+
+    c_type = c_type.tile((background[0].shape[0],1,1))
+    background = [np.concatenate((b,c_type), axis=2) for b in background]
+
+    #Compute importance score for each base of sequences
+    shap_scores = [compute_shap_score_wobias(model,s,torch.from_numpy(background[i]), idx_time) for i,s in enumerate(seq)]
+
+    #Reshape the sequences and scores
+    seq = torch.from_numpy(np.stack(seq)).permute(0,2,1)
+
+    shap_scores = torch.from_numpy(np.squeeze(np.stack(shap_scores)))
     
+    #Project the scores on the sequence
+    proj_score = (shap_scores[:,:4,:].sum(axis=1)[:,np.newaxis,:] * seq)
+
+    return seq, shap_scores, proj_score
+
+#Integrated gradient 
+#--------------------------------------------
+def compute_integrated_gradient_wbias(model, model_bias_path, seq, device, c_type, all_c_type):
+    
+    #Load the model to device
+    model.to(device)
+
+    #Compute tn5 bias for seq
+    model_bias = load_model(model_bias_path)    
+    tn5_bias = seq.apply(lambda x: compute_tn5_bias(model_bias, x))
+
+    #On-hot encode the sequences
+    seq = seq.apply(lambda x: one_hot_encode(x))
+    
+    #Add cell type encoding
+    mapping = dict(zip(all_c_type, range(len(all_c_type))))    
+    c_type = mapping[c_type]
+    c_type = torch.from_numpy(np.eye(len(all_c_type), dtype=np.float32)[c_type])
+    c_type = c_type.tile((seq[0].shape[0],1))
     seq = [np.concatenate((s,c_type), axis=1) for s in seq]
 
     #Compute integrated gradient 
-    out = [model(torch.tensor(s)[None,:,:].permute(0,2,1))[2][0] for s in seq]
+    seq = torch.tensor(seq).permute(0,2,1); tn5_bias = torch.tensor(tn5_bias).squeeze()
+    out = model(seq, tn5_bias)[2][0]
     integrated_gradients = IntegratedGradients(model)
-    attributions = [integrated_gradients.attribute(torch.tensor(s)[None,:,:].permute(0,2,1)) for i,s in enumerate(seq)]
-
-    #Reshape the sequeneces and scores
+    attributions = integrated_gradients.attribute(inputs=(seq, tn5_bias))[0]
+    #Reshape the sequences and scores
     seq = torch.from_numpy(np.stack(seq)).permute(0,2,1)
-
-    attributions = torch.from_numpy(np.squeeze(np.stack(attributions)))
     
-    #Project the scores on the sequence
-    proj_att = (attributions[:,:4,:].sum(axis=1)[:,np.newaxis,:] * seq)
-
     #Correct integrated gradient
     mean_att = attributions[:,:4,:].mean(axis=1)    
     mean_att = mean_att.tile((4,1,1)).permute(1,0,2)
     attributions = attributions[:,:4,:] - mean_att
+
+    #Project the scores on the sequence
+    proj_att = (attributions[:,:4,:].sum(axis=1)[:,np.newaxis,:] * seq.permute(0,2,1))
 
     return seq, attributions, proj_att
 
