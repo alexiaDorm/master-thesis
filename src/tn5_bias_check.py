@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import pandas as pd
 import subprocess
 
 from interpretation.synthetic_seq_analysis import generate_seq_tn5
@@ -21,6 +22,8 @@ seq = []
 for i in range(200):
     for j in range(len(bias_motifs)):
         seq.append(generate_seq_tn5(0.41, 4096, bias_motifs[j][1]))
+
+seq = pd.Series(seq)
 
 #Load models
 #--------------------------------------------
