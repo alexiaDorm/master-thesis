@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128_4"
+save_prefix = "64"
 
 def train():
 
@@ -44,8 +44,8 @@ def train():
                         shuffle=True, num_workers=4, pin_memory=True)
 
     #Initialize model, loss, and optimizer
-    nb_conv = 4
-    nb_filters = 128
+    nb_conv = 8
+    nb_filters = 64
     nb_pred = len(time_order)
     first_kernel = 21
 
@@ -63,8 +63,8 @@ def train():
     model = model.to(device)
 
     weight_MSE, weight_KLD = 1, 1
-    criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
-    #criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
+    #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
+    criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
     lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
