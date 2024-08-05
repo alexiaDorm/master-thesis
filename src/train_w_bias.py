@@ -37,7 +37,7 @@ def train():
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
 
-    with open('../results/test_dataset_bias.pkl', 'rb') as filenano:
+    with open('../results/test_dataset_bias.pkl', 'rb') as file:
         test_dataset = pickle.load(file)
      
     test_dataloader = DataLoader(test_dataset, 128,
