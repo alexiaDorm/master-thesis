@@ -29,7 +29,7 @@ seq = pd.Series(seq)
 #--------------------------------------------
 
 #Load the model - WITH tn5 bias
-path_model_bias = '../results/train_res/128_model.pkl'
+path_model_bias = '../results/train_res/128_MNLL_model.pkl'
 model_bias = CATAC_w_bias(nb_conv=8, nb_filters=128, first_kernel=21, 
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=4)
