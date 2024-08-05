@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128_6"
+save_prefix = "128_MNLL"
 
 def train():
 
@@ -37,14 +37,14 @@ def train():
     train_dataloader = DataLoader(train_dataset, batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
 
-    with open('../results/test_dataset_bias.pkl', 'rb') as file:
+    with open('../results/test_dataset_bias.pkl', 'rb') as filenano:
         test_dataset = pickle.load(file)
      
     test_dataloader = DataLoader(test_dataset, 128,
                         shuffle=True, num_workers=4, pin_memory=True)
 
     #Initialize model, loss, and optimizer
-    nb_conv = 6
+    nb_conv = 8
     nb_filters = 128
     nb_pred = len(time_order)
     first_kernel = 21
@@ -59,7 +59,10 @@ def train():
     model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=nb_pred, size_final_conv=size_final_conv)
-        
+    
+    path_model_bias = '../results/train_res/128_MNLL_model.pkl'   
+    model.load_state_dict(torch.load(path_model_bias, map_location=torch.device('cpu')))
+
     model = model.to(device)
 
     weight_MSE, weight_KLD = 1, 1
@@ -74,7 +77,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 40
+    nb_epoch = 10
     model.train() 
 
     for epoch in range(0, nb_epoch):
