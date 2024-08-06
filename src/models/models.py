@@ -776,8 +776,8 @@ class CATAC_w_bias_increase_filter(nn.Module):
             nn.ReLU()))
         
         for i in range (1,self.nb_conv):
-            if self.nb_filter < self.max_filters:
-                self.nb_filter = self.nb_filter*2
+            if self.nb_filters < self.max_filters:
+                self.nb_filters = self.nb_filters*2
 
             self.convlayers.append(nn.Sequential(
                 nn.Conv1d(in_channels=self.nb_filters, out_channels=self.nb_filters, kernel_size=self.rest_kernel, dilation=2**i),
