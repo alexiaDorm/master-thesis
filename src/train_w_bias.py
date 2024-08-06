@@ -61,7 +61,7 @@ def train():
     
     model = CATAC_w_bias_increase_filter(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
                       rest_kernel=3, out_pred_len=1024, 
-                      nb_pred=nb_pred, size_final_conv=size_final_conv, mult_filter=2, max=256)
+                      nb_pred=nb_pred, size_final_conv=size_final_conv, mult_filter=2, max_filters=256)
     
     model = model.to(device)
 
