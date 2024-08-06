@@ -60,9 +60,6 @@ def train():
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=nb_pred, size_final_conv=size_final_conv)
     
-    path_model_bias = '../results/train_res/128_MNLL_model.pkl'   
-    model.load_state_dict(torch.load(path_model_bias, map_location=torch.device('cpu')))
-
     model = model.to(device)
 
     weight_MSE, weight_KLD = 1, 1
@@ -77,7 +74,7 @@ def train():
     test_loss, test_KLD, test_MSE = [], [], []
     corr_test, jsd_test = [], []
 
-    nb_epoch = 10
+    nb_epoch = 40
     model.train() 
 
     for epoch in range(0, nb_epoch):
