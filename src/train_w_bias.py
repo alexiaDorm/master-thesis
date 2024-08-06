@@ -8,8 +8,7 @@ import pickle
 import numpy as np
 import pandas as pd
 
-from models.pytorch_datasets import PeaksDataset_w_bias
-from models.models import CATAC_w_bias
+from models.models import CATAC_w_bias, CATAC_w_bias_increase_filter
 from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
 
 seed = 42
@@ -24,7 +23,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128_k4"
+save_prefix = "128_32inc256"
 
 def train():
 
@@ -45,9 +44,9 @@ def train():
 
     #Initialize model, loss, and optimizer
     nb_conv = 8
-    nb_filters = 128
+    nb_filters = 32
     nb_pred = len(time_order)
-    first_kernel = 4
+    first_kernel = 21
 
     size_final_conv = 4096 - (first_kernel - 1)
     cropped = [2**l for l in range(0,nb_conv-1)] * (2*(3-1))
@@ -56,9 +55,13 @@ def train():
         size_final_conv -= c
     
     #Initialize model, loss, and optimizer
-    model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
+    """ model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
                       rest_kernel=3, out_pred_len=1024, 
-                      nb_pred=nb_pred, size_final_conv=size_final_conv)
+                      nb_pred=nb_pred, size_final_conv=size_final_conv) """
+    
+    model = CATAC_w_bias_increase_filter(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
+                      rest_kernel=3, out_pred_len=1024, 
+                      nb_pred=nb_pred, size_final_conv=size_final_conv, mult_filter=2, max=256)
     
     model = model.to(device)
 
