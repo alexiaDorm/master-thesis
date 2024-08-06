@@ -709,6 +709,7 @@ class CATAC_wo_bias(nn.Module):
     
     def first_filter_output(self, x):
         return self.convlayers[0](x)
+    
 
 class CATAC_w_bias_increase_filter(nn.Module):
     def __init__(self, nb_conv=8, nb_filters=32, first_kernel=21, rest_kernel=3, out_pred_len=1024, nb_pred=4, size_final_conv=3568, mult_filter=2, max_filters=256):
@@ -771,18 +772,30 @@ class CATAC_w_bias_increase_filter(nn.Module):
 
         #Convolutional layers
         self.convlayers = nn.ModuleList()
+        self.change_size = nn.ModuleList()
 
         self.convlayers.append(nn.Sequential(nn.Conv1d(in_channels=11, out_channels=self.nb_filters,kernel_size=self.first_kernel),
             nn.ReLU()))
         
         for i in range (1,self.nb_conv):
             if self.nb_filters < self.max_filters:
-                self.nb_filters = self.nb_filters*2
 
-            self.convlayers.append(nn.Sequential(
-                nn.Conv1d(in_channels=self.nb_filters, out_channels=self.nb_filters, kernel_size=self.rest_kernel, dilation=2**i),
-                nn.ReLU()
-                ))
+                self.convlayers.append(nn.Sequential(
+                    nn.Conv1d(in_channels=self.nb_filters, out_channels=self.nb_filters*self.mult_filter, kernel_size=self.rest_kernel, dilation=2**i),
+                    nn.ReLU()
+                    ))
+                
+                self.change_size.append(nn.Conv1d(in_channels=self.nb_filters, out_channels=self.nb_filters*self.mult_filter, kernel_size=1))
+                
+                self.nb_filters = self.nb_filters*self.mult_filter
+
+            else:
+                self.convlayers.append(nn.Sequential(
+                    nn.Conv1d(in_channels=self.nb_filters, out_channels=self.nb_filters, kernel_size=self.rest_kernel, dilation=2**i),
+                    nn.ReLU()
+                    ))
+                self.change_size.append(None)
+
         
         #Profile prediction heads
         self.profile_global_pool = nn.AdaptiveAvgPool1d(1)
@@ -791,7 +804,6 @@ class CATAC_w_bias_increase_filter(nn.Module):
         for i in range(self.nb_pred):
             self.profile_heads.append(nn.Linear(self.size_final_conv+self.out_pred_len, self.out_pred_len))
             #self.profile_heads.append(nn.Conv1d(self.nb_filters + 1, 1, kernel_size=75))
-
 
         #Total count prediction heads
         self.count_global_pool = nn.AdaptiveAvgPool1d(1)
@@ -806,7 +818,7 @@ class CATAC_w_bias_increase_filter(nn.Module):
         #-----------------------------------------------
         x = self.convlayers[0](x)
 
-        for layer in self.convlayers[1:]:
+        for z, layer in enumerate(self.convlayers[1:]):
             
             conv_x = layer(x)
 
@@ -814,6 +826,9 @@ class CATAC_w_bias_increase_filter(nn.Module):
             cropsize = (x.size(2) - conv_x.size(2)) // 2
 
             #Skipped connection
+            if conv_x.size(1) != x.size(1):
+                x = self.change_size[z](x)
+                
             x = conv_x + x[:, :, cropsize:-cropsize]   
     
         #Profile head
