@@ -66,12 +66,12 @@ np.savez('../results/seq_scores_wobias.npz', scores_wobias[:,:4,:], proj_score_w
 cmd_modisco = "modisco motifs -s  ../results/encod_seq_bias.npz -a  ../results/seq_scores_bias.npz -n 2000 -o modisco_results_bias.h5"
 subprocess.run(cmd_modisco, shell=True)
 
-cmd_tomtom = "modisco report -i modisco_results_bias.h5 -o  -s  -m ../data/JASPAR_motif.txt"
+cmd_tomtom = "modisco report -i modisco_results_bias.h5 -o . -s . -m ../data/JASPAR_motif.txt"
 subprocess.run(cmd_tomtom, shell=True)
 
 """ #NO Bias
 cmd_modisco = "modisco motifs -s  ../results/encod_seq_wobias.npz -a  ../results/seq_scores_wobias.npz -n 2000 -o modisco_results_wobias.h5"
 subprocess.run(cmd_modisco, shell=True)
 
-cmd_tomtom = "modisco report -i modisco_results_wobias.h5 -o  -s  -m ../data/JASPAR_motif.txt"
+cmd_tomtom = "modisco report -i modisco_results_wobias.h5 -o . -s . -m ../data/JASPAR_motif.txt"
 subprocess.run(cmd_tomtom, shell=True) """
