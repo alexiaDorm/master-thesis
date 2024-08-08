@@ -23,7 +23,7 @@ syn_seq = []
 for f in motif_files:
     for _ in range(200):
         motif = generate_motif(f, rng)
-        seq, idx = generate_seq_tn5(0.41, 4096, motif)
+        seq = generate_seq_tn5(0.41, 4096, motif)
 
         syn_seq.append(seq)
 
