@@ -40,18 +40,36 @@ model_base = CATAC_w_bias(nb_conv=8, nb_filters=128, first_kernel=21,
 model_base.load_state_dict(torch.load(path_model_base, map_location=torch.device('cpu')))
 
 #Load the model kernel size =4
+
+nb_conv = 10
+first_kernel = 4
+
+size_final_conv = 4096 - (first_kernel - 1)
+cropped = [2**l for l in range(0,nb_conv-1)] * (2*(3-1))
+for c in cropped:
+    size_final_conv -= c
+
 path_model_k4 = '../results/train_res/128_k4_model.pkl'
 model_k4 = CATAC_w_bias(nb_conv=8, nb_filters=128, first_kernel=4, 
                       rest_kernel=3, out_pred_len=1024, 
-                      nb_pred=4)
+                      nb_pred=4, size_final_conv= size_final_conv)
         
 model_k4.load_state_dict(torch.load(path_model_k4, map_location=torch.device('cpu')))
 
 #Load the model kernel size =9
+
+nb_conv = 10
+first_kernel = 9
+
+size_final_conv = 4096 - (first_kernel - 1)
+cropped = [2**l for l in range(0,nb_conv-1)] * (2*(3-1))
+for c in cropped:
+    size_final_conv -= c
+
 path_model_k9 = '../results/train_res/128_9_model.pkl'
 model_k9 = CATAC_w_bias(nb_conv=8, nb_filters=128, first_kernel=9, 
                       rest_kernel=3, out_pred_len=1024, 
-                      nb_pred=4)
+                      nb_pred=4, size_final_conv= size_final_conv)
         
 model_k9.load_state_dict(torch.load(path_model_k9, map_location=torch.device('cpu')))
 
