@@ -23,7 +23,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "64_10"
+save_prefix = "64inc128_10"
 
 def train():
 
@@ -55,14 +55,14 @@ def train():
         size_final_conv -= c
     
     #Initialize model, loss, and optimizer
-    model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
+    """ model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
                       rest_kernel=3, out_pred_len=1024, 
-                      nb_pred=nb_pred, size_final_conv=size_final_conv)
+                      nb_pred=nb_pred, size_final_conv=size_final_conv) """
     
-    """ model = CATAC_w_bias_increase_filter(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
+    model = CATAC_w_bias_increase_filter(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
                       rest_kernel=3, out_pred_len=1024, 
-                      nb_pred=nb_pred, size_final_conv=size_final_conv, mult_filter=2, max_filters=256)
-     """
+                      nb_pred=nb_pred, size_final_conv=size_final_conv, mult_filter=2, max_filters=128)
+    
     model = model.to(device)
 
     weight_MSE, weight_KLD = 1, 1
