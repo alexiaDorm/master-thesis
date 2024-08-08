@@ -80,17 +80,17 @@ path_model_bias = "../data/Tn5_NN_model.h5"
 #--------------------------------------------
 
 #Base
-seq_base, scores_base, proj_score_base = compute_importance_score_bias(model_base, path_model_bias, seq, device, "Myogenic", all_c_type, 2)
+seq_base, scores_base, proj_score_base = compute_importance_score_bias(model_base, path_model_bias, syn_seq, device, "Myogenic", all_c_type, 2)
 np.savez('../results/encod_seq_base.npz', seq_base[:,:4,:])
 np.savez('../results/seq_scores_base.npz', scores_base[:,:4,:], proj_score_base[:,:4,:])
 
 #128_k4
-seq_k4, scores_k4, proj_score_k4 = compute_importance_score_bias(model_k4, path_model_bias, seq, device, "Myogenic", all_c_type, 2)
+seq_k4, scores_k4, proj_score_k4 = compute_importance_score_bias(model_k4, path_model_bias, syn_seq, device, "Myogenic", all_c_type, 2)
 np.savez('../results/encod_seq_k4.npz', seq_k4[:,:4,:])
 np.savez('../results/seq_scores_k4.npz', scores_k4[:,:4,:], proj_score_k4[:,:4,:])
 
 #128_k9
-seq_k9, scores_k9, proj_score_k9 = compute_importance_score_bias(model_k9, path_model_bias, seq, device, "Myogenic", all_c_type, 2)
+seq_k9, scores_k9, proj_score_k9 = compute_importance_score_bias(model_k9, path_model_bias, syn_seq, device, "Myogenic", all_c_type, 2)
 np.savez('../results/encod_seq_k9.npz', seq_k9[:,:4,:])
 np.savez('../results/seq_scores_k9.npz', scores_k9[:,:4,:], proj_score_k9[:,:4,:])
 
