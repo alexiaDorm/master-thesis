@@ -41,7 +41,7 @@ model_base.load_state_dict(torch.load(path_model_base, map_location=torch.device
 
 #Load the model kernel size =4
 
-nb_conv = 10
+nb_conv = 8
 first_kernel = 4
 
 size_final_conv = 4096 - (first_kernel - 1)
@@ -58,7 +58,7 @@ model_k4.load_state_dict(torch.load(path_model_k4, map_location=torch.device('cp
 
 #Load the model kernel size =9
 
-nb_conv = 10
+nb_conv = 8
 first_kernel = 9
 
 size_final_conv = 4096 - (first_kernel - 1)
