@@ -41,7 +41,7 @@ model_base.load_state_dict(torch.load(path_model_base, map_location=torch.device
 
 #Load the model kernel size =4
 path_model_k4 = '../results/train_res/128_k4_model.pkl'
-model_k4 = CATAC_wo_bias(nb_conv=8, nb_filters=128, first_kernel=4, 
+model_k4 = CATAC_w_bias(nb_conv=8, nb_filters=128, first_kernel=4, 
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=4)
         
@@ -49,7 +49,7 @@ model_k4.load_state_dict(torch.load(path_model_k4, map_location=torch.device('cp
 
 #Load the model kernel size =9
 path_model_k9 = '../results/train_res/128_9_model.pkl'
-model_k9 = CATAC_wo_bias(nb_conv=8, nb_filters=128, first_kernel=9, 
+model_k9 = CATAC_w_bias(nb_conv=8, nb_filters=128, first_kernel=9, 
                       rest_kernel=3, out_pred_len=1024, 
                       nb_pred=4)
         
