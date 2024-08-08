@@ -73,5 +73,5 @@ subprocess.run(cmd_tomtom, shell=True) """
 cmd_modisco = "modisco motifs -s  ../results/encod_seq_wobias.npz -a  ../results/seq_scores_wobias.npz -n 2000 -o modisco_results_wobias.h5"
 subprocess.run(cmd_modisco, shell=True)
 
-cmd_tomtom = "modisco report -i modisco_results_wobias.h5 -o . -s  -m ../data/JASPAR_motif.txt"
+cmd_tomtom = "modisco report -i modisco_results_wobias.h5 -o TOMTOM -s ./  -m ../data/JASPAR_motif.txt"
 subprocess.run(cmd_tomtom, shell=True)
