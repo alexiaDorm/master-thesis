@@ -13,7 +13,7 @@ time_point = ["D8", "D12", "D20", "D22"]
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-""" #Define tn5 motifs from https://github.com/kundajelab/chrombpnet/blob/master/chrombpnet/pipelines.py
+""" """ #Define tn5 motifs from https://github.com/kundajelab/chrombpnet/blob/master/chrombpnet/pipelines.py
 bias_motifs = [["tn5_1","GCACAGTACAGAGCTG"],["tn5_2","GTGCACAGTTCTAGAGTGTGCAG"],["tn5_3","CCTCTACACTGTGCAGAA"],["tn5_4","GCACAGTTCTAGACTGTGCAG"],["tn5_5","CTGCACAGTGTAGAGTTGTGC"]]
 
 #Generate random sequence with tn5 bias 
@@ -57,21 +57,21 @@ np.savez('../results/seq_scores_bias.npz', scores_bias[:,:4,:], proj_score_bias[
 #NO Bias
 seq_wobias, scores_wobias, proj_score_wobias = compute_importance_score_wobias(model_wobias, seq, device, "Myogenic", all_c_type, 2)
 np.savez('../results/encod_seq_wobias.npz', seq_wobias[:,:4,:])
-np.savez('../results/seq_scores_wobias.npz', scores_wobias[:,:4,:], proj_score_wobias[:,:4,:]) """
+np.savez('../results/seq_scores_wobias.npz', scores_wobias[:,:4,:], proj_score_wobias[:,:4,:]) 
 
 #Run modisco + TOMTOM
 #--------------------------------------------
 
-""" #Bias
+#Bias
 cmd_modisco = "modisco motifs -s  ../results/encod_seq_bias.npz -a  ../results/seq_scores_bias.npz -n 2000 -o modisco_results_bias.h5"
 subprocess.run(cmd_modisco, shell=True)
 
-cmd_tomtom = "modisco report -i modisco_results_bias.h5 -o . -s  -m ../data/JASPAR_motif.txt"
-subprocess.run(cmd_tomtom, shell=True) """
+cmd_tomtom = "modisco report -i modisco_results_bias.h5 -o TOMTOM_bias -s ./ -m ../data/JASPAR_motif.txt"
+subprocess.run(cmd_tomtom, shell=True)
 
 #NO Bias
 cmd_modisco = "modisco motifs -s  ../results/encod_seq_wobias.npz -a  ../results/seq_scores_wobias.npz -n 2000 -o modisco_results_wobias.h5"
 subprocess.run(cmd_modisco, shell=True)
 
-cmd_tomtom = "modisco report -i modisco_results_wobias.h5 -o TOMTOM -s ./  -m ../data/JASPAR_motif.txt"
+cmd_tomtom = "modisco report -i modisco_results_wobias.h5 -o TOMTOM_wobias -s ./  -m ../data/JASPAR_motif.txt"
 subprocess.run(cmd_tomtom, shell=True)
