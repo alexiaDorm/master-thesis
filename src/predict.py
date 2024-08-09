@@ -52,7 +52,7 @@ for i, data in enumerate(test_dataloader):
         idx_skip = idx_skip.to(device)
         tn5_bias = tn5_bias.to(device, dtype=torch.float32)
 
-        _, profile, count = model(inputs)
+        _, profile, count = model(inputs, tn5_bias)
 
         #Convert profile and total count to track
         p = torch.nn.functional.softmax(profile, dim=1).permute(0,2,1)
@@ -77,7 +77,7 @@ for i, data in enumerate(train_dataloader):
         idx_skip = idx_skip.to(device)
         tn5_bias = tn5_bias.to(device, dtype=torch.float32)
 
-        _, profile, count = model(inputs)
+        _, profile, count = model(inputs, tn5_bias)
 
         #Convert profile and total count to track
         p = torch.nn.functional.softmax(profile, dim=1).permute(0,2,1)
