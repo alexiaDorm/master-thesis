@@ -34,7 +34,7 @@ with open('../results/train_dataset_bias.pkl', 'rb') as file:
 train_dataloader = DataLoader(train_dataset, 128,
                         shuffle=True, num_workers=4, pin_memory=True)
 
-with open('../results/test_dataset.pkl', 'rb') as file:
+with open('../results/test_dataset_bias.pkl', 'rb') as file:
     test_dataset = pickle.load(file)
     
 test_dataloader = DataLoader(test_dataset, 128,
