@@ -152,12 +152,12 @@ def compute_tn5_bias(model, seq, len_pred=1024):
 
     return pred_bias[None,:]
 
-def compute_shap_score_bias(model ,seq, back, tn5_bias, idx_time):
+def compute_shap_score_bias(model ,seq, back, tn5_bias, tn5_bias_back, idx_time):
     back = back.permute(0,2,1)
     seq = torch.from_numpy(seq).permute(1,0)[None,:,:]
 
     explainer = DeepExplainer(
-        model, [back, tn5_bias.tile((back.shape[0],1))], idx_time)
+        model, [back, tn5_bias_back], idx_time)
     raw_scores = explainer.shap_values([seq, tn5_bias])
     
     return raw_scores[0]
@@ -185,8 +185,14 @@ def compute_importance_score_bias(model, model_bias_path, seq, device, c_type, a
     seq = seq.apply(lambda x: one_hot_encode(x))
     
     #Create shuffled sequences for background
-    background = [dinuc_shuffle(s, num_shufs=20) for s in seq]
+    background = [dinuc_shuffle(s, num_shufs=2) for s in seq]
 
+    #Reverse one-hot encoding for shuffled sequences, compute tn5 bias for background
+    tn5_bias_back = []
+    for b in background:
+        background_seq = pd.Series(["".join(pd.DataFrame(s, columns=['A', 'C', 'G', 'T']).idxmax(axis=1).tolist()) for s in b])
+        tn5_bias_back.append(np.vstack(background_seq.apply(lambda x: compute_tn5_bias(model_bias, x))).squeeze())
+        
     #Add cell type encoding
     mapping = dict(zip(all_c_type, range(len(all_c_type))))    
     c_type = mapping[c_type]
@@ -200,7 +206,8 @@ def compute_importance_score_bias(model, model_bias_path, seq, device, c_type, a
     background = [np.concatenate((b,c_type), axis=2) for b in background]
 
     #Compute importance score for each base of sequences
-    shap_scores = [compute_shap_score_bias(model,s,torch.from_numpy(background[i]), torch.from_numpy(tn5_bias[i]), idx_time) for i,s in enumerate(seq)]
+    shap_scores = [compute_shap_score_bias(model,s,torch.from_numpy(background[i]), torch.from_numpy(tn5_bias[i]), 
+                                           torch.from_numpy(tn5_bias_back[i]), idx_time) for i,s in enumerate(seq)]
 
     #Reshape the sequences and scores
     seq = torch.from_numpy(np.stack(seq)).permute(0,2,1)
