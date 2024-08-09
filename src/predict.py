@@ -46,7 +46,7 @@ for i, data in enumerate(test_dataloader):
     with torch.no_grad():    
         
         inputs, tracks, idx_skip, tn5_bias = data 
-        target_track.append(target_track)
+        target_track.append(tracks)
         inputs = inputs.to(device, dtype=torch.float32)
         tracks = tracks.to(device, dtype=torch.float32)
         idx_skip = idx_skip.to(device)
@@ -59,6 +59,9 @@ for i, data in enumerate(test_dataloader):
         p = p * ((torch.exp(count)-1).unsqueeze(-1))
 
         pred_track.append(p.cpu())
+
+pred_track = torch.cat(pred_track)
+target_track = torch.cat(target_track)
 
 with open('../results/predictions/test_pred.pkl', 'wb') as file:
     pickle.dump(pred_track, file)
@@ -71,7 +74,7 @@ for i, data in enumerate(train_dataloader):
     with torch.no_grad():    
         
         inputs, tracks, idx_skip, tn5_bias = data 
-        target_track.append(target_track)
+        target_track.append(tracks)
         inputs = inputs.to(device, dtype=torch.float32)
         tracks = tracks.to(device, dtype=torch.float32)
         idx_skip = idx_skip.to(device)
@@ -84,6 +87,9 @@ for i, data in enumerate(train_dataloader):
         p = p * ((torch.exp(count)-1).unsqueeze(-1))
 
         pred_track.append(p.cpu())
+
+pred_track = torch.cat(pred_track)
+target_track = torch.cat(target_track)
 
 with open('../results/predictions/train_pred.pkl', 'wb') as file:
     pickle.dump(pred_track, file)
