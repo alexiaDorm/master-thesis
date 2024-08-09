@@ -66,6 +66,7 @@ with open('../results/predictions/test_pred.pkl', 'wb') as file:
 with open('../results/predictions/test_target.pkl', 'wb') as file:
     pickle.dump(target_track, file)
 
+pred_track, target_track = [], []
 for i, data in enumerate(train_dataloader):
     with torch.no_grad():    
         
