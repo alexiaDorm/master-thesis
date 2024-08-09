@@ -185,7 +185,7 @@ def compute_importance_score_bias(model, model_bias_path, seq, device, c_type, a
     seq = seq.apply(lambda x: one_hot_encode(x))
     
     #Create shuffled sequences for background
-    background = [dinuc_shuffle(s, num_shufs=2) for s in seq]
+    background = [dinuc_shuffle(s, num_shufs=20) for s in seq]
 
     #Reverse one-hot encoding for shuffled sequences, compute tn5 bias for background
     tn5_bias_back = []
