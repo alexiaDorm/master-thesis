@@ -9,3 +9,7 @@ notes/~$initial_exploration-25.03.pptx
 /notes
 /src/data/models
 /src/main
+src/exploration/gene2go
+src/exploration/gene_result.txt
+src/exploration/genes_ncbi_proteincoding.py
+src/exploration/go-basic.obo
