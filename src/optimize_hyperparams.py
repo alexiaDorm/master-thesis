@@ -17,7 +17,7 @@ def objective(trial):
     
     model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test = train_w_bias(trial, str(trial.number), device, save=True)
 
-    return torch.sum(test_KLD[-1] + 2*test_MSE[-1])
+    return torch.sum(test_KLD[-1] + test_MSE[-1])
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="minimize", pruner=optuna.pruners.WilcoxonPruner(p_threshold=0.1))

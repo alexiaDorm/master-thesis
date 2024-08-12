@@ -15,7 +15,7 @@ from models.eval_metrics import ATACloss_MNLLL, counts_metrics, profile_metrics
 #-------------------------------
 def train_w_bias(trial, save_prefix, device, save=True):
 
-    batch_size = 2**trial.suggest_int("n_estimators", 6, 7)
+    batch_size = 2**trial.suggest_int("batch_size", 6, 7)
 
     #Load the data
     with open('../results/train_dataset_bias.pkl', 'rb') as file:
@@ -148,7 +148,7 @@ def train_w_bias(trial, save_prefix, device, save=True):
 
         # Handle pruning based on the intermediate value.
         if trial.should_prune():
-            return test_loss[-1]
+            return model, train_loss, train_KLD, train_MSE, test_KLD, test_MSE, corr_test, jsd_test
 
         if save:
             #Save every five epoch
