@@ -22,7 +22,7 @@ def objective(trial):
 if __name__ == "__main__":
     study = optuna.create_study(direction="minimize", pruner=optuna.pruners.WilcoxonPruner(p_threshold=0.1))
 
-    study.optimize(objective, n_trials=15)
+    study.optimize(objective, n_trials=10)
 
     pruned_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED]
     complete_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
