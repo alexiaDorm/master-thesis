@@ -23,7 +23,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "1e-2_0.95"
+save_prefix = "1e-2_0.9"
 
 def train():
 
@@ -71,7 +71,7 @@ def train():
     lr = 0.01
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
     
     train_loss, train_KLD, train_MSE = [], [], []
     test_loss, test_KLD, test_MSE = [], [], []
