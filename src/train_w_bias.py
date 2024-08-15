@@ -23,7 +23,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "1e-2_0.99"
+save_prefix = "1e-3_0.99"
 
 def train():
 
@@ -68,7 +68,7 @@ def train():
     weight_MSE, weight_KLD = 1, 1
     #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
-    lr = 0.01
+    lr = 0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
