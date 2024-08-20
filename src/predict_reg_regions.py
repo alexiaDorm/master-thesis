@@ -105,7 +105,10 @@ with open("../results/idx_seq.pkl", 'rb') as file:
 with open("../results/c_type_track.pkl", 'rb') as file:
     c_type = pickle.load(file)
 
-seq_idx = np.where(np.logical_and(idx_seq == active_enhancer.index, c_type == "Myogenic"))[0]
+print(idx_seq.isin(active_enhancer.index).shape)
+print(c_type.shape)
+
+seq_idx = np.where(np.logical_and(idx_seq.isin(active_enhancer.index), c_type == "Myogenic"))[0]
 ATAC_track = ATAC_track[seq_idx]
 
 with open('../results/target_active_enhancer.pkl', 'wb') as file:
