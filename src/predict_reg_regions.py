@@ -104,7 +104,7 @@ for t in TIME_POINT:
     bw_files = '../results/bam_cell_type/' + t +'/' + 'Myogenic'  + '_unstranded.bw'
 
     #Get insertion count
-    bw = pyBigWig.open(f)
+    bw = pyBigWig.open(bw_files)
     ATAC_tracks = tmp_reg.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
     ATAC_tracks = np.stack(ATAC_tracks)
     
