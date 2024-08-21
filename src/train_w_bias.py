@@ -65,13 +65,13 @@ def train():
      """
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 1, 1
+    weight_MSE, weight_KLD = 1, 3.416104833235108
     #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
-    lr = 0.01
+    lr =  6.279281545213231e-05
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.8890076503814213)
     
     train_loss, train_KLD, train_MSE = [], [], []
     test_loss, test_KLD, test_MSE = [], [], []
