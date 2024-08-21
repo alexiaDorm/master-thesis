@@ -104,13 +104,11 @@ with open("../results/c_type_track.pkl", 'rb') as file:
 
 seq_id = peaks.index.to_numpy()
 seq_id = np.repeat(seq_id, 7)
-print(seq_id)
-print(np.sum(np.isin(seq_id, active_enhancer.index.to_numpy())))
-""" seq_idx = np.where(np.logical_and(np.isin(np.array(idx_seq), active_enhancer.index.to_numpy()), c_type == "Myogenic"))[0]
+seq_idx = np.where(np.logical_and(np.isin(seq_id, active_enhancer.index.to_numpy())), c_type == "Myogenic"))[0]
 ATAC_track = ATAC_track[seq_idx]
 
 with open('../results/target_active_enhancer.pkl', 'wb') as file:
-    pickle.dump(ATAC_track, file) """
+    pickle.dump(ATAC_track, file)
 
 """ #Predict for variant the ref and alt sequence
 #---------------------------------
