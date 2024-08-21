@@ -108,11 +108,11 @@ for t in TIME_POINT:
     ATAC_tracks = tmp_reg.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
     ATAC_tracks = np.stack(ATAC_tracks)
     
-    print(ATAC_tracks.shape)
     all_ATAC.append(ATAC_tracks)
 
-all_ATAC = torch.from_numpy(np.concatenate(all_ATAC, axis=0))
-print(all_ATAC)
+print(len(all_ATAC))
+all_ATAC = torch.from_numpy(np.concatenate(all_ATAC))
+print(all_ATAC.shape)
 
 with open('../results/target_active_enhancer.pkl', 'wb') as file:
     pickle.dump(all_ATAC, file)
