@@ -104,15 +104,16 @@ with open("../results/idx_seq.pkl", 'rb') as file:
 
 with open("../results/c_type_track.pkl", 'rb') as file:
     c_type = pickle.load(file)
-    
 
+print(idx_seq[:10])
+print(np.sum(np.isin(np.array(idx_seq), active_enhancer.index.to_numpy())))
 seq_idx = np.where(np.logical_and(np.isin(np.array(idx_seq), active_enhancer.index.to_numpy()), c_type == "Myogenic"))[0]
 ATAC_track = ATAC_track[seq_idx]
 
 with open('../results/target_active_enhancer.pkl', 'wb') as file:
     pickle.dump(ATAC_track, file)
 
-#Predict for variant the ref and alt sequence
+""" #Predict for variant the ref and alt sequence
 #---------------------------------
 #Define sequences
 ref_seq = active_enhancer.sequence
@@ -153,4 +154,4 @@ with open('../results/alt_pred_profile_active_enhancer.pkl', 'wb') as file:
     pickle.dump(profile_alt, file)
 
 with open('../results/alt_pred_count_active_enhancer.pkl', 'wb') as file:
-    pickle.dump(count_alt, file)
+    pickle.dump(count_alt, file) """
