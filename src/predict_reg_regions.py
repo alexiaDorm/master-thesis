@@ -110,8 +110,7 @@ for t in TIME_POINT:
     
     all_ATAC.append(ATAC_tracks)
 
-print(len(all_ATAC))
-all_ATAC = torch.from_numpy(np.concatenate(all_ATAC))
+all_ATAC = torch.from_numpy(np.stack(all_ATAC, axis=2))
 print(all_ATAC.shape)
 
 with open('../results/target_active_enhancer.pkl', 'wb') as file:
