@@ -105,6 +105,7 @@ with open("../results/c_type_track.pkl", 'rb') as file:
 seq_id = peaks.index.to_numpy()
 seq_id = np.repeat(seq_id, 7)
 print(np.sum(np.isin(seq_id, active_enhancer.index.to_numpy())))
+print(active_enhancer.index[~np.isin(seq_id, active_enhancer.index.to_numpy())])
 seq_idx = np.where(np.logical_and(np.isin(seq_id, active_enhancer.index.to_numpy()), c_type == "Myogenic"))[0]
 ATAC_track = ATAC_track[seq_idx]
 
