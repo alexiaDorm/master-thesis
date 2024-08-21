@@ -101,17 +101,14 @@ tmp_reg = active_enhancer.rename(columns={"chr_peak": "chr", "start_peak": "star
 
 all_ATAC = []
 for t in TIME_POINT: 
-    bw_files = ['../results/bam_cell_type/' + t +'/' + 'Myogenic'  + '_unstranded.bw' for t in TIME_POINT]
-    ATAC_tracks, is_defined = [], []
-    for f in bw_files:
-                
-        #Get insertion count
-        bw = pyBigWig.open(f)
-        ATAC = tmp_reg.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
-        ATAC = np.stack(ATAC)
-        ATAC_tracks.append(ATAC)
+    bw_files = '../results/bam_cell_type/' + t +'/' + 'Myogenic'  + '_unstranded.bw'
+
+    #Get insertion count
+    bw = pyBigWig.open(f)
+    ATAC_tracks = tmp_reg.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
+    ATAC_tracks = np.stack(ATAC_tracks)
     
-    all_ATAC.append(np.transpose(np.stack(ATAC_tracks), (1, 2, 0)))
+    all_ATAC.append(np.transpose(ATAC_tracks, (1, 2, 0)))
 
 all_ATAC = torch.from_numpy(np.concatenate(all_ATAC, axis=0))
 
