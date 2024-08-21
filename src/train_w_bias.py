@@ -11,7 +11,7 @@ import pandas as pd
 from models.models import CATAC_w_bias, CATAC_w_bias_increase_filter
 from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
 
-seed = 42
+seed = 0
 torch.manual_seed(seed)
 random.seed(seed)
 np.random.seed(seed)
@@ -23,7 +23,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "1e-2_0.9"
+save_prefix = "128_10_2"
 
 def train():
 
@@ -65,13 +65,13 @@ def train():
      """
     model = model.to(device)
 
-    weight_MSE, weight_KLD = 1, 3.416104833235108
+    weight_MSE, weight_KLD = 1, 1
     #criterion = ATACloss_KLD(weight_MSE= weight_MSE, weight_KLD = weight_KLD)
     criterion = ATACloss_MNLLL(weight_MSE= weight_MSE)
-    lr =  6.279281545213231e-05
+    lr =  0.001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.8890076503814213)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
     
     train_loss, train_KLD, train_MSE = [], [], []
     test_loss, test_KLD, test_MSE = [], [], []
