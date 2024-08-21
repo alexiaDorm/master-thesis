@@ -11,7 +11,7 @@ import pandas as pd
 from models.models import CATAC_w_bias, CATAC_w_bias_increase_filter
 from models.eval_metrics import ATACloss_KLD, ATACloss_MNLLL, counts_metrics, profile_metrics
 
-seed = 0
+seed = 666
 torch.manual_seed(seed)
 random.seed(seed)
 np.random.seed(seed)
@@ -23,7 +23,7 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128_10_2"
+save_prefix = "128_10_3"
 
 def train():
 
