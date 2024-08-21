@@ -97,7 +97,7 @@ active_enhancer['sequence_alt'] = [x[math.floor((len(x)-4096)/2):-math.ceil((len
 #Get and store the ground truth for each peak investigated for cell type
 #---------------------------------
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
-tmp_reg = active_enhancer.rename(columns={"start_peak": "start", "end_peak": "end"})
+tmp_reg = active_enhancer.rename(columns={"chr_peak": "chr", "start_peak": "start", "end_peak": "end"})
 
 all_ATAC = []
 for t in TIME_POINT: 
