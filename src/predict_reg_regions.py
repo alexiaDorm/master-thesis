@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 from keras.models import load_model
 from interpretation.interpret import compute_tn5_bias
 import subprocess
+import pyBigWig
 
 from models.models import CATAC_wo_bias, CATAC_w_bias, CATAC_w_bias_increase_filter
-from data_processing.utils_data_preprocessing import one_hot_encode
+from data_processing.utils_data_preprocessing import one_hot_encode, get_continuous_wh_window
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -93,24 +94,29 @@ active_enhancer['sequence_alt'] = [x[:active_enhancer.var_pos_seq[i]] + active_e
 #if alt more than one nucleotide, crop sequence alt
 active_enhancer['sequence_alt'] = [x[math.floor((len(x)-4096)/2):-math.ceil((len(x)-4096)/2)] if len(x) > 4096 else x for x in active_enhancer.sequence_alt]
 
-#Store the ground truth for each peak investigated for Myogenic progenitors
-active_enhancer.index = active_enhancer.chr_peak.astype(str) + ":" + active_enhancer.start_peak.astype(str) + "-" + active_enhancer.end_peak.astype(str)
+#Get and store the ground truth for each peak investigated for cell type
+#---------------------------------
+TIME_POINT = ["D8", "D12", "D20", "D22-15"]
+tmp_reg = active_enhancer.rename(columns={"start_peak": "start", "end_peak": "end"})
 
-with open("../results/ATAC_peaks_new.pkl", 'rb') as file:
-    ATAC_track = pickle.load(file)
+all_ATAC = []
+for t in TIME_POINT: 
+    bw_files = ['../results/bam_cell_type/' + t +'/' + 'Myogenic'  + '_unstranded.bw' for t in TIME_POINT]
+    ATAC_tracks, is_defined = [], []
+    for f in bw_files:
+                
+        #Get insertion count
+        bw = pyBigWig.open(f)
+        ATAC = tmp_reg.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
+        ATAC = np.stack(ATAC)
+        ATAC_tracks.append(ATAC)
+    
+    all_ATAC.append(np.transpose(np.stack(ATAC_tracks), (1, 2, 0)))
 
-with open("../results/c_type_track.pkl", 'rb') as file:
-    c_type = pickle.load(file)
-
-seq_id = peaks.index.to_numpy()
-seq_id = np.repeat(seq_id, 7)
-print(np.sum(np.isin(seq_id, active_enhancer.index.to_numpy())))
-print(active_enhancer.index[~np.isin(active_enhancer.index.to_numpy(), seq_id)])
-seq_idx = np.where(np.logical_and(np.isin(seq_id, active_enhancer.index.to_numpy()), c_type == "Myogenic"))[0]
-ATAC_track = ATAC_track[seq_idx]
+all_ATAC = torch.from_numpy(np.concatenate(all_ATAC, axis=0))
 
 with open('../results/target_active_enhancer.pkl', 'wb') as file:
-    pickle.dump(ATAC_track, file)
+    pickle.dump(all_ATAC, file)
 
 """ #Predict for variant the ref and alt sequence
 #---------------------------------
