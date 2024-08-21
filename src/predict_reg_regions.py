@@ -96,7 +96,7 @@ active_enhancer['sequence_alt'] = [x[math.floor((len(x)-4096)/2):-math.ceil((len
 
 #Get and store the ground truth for each peak investigated for cell type
 #---------------------------------
-TIME_POINT = ["D8", "D12", "D20", "D22-15"]
+""" TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 tmp_reg = active_enhancer.rename(columns={"chr_peak": "chr", "start_peak": "start", "end_peak": "end"})
 
 all_ATAC = []
@@ -111,14 +111,13 @@ for t in TIME_POINT:
     all_ATAC.append(ATAC_tracks)
 
 all_ATAC = torch.from_numpy(np.stack(all_ATAC, axis=2))
-print(all_ATAC.shape)
 
 with open('../results/target_active_enhancer.pkl', 'wb') as file:
-    pickle.dump(all_ATAC, file)
+    pickle.dump(all_ATAC, file) """
 
-""" #Predict for variant the ref and alt sequence
+#Predict for variant the ref and alt sequence
 #---------------------------------
-#Define sequences
+""" #Define sequences
 ref_seq = active_enhancer.sequence
 alt_seq = active_enhancer.sequence_alt
 
@@ -158,3 +157,81 @@ with open('../results/alt_pred_profile_active_enhancer.pkl', 'wb') as file:
 
 with open('../results/alt_pred_count_active_enhancer.pkl', 'wb') as file:
     pickle.dump(count_alt, file) """
+
+#Load predictions
+#---------------------------------
+import pickle
+import torch
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.spatial import distance
+
+with open("../results/pred_profile_active_enhancer.pkl", 'rb') as file:
+    profile = pickle.load(file)
+with open("../results/pred_count_active_enhancer.pkl", 'rb') as file:
+    count = pickle.load(file)
+
+with open("../results/alt_pred_profile_active_enhancer.pkl", 'rb') as file:
+    alt_profile = pickle.load(file)
+with open("../results/alt_pred_count_active_enhancer.pkl", 'rb') as file:
+    alt_count = pickle.load(file)    
+
+profile = torch.nn.functional.softmax(profile, dim=1).detach().numpy()
+alt_profile = torch.nn.functional.softmax(alt_profile, dim=1).detach().numpy()
+
+with open("../results/target_active_enhancer.pkl", 'rb') as file:
+    target = pickle.load(file)    
+
+
+#Identify the variants significantly modifying the total count predictions
+#---------------------------------
+i, t = 50, 3
+jsds, diffs, which_seq = [], [], []
+for i in range (count.size(0)):
+    for t in range(4):
+        jsd = distance.jensenshannon(profile[i,t,:], alt_profile[i,t,:])
+        jsds.append(jsd)
+
+        diff =  alt_count[i,t].detach().numpy() - count[i,t].detach().numpy()
+        diffs.append(diff)
+
+        if abs(diff) > 0.25:
+            """ print("--------------------")
+            print(i, " ", t, " ", jsd, " ", diff)
+            print("Reference")
+            print(count[i,t])
+            plt.plot(np.arange(0,1024),profile[i,:,t])
+            plt.show()
+
+            print("Alt")
+            print(alt_count[i,t])
+            plt.plot(np.arange(0,1024),alt_profile[i,:,t])
+            plt.show() """
+
+            which_seq.append(i)
+
+""" plt.hist(jsds, bins=50)
+plt.show()
+plt.hist(diffs, bins=50)
+plt.show() """
+
+which_seq = np.unique(which_seq)
+
+#Compute attributions maps for identified sequeneces
+#---------------------------------
+from interpretation.interpret import compute_importance_score_bias
+
+active_enhancer = active_enhancer.iloc[which_seq]
+
+#Define sequences
+ref_seq = active_enhancer.sequence
+alt_seq = active_enhancer.sequence_alt
+
+#Compute attribution scores
+seq, shap_scores, proj_scores = compute_importance_score_bias(model, path_model_bias, ref_seq, device, "Myogenic", all_c_type, 1)
+seq_alt, shap_scores_alt, proj_scores_alt = compute_importance_score_bias(model, path_model_bias, alt_seq, device, "Myogenic", all_c_type, 1)
+
+with open('../results/proj_scores.pkl', 'wb') as file:
+    pickle.dump(proj_scores, file)
+with open('../results/proj_scores_alt.pkl', 'wb') as file:
+    pickle.dump(proj_scores_alt, file)
