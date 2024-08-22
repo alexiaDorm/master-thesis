@@ -94,6 +94,9 @@ active_enhancer['sequence_alt'] = [x[:active_enhancer.var_pos_seq[i]] + active_e
 #if alt more than one nucleotide, crop sequence alt
 active_enhancer['sequence_alt'] = [x[math.floor((len(x)-4096)/2):-math.ceil((len(x)-4096)/2)] if len(x) > 4096 else x for x in active_enhancer.sequence_alt]
 
+with open('../results/active_enhancer.pkl', 'wb') as file:
+    pickle.dump(active_enhancer, file)
+    
 #Find motifs in sequences
 #---------------------------------
 #Create bed of regions 
