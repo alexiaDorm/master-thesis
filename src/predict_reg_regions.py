@@ -189,9 +189,6 @@ with open("../results/alt_pred_count_rep_enhancer.pkl", 'rb') as file:
 profile = torch.nn.functional.softmax(profile, dim=1).detach().numpy()
 alt_profile = torch.nn.functional.softmax(alt_profile, dim=1).detach().numpy()
 
-with open("../results/target_rep_enhancer.pkl", 'rb') as file:
-    target = pickle.load(file)    
-
 
 #Identify the variants significantly modifying the total count predictions
 #---------------------------------
