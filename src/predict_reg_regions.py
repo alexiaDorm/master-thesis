@@ -112,12 +112,12 @@ for h,r in enumerate(regions_type):
     cmd = "~/work/jaspar_TBS/bin/extract_TFBSs_JASPAR.sh \
     -i ~/work/master-thesis/results/reg_regions.bed \
     -b ~/work/master-thesis/data/JASPAR2024_hg38.bb.1 \
-    -o ~/work/master-thesis/results/oooo"
+    -o ~/work/master-thesis/results/variants/" + r + "_motifs.bed"
 
     subprocess.run(cmd, shell=True)
 
     cmd_rename = "mv ../results/extraction_results.bed ../results/variants/" + r + "_motifs.bed"
-    subprocess.run(cmd_rename, shell=True)
+    #subprocess.run(cmd_rename, shell=True)
 
     """ #Get and store the ground truth for each peak investigated for cell type
     #---------------------------------
