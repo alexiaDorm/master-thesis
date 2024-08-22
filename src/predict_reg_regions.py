@@ -118,7 +118,7 @@ for h,r in enumerate(regions_type):
     cmd_rename = "mv ../results/extraction_results.bed ../results/variants/" + r + "_motifs.bed"
     subprocess.run(cmd_rename, shell=True)
 
-    #Get and store the ground truth for each peak investigated for cell type
+    """ #Get and store the ground truth for each peak investigated for cell type
     #---------------------------------
     TIME_POINT = ["D8", "D12", "D20", "D22-15"]
     tmp_reg = active_enhancer.rename(columns={"chr_peak": "chr", "start_peak": "start", "end_peak": "end"})
@@ -236,4 +236,4 @@ for h,r in enumerate(regions_type):
     with open('../results/variants/'+ r + '_proj_scores.pkl', 'wb') as file:
         pickle.dump(proj_scores, file)
     with open('../results/variants/'+ r + '_proj_scores_alt.pkl', 'wb') as file:
-        pickle.dump(proj_scores_alt, file)
+        pickle.dump(proj_scores_alt, file) """
