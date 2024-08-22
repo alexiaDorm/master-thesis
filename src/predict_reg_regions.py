@@ -49,10 +49,10 @@ peaks.to_csv('../results/peaks_set.bed', header=False, index=False, sep='\t')
 
 #Intersect the variants in active enhancer with the peak set 
 #Change here the file with variants
-cmd_bed = "bedtools intersect -a ../results/peaks_set.bed -b ../data/vars_in_repressed_enchancers.bed -wa -wb > ../results/revp_pverlap.bed"
+cmd_bed = "bedtools intersect -a ../results/peaks_set.bed -b ../data/variants_in_active_promoters.bed -wa -wb > ../results/pvp_pverlap.bed"
 subprocess.run(cmd_bed, shell=True)
 
-active_enhancer = pd.read_csv("../results/revp_pverlap.bed", header=None, sep='\t', names=["chr_peak", "start_peak", "end_peak", "chr_var", "pos_var", "end_var"])
+active_enhancer = pd.read_csv("../results/pvp_pverlap.bed", header=None, sep='\t', names=["chr_peak", "start_peak", "end_peak", "chr_var", "pos_var", "end_var"])
 
 #Add sequence of peak
 with open('../results/peaks_seq.pkl', 'rb') as file:
@@ -122,12 +122,12 @@ for t in TIME_POINT:
 
 all_ATAC = torch.from_numpy(np.stack(all_ATAC, axis=2))
 
-with open('../results/target_rep_enhancer.pkl', 'wb') as file:
+with open('../results/target_promoter.pkl', 'wb') as file:
     pickle.dump(all_ATAC, file)
 
 #Predict for variant the ref and alt sequence
 #---------------------------------
-""" #Define sequences
+#Define sequences
 ref_seq = active_enhancer.sequence
 alt_seq = active_enhancer.sequence_alt
 
@@ -156,16 +156,16 @@ alt_seq_enc = torch.tensor(alt_seq_enc).permute(0,2,1)
 x_ref, profile_ref, count_ref = model(ref_seq_enc, torch.tensor(np.vstack(tn5_bias_ref)))
 x_alt, profile_alt, count_alt = model(alt_seq_enc, torch.tensor(np.vstack(tn5_bias_alt)))
 
-with open('../results/pred_profile_rep_enhancer.pkl', 'wb') as file:
+with open('../results/pred_profile_promoter.pkl', 'wb') as file:
     pickle.dump(profile_ref, file)
 
-with open('../results/pred_count_rep_enhancer.pkl', 'wb') as file:
+with open('../results/pred_count_promoter.pkl', 'wb') as file:
     pickle.dump(count_ref, file)
 
-with open('../results/alt_pred_profile_rep_enhancer.pkl', 'wb') as file:
+with open('../results/alt_pred_profile_promoter.pkl', 'wb') as file:
     pickle.dump(profile_alt, file)
 
-with open('../results/alt_pred_count_rep_enhancer.pkl', 'wb') as file:
+with open('../results/alt_pred_count_promoter.pkl', 'wb') as file:
     pickle.dump(count_alt, file)
 
 #Load predictions
@@ -176,14 +176,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial import distance
 
-with open("../results/pred_profile_rep_enhancer.pkl", 'rb') as file:
+with open("../results/pred_profile_promoter.pkl", 'rb') as file:
     profile = pickle.load(file)
-with open("../results/pred_count_rep_enhancer.pkl", 'rb') as file:
+with open("../results/pred_count_promoter.pkl", 'rb') as file:
     count = pickle.load(file)
 
-with open("../results/alt_pred_profile_rep_enhancer.pkl", 'rb') as file:
+with open("../results/alt_pred_profile_promoter.pkl", 'rb') as file:
     alt_profile = pickle.load(file)
-with open("../results/alt_pred_count_rep_enhancer.pkl", 'rb') as file:
+with open("../results/alt_pred_count_promoter.pkl", 'rb') as file:
     alt_count = pickle.load(file)    
 
 profile = torch.nn.functional.softmax(profile, dim=1).detach().numpy()
@@ -221,7 +221,7 @@ alt_seq = active_enhancer.sequence_alt
 seq, shap_scores, proj_scores = compute_importance_score_bias(model, path_model_bias, ref_seq, device, "Myogenic", all_c_type, 1)
 seq_alt, shap_scores_alt, proj_scores_alt = compute_importance_score_bias(model, path_model_bias, alt_seq, device, "Myogenic", all_c_type, 1)
 
-with open('../results/rep_e_proj_scores.pkl', 'wb') as file:
+with open('../results/promoter_proj_scores.pkl', 'wb') as file:
     pickle.dump(proj_scores, file)
-with open('../results/rep_e_proj_scores_alt.pkl', 'wb') as file:
-    pickle.dump(proj_scores_alt, file) """
+with open('../results/promoter_proj_scores_alt.pkl', 'wb') as file:
+    pickle.dump(proj_scores_alt, file)
