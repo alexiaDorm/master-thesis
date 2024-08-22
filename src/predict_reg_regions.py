@@ -49,10 +49,10 @@ peaks.to_csv('../results/peaks_set.bed', header=False, index=False, sep='\t')
 
 #Intersect the variants in active enhancer with the peak set 
 #Change here the file with variants
-cmd_bed = "bedtools intersect -a ../results/peaks_set.bed -b ../data/variants_in_active_promoters.bed -wa -wb > ../results/pvp_pverlap.bed"
+cmd_bed = "bedtools intersect -a ../results/peaks_set.bed -b ../data/vars_in_acitive_enchancers.bed -wa -wb > ../results/aevp_pverlap.bed"
 subprocess.run(cmd_bed, shell=True)
 
-active_enhancer = pd.read_csv("../results/pvp_pverlap.bed", header=None, sep='\t', names=["chr_peak", "start_peak", "end_peak", "chr_var", "pos_var", "end_var"])
+active_enhancer = pd.read_csv("../results/aevp_pverlap.bed", header=None, sep='\t', names=["chr_peak", "start_peak", "end_peak", "chr_var", "pos_var", "end_var"])
 
 #Add sequence of peak
 with open('../results/peaks_seq.pkl', 'rb') as file:
@@ -104,9 +104,16 @@ reg_regions.to_csv('../results/reg_regions.bed', header=False, index=False, sep=
 cmd = "motifscan scan -i ../results/reg_regions.bed -g hg38 -m motifs_JASPAR -o ../results/rep_enhancer/"
 subprocess.run(cmd, shell=True)
 
+cmd = "../../jaspar_TBS/bin/extract_TFBSs_JASPAR.sh \
+  -i ../results/reg_regions.bed \
+  -b ../data/JASPAR2024_hg38.bb.1 \
+  -o ../results/rep_enhancer/"
+
+subprocess.run(cmd, shell=True)
+
 #Get and store the ground truth for each peak investigated for cell type
 #---------------------------------
-TIME_POINT = ["D8", "D12", "D20", "D22-15"]
+""" TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 tmp_reg = active_enhancer.rename(columns={"chr_peak": "chr", "start_peak": "start", "end_peak": "end"})
 
 all_ATAC = []
@@ -224,4 +231,4 @@ seq_alt, shap_scores_alt, proj_scores_alt = compute_importance_score_bias(model,
 with open('../results/promoter_proj_scores.pkl', 'wb') as file:
     pickle.dump(proj_scores, file)
 with open('../results/promoter_proj_scores_alt.pkl', 'wb') as file:
-    pickle.dump(proj_scores_alt, file)
+    pickle.dump(proj_scores_alt, file) """
