@@ -94,6 +94,15 @@ active_enhancer['sequence_alt'] = [x[:active_enhancer.var_pos_seq[i]] + active_e
 #if alt more than one nucleotide, crop sequence alt
 active_enhancer['sequence_alt'] = [x[math.floor((len(x)-4096)/2):-math.ceil((len(x)-4096)/2)] if len(x) > 4096 else x for x in active_enhancer.sequence_alt]
 
+#Find motifs in sequences
+#---------------------------------
+#Create bed of regions 
+reg_regions = active_enhancer
+reg_regions.to_csv('../results/reg_regions.bed', header=False, index=False, sep='\t')
+
+cmd = "motifscan scan -i ../results/reg_regions.bed -g hg38 -m motifs_JASPAR -o ../results/active_enhancer/"
+subprocess.run(cmd, shell=True)
+
 #Get and store the ground truth for each peak investigated for cell type
 #---------------------------------
 """ TIME_POINT = ["D8", "D12", "D20", "D22-15"]
@@ -160,7 +169,7 @@ with open('../results/alt_pred_count_active_enhancer.pkl', 'wb') as file:
 
 #Load predictions
 #---------------------------------
-import pickle
+""" import pickle
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
@@ -180,12 +189,12 @@ profile = torch.nn.functional.softmax(profile, dim=1).detach().numpy()
 alt_profile = torch.nn.functional.softmax(alt_profile, dim=1).detach().numpy()
 
 with open("../results/target_active_enhancer.pkl", 'rb') as file:
-    target = pickle.load(file)    
+    target = pickle.load(file)     """
 
 
 #Identify the variants significantly modifying the total count predictions
 #---------------------------------
-i, t = 50, 3
+""" i, t = 50, 3
 jsds, diffs, which_seq = [], [], []
 for i in range (count.size(0)):
     for t in range(4):
@@ -196,30 +205,13 @@ for i in range (count.size(0)):
         diffs.append(diff)
 
         if abs(diff) > 0.25:
-            """ print("--------------------")
-            print(i, " ", t, " ", jsd, " ", diff)
-            print("Reference")
-            print(count[i,t])
-            plt.plot(np.arange(0,1024),profile[i,:,t])
-            plt.show()
-
-            print("Alt")
-            print(alt_count[i,t])
-            plt.plot(np.arange(0,1024),alt_profile[i,:,t])
-            plt.show() """
-
             which_seq.append(i)
 
-""" plt.hist(jsds, bins=50)
-plt.show()
-plt.hist(diffs, bins=50)
-plt.show() """
-
-which_seq = np.unique(which_seq)
+which_seq = np.unique(which_seq) """
 
 #Compute attributions maps for identified sequeneces
 #---------------------------------
-from interpretation.interpret import compute_importance_score_bias
+""" from interpretation.interpret import compute_importance_score_bias
 
 active_enhancer = active_enhancer.iloc[which_seq]
 
@@ -234,4 +226,4 @@ seq_alt, shap_scores_alt, proj_scores_alt = compute_importance_score_bias(model,
 with open('../results/proj_scores.pkl', 'wb') as file:
     pickle.dump(proj_scores, file)
 with open('../results/proj_scores_alt.pkl', 'wb') as file:
-    pickle.dump(proj_scores_alt, file)
+    pickle.dump(proj_scores_alt, file) """
