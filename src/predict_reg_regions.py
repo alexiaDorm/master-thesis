@@ -106,7 +106,7 @@ subprocess.run(cmd, shell=True)
 
 #Get and store the ground truth for each peak investigated for cell type
 #---------------------------------
-""" TIME_POINT = ["D8", "D12", "D20", "D22-15"]
+TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 tmp_reg = active_enhancer.rename(columns={"chr_peak": "chr", "start_peak": "start", "end_peak": "end"})
 
 all_ATAC = []
@@ -122,12 +122,12 @@ for t in TIME_POINT:
 
 all_ATAC = torch.from_numpy(np.stack(all_ATAC, axis=2))
 
-with open('../results/target_active_enhancer.pkl', 'wb') as file:
-    pickle.dump(all_ATAC, file) """
+with open('../results/target_rep_enhancer.pkl', 'wb') as file:
+    pickle.dump(all_ATAC, file)
 
 #Predict for variant the ref and alt sequence
 #---------------------------------
-#Define sequences
+""" #Define sequences
 ref_seq = active_enhancer.sequence
 alt_seq = active_enhancer.sequence_alt
 
@@ -224,4 +224,4 @@ seq_alt, shap_scores_alt, proj_scores_alt = compute_importance_score_bias(model,
 with open('../results/rep_e_proj_scores.pkl', 'wb') as file:
     pickle.dump(proj_scores, file)
 with open('../results/rep_e_proj_scores_alt.pkl', 'wb') as file:
-    pickle.dump(proj_scores_alt, file)
+    pickle.dump(proj_scores_alt, file) """
