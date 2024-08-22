@@ -98,6 +98,7 @@ active_enhancer['sequence_alt'] = [x[math.floor((len(x)-4096)/2):-math.ceil((len
 #---------------------------------
 #Create bed of regions 
 reg_regions = active_enhancer[["chr_peak",'start_peak','end_peak']]
+reg_regions.chr_peak = ["chr" + x for x in reg_regions.chr_peak]
 reg_regions.to_csv('../results/reg_regions.bed', header=False, index=False, sep='\t')
 
 cmd = "motifscan scan -i ../results/reg_regions.bed -g hg38 -m motifs_JASPAR -o ../results/active_enhancer/"
