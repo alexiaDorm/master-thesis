@@ -101,13 +101,13 @@ reg_regions = active_enhancer[["chr_peak",'start_peak','end_peak']]
 reg_regions.chr_peak = ["chr" + str(x) for x in reg_regions.chr_peak]
 reg_regions.to_csv('../results/reg_regions.bed', header=False, index=False, sep='\t')
 
-cmd = "motifscan scan -i ../results/reg_regions.bed -g hg38 -m motifs_JASPAR -o ../results/rep_enhancer/"
-subprocess.run(cmd, shell=True)
+""" cmd = "motifscan scan -i ../results/reg_regions.bed -g hg38 -m motifs_JASPAR -o ../results/rep_enhancer/"
+subprocess.run(cmd, shell=True) """
 
-cmd = "../../jaspar_TBS/bin/extract_TFBSs_JASPAR.sh \
-  -i ../results/reg_regions.bed \
-  -b ../data/JASPAR2024_hg38.bb.1 \
-  -o ../results/rep_enhancer/"
+cmd = "~/work/jaspar_TBS/bin/extract_TFBSs_JASPAR.sh \
+  -i ~/work/master-thesis/results/reg_regions.bed \
+  -b ~/work/master-thesis//data/JASPAR2024_hg38.bb.1 \
+  -o ~/work/master-thesis//results/rep_enhancer/"
 
 subprocess.run(cmd, shell=True)
 
