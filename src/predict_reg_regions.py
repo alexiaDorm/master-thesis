@@ -96,7 +96,7 @@ active_enhancer['sequence_alt'] = [x[math.floor((len(x)-4096)/2):-math.ceil((len
 
 with open('../results/active_enhancer.pkl', 'wb') as file:
     pickle.dump(active_enhancer, file)
-    
+
 #Find motifs in sequences
 #---------------------------------
 #Create bed of regions 
@@ -110,7 +110,7 @@ subprocess.run(cmd, shell=True) """
 cmd = "~/work/jaspar_TBS/bin/extract_TFBSs_JASPAR.sh \
   -i ~/work/master-thesis/results/reg_regions.bed \
   -b ~/work/master-thesis//data/JASPAR2024_hg38.bb.1 \
-  -o ~/work/master-thesis//results/rep_enhancer/"
+  -o ~/work/master-thesis//results/active_enhancer/"
 
 subprocess.run(cmd, shell=True)
 
