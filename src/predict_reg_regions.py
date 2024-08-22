@@ -112,7 +112,7 @@ for h,r in enumerate(regions_type):
     cmd = "~/work/jaspar_TBS/bin/extract_TFBSs_JASPAR.sh \
     -i ~/work/master-thesis/results/reg_regions.bed \
     -b ~/work/master-thesis/data/JASPAR2024_hg38.bb.1 \
-    -o ~/work/master-thesis/results/"
+    -o ~/work/master-thesis/results/oooo"
 
     subprocess.run(cmd, shell=True)
 
