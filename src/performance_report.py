@@ -89,6 +89,8 @@ for c in all_c_type:
     #---------------------------------
     all_ATAC = []
     for t in TIME_POINT: 
+        if t == "D8" and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
+            continue
         bw_files = '../results/bam_cell_type/' + t +'/' + c + '_unstranded.bw'
 
         bw = pyBigWig.open(bw_files)
