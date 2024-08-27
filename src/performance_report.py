@@ -108,8 +108,12 @@ for c in all_c_type:
 
     corrs=[]
     for i in range(4):
-        corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
-                                           np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]))
+        if i == 0 and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
+            corrs.append(-999)
+            
+        else:
+            corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
+                                            np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]))
     
     jsds = []
     for i in range (count.size(0)):
@@ -164,6 +168,8 @@ for c in all_c_type:
     #---------------------------------
     all_ATAC = []
     for t in TIME_POINT: 
+        if t == "D8" and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
+            continue
         bw_files = '../results/bam_cell_type/' + t +'/' + c + '_unstranded.bw'
 
         bw = pyBigWig.open(bw_files)
@@ -179,8 +185,12 @@ for c in all_c_type:
 
     corrs=[]
     for i in range(4):
-        corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
-                                           np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]))
+        if i == 0 and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
+            corrs.append(-999)
+            
+        else:
+            corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
+                                            np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]))
     
     jsds = []
     for i in range (count.size(0)):
@@ -262,6 +272,9 @@ for c in all_c_type:
     #---------------------------------
     all_ATAC = []
     for t in TIME_POINT: 
+        if t == "D8" and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
+            continue
+
         bw_files = '../results/bam_cell_type/' + t +'/' + c + '_unstranded.bw'
 
         bw = pyBigWig.open(bw_files)
@@ -277,8 +290,12 @@ for c in all_c_type:
 
     corrs=[]
     for i in range(4):
-        corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
-                                           np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]))
+        if i == 0 and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
+            corrs.append(-999)
+            
+        else:
+            corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
+                                            np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]))
     
     jsds = []
     for i in range (count.size(0)):
