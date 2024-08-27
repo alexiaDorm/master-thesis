@@ -89,13 +89,16 @@ for c in all_c_type:
     #---------------------------------
     all_ATAC = []
     for t in TIME_POINT: 
+        
         if t == "D8" and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
-            continue
-        bw_files = '../results/bam_cell_type/' + t +'/' + c + '_unstranded.bw'
+            ATAC_tracks = torch.zeros_like((profile))
+        
+        else:
+            bw_files = '../results/bam_cell_type/' + t +'/' + c + '_unstranded.bw'
 
-        bw = pyBigWig.open(bw_files)
-        ATAC_tracks = peaks.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
-        ATAC_tracks = np.stack(ATAC_tracks)
+            bw = pyBigWig.open(bw_files)
+            ATAC_tracks = peaks.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
+            ATAC_tracks = np.stack(ATAC_tracks)
             
         all_ATAC.append(ATAC_tracks)
 
@@ -108,11 +111,7 @@ for c in all_c_type:
 
     corrs=[]
     for i in range(4):
-        if i == 0 and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
-            corrs.append(-999)
-            
-        else:
-            corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
+        corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
                                             np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]))
     
     jsds = []
