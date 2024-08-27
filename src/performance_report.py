@@ -103,6 +103,8 @@ for c in all_c_type:
 
     #Compute performance metric (correlation + jsd)
     #---------------------------------
+    print(all_ATAC.shape)
+    print(all_ATAC.sum(dim=1).numpy().shape)
 
     corrs=[]
     for i in range(4):
