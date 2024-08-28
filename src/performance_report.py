@@ -53,6 +53,7 @@ model_bias = load_model(path_model_bias)
 #Predict and evaluate performance in peak test set
 
 #---------------------------------
+jsd_list, corr_list = [], []
 for c in all_c_type:
 
     #Get and encode the test sequences
@@ -62,8 +63,6 @@ for c in all_c_type:
         peaks = pickle.load(file)
 
     peaks = peaks[peaks.chr.isin(chr_test)]
-    peaks = peaks.sample(50)
-
     seq = peaks.sequence
 
     #Predict tn5 bias for each sequence
@@ -107,12 +106,12 @@ for c in all_c_type:
     #Compute performance metric (correlation + jsd)
     #---------------------------------
 
-    corrs=[]
+    corr_c_type=[]
     for i in range(4):
-        corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
+        corr_c_type.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
                                             np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]).statistic)
     
-    jsds = []
+    jsd_c_type = []
     tot_ATAC = all_ATAC.sum(dim=1)
     for i in range (count.size(0)):
         jsd_time = []
@@ -124,19 +123,25 @@ for c in all_c_type:
 
             jsd_time.append(distance.jensenshannon(prob_pred, prob_obs))
         
-        jsds.append(jsd_time)
+        jsd_c_type.append(jsd_c_type)
     
-    jsds = np.array(jsds)
-    print(jsds.shape)
-    jsds = jsds.mean(axis=0)
+    jsd_c_type = np.array(jsd_c_type).nanmean(axis=0)
 
-    print(corrs, jsds)
+    corr_list.append(corr_c_type); jsd_list.append(jsd_c_type)
 
-""" #---------------------------------
+print(corr_list, jsd_list)
+with open('../results/predictions/peak_corr.pkl', 'wb') as file:
+        pickle.dump(corr_list, file)
+
+with open('../results/predictions/peak_jsd.pkl', 'wb') as file:
+        pickle.dump(jsd_list, file)
+
+#---------------------------------
 
 #Predict and evaluate performance in background test set
 
 #---------------------------------
+jsd_list, corr_list = [], []
 for c in all_c_type:
 
     #Get and encode the test sequences
@@ -146,8 +151,6 @@ for c in all_c_type:
         peaks = pickle.load(file)
 
     peaks = peaks[peaks.chr.isin(chr_test)]
-    peaks = peaks.sample(50)
-
     seq = peaks.sequence
 
     #Predict tn5 bias for each sequence
@@ -188,22 +191,35 @@ for c in all_c_type:
     #Compute performance metric (correlation + jsd)
     #---------------------------------
 
-    corrs=[]
+    corr_c_type=[]
     for i in range(4):
-        corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
-                                            np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]))
+        corr_c_type.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
+                                            np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]).statistic)
     
-    jsds = []
+    jsd_c_type = []
+    tot_ATAC = all_ATAC.sum(dim=1)
     for i in range (count.size(0)):
         jsd_time = []
         for t in range(4):
-            jsd_time.append(distance.jensenshannon(profile[i,t,:], all_ATAC[i,t,:]))
-        
-        jsds.append(jsd_time)
-    
-    jsds = np.array(jsd_time).mean(axis=0)
+            prob_obs = all_ATAC[i,:,t]/tot_ATAC[i,t]
+            prob_obs[prob_obs != prob_obs] = 0 #set division by zero to 0 
 
-    print(corrs, jsds)
+            prob_pred = torch.nn.functional.softmax(profile[i,:,t])
+
+            jsd_time.append(distance.jensenshannon(prob_pred, prob_obs))
+        
+        jsd_c_type.append(jsd_c_type)
+    
+    jsd_c_type = np.array(jsd_c_type).nanmean(axis=0)
+
+    corr_list.append(corr_c_type); jsd_list.append(jsd_c_type)
+
+print(corr_list, jsd_list)
+with open('../results/predictions/back_corr.pkl', 'wb') as file:
+        pickle.dump(corr_list, file)
+
+with open('../results/predictions/back_jsd.pkl', 'wb') as file:
+        pickle.dump(jsd_list, file)
 
 #---------------------------------
 
@@ -239,6 +255,7 @@ reg_regions = peaks.loc[reg_regions.index]
 with open('../results/reg_regions.pkl', 'wb') as file:
     pickle.dump(reg_regions, file)
 
+jsd_list, corr_list = [], []
 for c in all_c_type:
 
     #Get and encode the test sequences
@@ -246,8 +263,6 @@ for c in all_c_type:
     #Overlap background and test chromosomes
     with open('../results/reg_regions.pkl', 'rb') as file:
         peaks = pickle.load(file)
-    peaks = peaks.sample(50)
-
     seq = peaks.sequence
 
     #Predict tn5 bias for each sequence
@@ -290,19 +305,32 @@ for c in all_c_type:
     #Compute performance metric (correlation + jsd)
     #---------------------------------
 
-    corrs=[]
+    corr_c_type=[]
     for i in range(4):
-        corrs.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
-                                            np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]))
+        corr_c_type.append(scipy.stats.spearmanr(count[:,i].detach().numpy(), 
+                                            np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]).statistic)
     
-    jsds = []
+    jsd_c_type = []
+    tot_ATAC = all_ATAC.sum(dim=1)
     for i in range (count.size(0)):
         jsd_time = []
         for t in range(4):
-            jsd_time.append(distance.jensenshannon(profile[i,t,:], all_ATAC[i,t,:]))
-        
-        jsds.append(jsd_time)
-    
-    jsds = np.array(jsd_time).mean(axis=0)
+            prob_obs = all_ATAC[i,:,t]/tot_ATAC[i,t]
+            prob_obs[prob_obs != prob_obs] = 0 #set division by zero to 0 
 
-    print(corrs, jsds) """
+            prob_pred = torch.nn.functional.softmax(profile[i,:,t])
+
+            jsd_time.append(distance.jensenshannon(prob_pred, prob_obs))
+        
+        jsd_c_type.append(jsd_c_type)
+    
+    jsd_c_type = np.array(jsd_c_type).nanmean(axis=0)
+
+    corr_list.append(corr_c_type); jsd_list.append(jsd_c_type)
+
+print(corr_list, jsd_list)
+with open('../results/predictions/reg_corr.pkl', 'wb') as file:
+        pickle.dump(corr_list, file)
+
+with open('../results/predictions/reg_jsd.pkl', 'wb') as file:
+        pickle.dump(jsd_list, file)
