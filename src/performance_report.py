@@ -106,8 +106,6 @@ for c in all_c_type:
 
     #Compute performance metric (correlation + jsd)
     #---------------------------------
-    print(all_ATAC.shape)
-    print(all_ATAC.sum(dim=1).numpy().shape)
 
     corrs=[]
     for i in range(4):
@@ -123,13 +121,14 @@ for c in all_c_type:
             prob_obs[prob_obs != prob_obs] = 0 #set division by zero to 0 
 
             prob_pred = torch.nn.functional.softmax(profile[i,:,t])
-            print(prob_pred.shape)
 
             jsd_time.append(distance.jensenshannon(prob_pred, prob_obs))
         
         jsds.append(jsd_time)
     
-    jsds = np.array(jsd_time)
+    jsds = np.array(jsds)
+    print(jsds.shape)
+    jsds = jsds.mean(axis=0)
 
     print(corrs, jsds)
 
