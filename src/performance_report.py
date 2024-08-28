@@ -136,7 +136,7 @@ with open('../results/predictions/peak_corr.pkl', 'wb') as file:
 with open('../results/predictions/peak_jsd.pkl', 'wb') as file:
         pickle.dump(jsd_list, file)
 
-#---------------------------------
+""" #---------------------------------
 
 #Predict and evaluate performance in background test set
 
@@ -333,4 +333,4 @@ with open('../results/predictions/reg_corr.pkl', 'wb') as file:
         pickle.dump(corr_list, file)
 
 with open('../results/predictions/reg_jsd.pkl', 'wb') as file:
-        pickle.dump(jsd_list, file)
+        pickle.dump(jsd_list, file) """
