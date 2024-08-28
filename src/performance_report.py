@@ -115,10 +115,17 @@ for c in all_c_type:
                                             np.log(all_ATAC.sum(dim=1).numpy() +1)[:,i]).statistic)
     
     jsds = []
+    tot_ATAC = all_ATAC.sum(dim=1)
     for i in range (count.size(0)):
         jsd_time = []
         for t in range(4):
-            jsd_time.append(distance.jensenshannon(profile[i,t,:], all_ATAC[i,t,:]))
+            prob_obs = all_ATAC[i,:,t]/tot_ATAC[i,t]
+            prob_obs[prob_obs != prob_obs] = 0 #set division by zero to 0 
+
+            prob_pred = torch.nn.functional.softmax(profile[i,:,t])
+            print(prob_pred.shape)
+
+            jsd_time.append(distance.jensenshannon(prob_pred, prob_obs))
         
         jsds.append(jsd_time)
     
