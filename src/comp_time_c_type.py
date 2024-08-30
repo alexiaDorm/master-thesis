@@ -59,9 +59,9 @@ peaks = peaks[peaks.chr.isin(chr_test)]
 peaks.to_csv('../results/peaks_set.bed', header=False, index=False, sep='\t')
 
 #Merge regulatory regions bed files
-active_enhancer = pd.read_csv("../data/active_enhancers_all_days.bed", header=None, index=None, sep='\t')
-rep_enhancer = pd.read_csv("../data/repressed_enhancers_all_days.bed", header=None, index=None, sep='\t')
-promoter = pd.read_csv("../data/active_promoters_all_days.bed", header=None, index=None, sep='\t')
+active_enhancer = pd.read_csv("../data/active_enhancers_all_days.bed", header=None, sep='\t')
+rep_enhancer = pd.read_csv("../data/repressed_enhancers_all_days.bed", header=None,  sep='\t')
+promoter = pd.read_csv("../data/active_promoters_all_days.bed", header=None, sep='\t')
 
 reg_regions = pd.concat([active_enhancer, rep_enhancer, promoter])
 reg_regions.to_csv('../results/reg_regions.bed', header=False, index=False, sep='\t')
@@ -81,4 +81,6 @@ print(reg_regions.shape)
 
 with open('../results/reg_regions.pkl', 'rb') as file:
     reg_regions = pickle.load(file)
+
+reg_regions = reg_regions.sample(10000)
     
