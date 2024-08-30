@@ -72,6 +72,7 @@ subprocess.run(cmd_bed, shell=True)
 reg_regions = pd.read_csv("../results/accessible_reg_regions.bed", header=None, sep='\t', 
                           names=['chr','start','end'])
 reg_regions.index = reg_regions.chr.astype(str) + ":" + reg_regions.start.astype(str) + '-' + reg_regions.end.astype(str)
+print(reg_regions.head())
 
 reg_regions = peaks.loc[reg_regions.index]
 with open('../results/reg_regions.pkl', 'wb') as file:
