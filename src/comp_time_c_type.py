@@ -70,7 +70,7 @@ cmd_bed = "bedtools intersect -a ../results/peaks_set.bed -b ../results/reg_regi
 subprocess.run(cmd_bed, shell=True)
 
 reg_regions = pd.read_csv("../results/accessible_reg_regions.bed", header=None, sep='\t', 
-                          names=['chr','start','end'])
+                          names=['chr_reg','start_reg','end_reg', 'chr_peak', 'start_peak', 'end_peak', 'middle', 'sequence', 'GC_cont'])
 #reg_regions.index = reg_regions.chr.astype(str) + ":" + reg_regions.start.astype(str) + '-' + reg_regions.end.astype(str)
 print(reg_regions.head())
 
