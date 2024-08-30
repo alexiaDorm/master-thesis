@@ -76,9 +76,7 @@ reg_regions = reg_regions.iloc[:,:-4]
 with open('../results/reg_regions.pkl', 'wb') as file:
     pickle.dump(reg_regions, file)
 
-print(reg_regions.head())
-
-""" profile_pred, count_pred = [], []
+profile_pred, count_pred = [], []
 for c in all_c_type:
 
     #Get and encode the test sequences
@@ -86,8 +84,6 @@ for c in all_c_type:
     #Overlap peak and test set
     with open('../results/reg_regions.pkl', 'rb') as file:
         peaks = pickle.load(file)
-
-    peaks = peaks[peaks.chr.isin(chr_test)]
     seq = peaks.sequence
 
     #Predict tn5 bias for each sequence
@@ -109,6 +105,9 @@ for c in all_c_type:
     with torch.no_grad():
         x, profile, count = model(seq_enc, torch.tensor(np.vstack(tn5_bias)))
 
-    profile_pred.append(profile)
+    profile_pred.append(profile); count_pred.append(count)
 
- """
+with open('../results/predictions/profile_pred.pkl', 'wb') as file:
+        pickle.dump(profile_pred, file)
+with open('../results/predictions/count_pred.pkl', 'wb') as file:
+        pickle.dump(count_pred, file)
