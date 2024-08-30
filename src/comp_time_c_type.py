@@ -1,0 +1,84 @@
+import numpy as np
+import random
+import pandas as pd
+import torch
+import scipy
+import math
+import pickle
+import matplotlib.pyplot as plt
+from keras.models import load_model
+from interpretation.interpret import compute_tn5_bias
+import subprocess
+import pyBigWig
+import matplotlib.pyplot as plt
+from scipy.spatial import distance
+
+from models.models import CATAC_wo_bias, CATAC_w_bias, CATAC_w_bias_increase_filter
+from data_processing.utils_data_preprocessing import one_hot_encode, get_continuous_wh_window
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+seed = 42
+torch.manual_seed(seed)
+random.seed(seed)
+np.random.seed(seed)
+
+chr_test = ['6','13','22']  
+
+#Load model
+#---------------------------------
+path_model = '../results/train_res/128_10_model.pkl'
+all_c_type = ['Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast',
+       'Neuronal', 'Somite']
+TIME_POINT = ["D8", "D12", "D20", "D22-15"]
+
+first_kernel = 21
+nb_conv = 10
+size_final_conv = 4096 - (first_kernel - 1)
+cropped = [2**l for l in range(0,nb_conv-1)] * (2*(3-1))
+
+for c in cropped:
+       size_final_conv -= c
+
+model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=128, first_kernel=first_kernel, 
+                      rest_kernel=3, out_pred_len=1024, 
+                      nb_pred=4, size_final_conv = size_final_conv)
+model.load_state_dict(torch.load(path_model, map_location=torch.device(device)))
+
+path_model_bias = "../data/Tn5_NN_model.h5"
+model_bias = load_model(path_model_bias)
+
+
+#Create dataframe of regulatory regions
+#---------------------------------
+#Overlap between peak (accessible regions) and regulatory regions
+with open('../results/peaks_seq.pkl', 'rb') as file:
+        peaks = pickle.load(file)
+
+peaks = peaks[peaks.chr.isin(chr_test)]
+peaks.to_csv('../results/peaks_set.bed', header=False, index=False, sep='\t')
+
+#Merge regulatory regions bed files
+active_enhancer = pd.read_csv("../data/active_enhancers_all_days.bed", header=None, index=None, sep='\t')
+rep_enhancer = pd.read_csv("../data/repressed_enhancers_all_days.bed", header=None, index=None, sep='\t')
+promoter = pd.read_csv("../data/active_promoters_all_days.bed", header=None, index=None, sep='\t')
+
+reg_regions = pd.concat([active_enhancer, rep_enhancer, promoter])
+reg_regions.to_csv('../results/reg_regions.bed', header=False, index=False, sep='\t')
+
+cmd_bed = "bedtools intersect -a ../results/peaks_set.bed -b ../results/reg_regions.bed -wa -wb > ../results/accessible_reg_regions.bed"
+subprocess.run(cmd_bed, shell=True)
+
+reg_regions = pd.read_csv("../results/accessible_reg_regions.bed", header=None, index=None, sep='\t', 
+                          columns=['chr','start','end'])
+reg_regions.index = reg_regions.chr.astype(str) + ":" + reg_regions.start.astype(str) + '-' + reg_regions.end.astype(str)
+
+reg_regions = peaks.loc[reg_regions.index]
+with open('../results/reg_regions.pkl', 'wb') as file:
+    pickle.dump(reg_regions, file)
+
+print(reg_regions.shape)
+
+with open('../results/reg_regions.pkl', 'rb') as file:
+    reg_regions = pickle.load(file)
+    
