@@ -13,3 +13,6 @@ src/exploration/gene2go
 src/exploration/gene_result.txt
 src/exploration/genes_ncbi_proteincoding.py
 src/exploration/go-basic.obo
+src/genes_ncbi_proteincoding.py
+src/gene2go
+src/go-basic.obo
