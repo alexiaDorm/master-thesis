@@ -69,7 +69,7 @@ reg_regions.to_csv('../results/reg_regions.bed', header=False, index=False, sep=
 cmd_bed = "bedtools intersect -a ../results/peaks_set.bed -b ../results/reg_regions.bed -wa -wb > ../results/accessible_reg_regions.bed"
 subprocess.run(cmd_bed, shell=True)
 
-reg_regions = pd.read_csv("../results/accessible_reg_regions.bed", header=None, index=None, sep='\t', 
+reg_regions = pd.read_csv("../results/accessible_reg_regions.bed", header=None, sep='\t', 
                           columns=['chr','start','end'])
 reg_regions.index = reg_regions.chr.astype(str) + ":" + reg_regions.start.astype(str) + '-' + reg_regions.end.astype(str)
 
@@ -83,4 +83,37 @@ with open('../results/reg_regions.pkl', 'rb') as file:
     reg_regions = pickle.load(file)
 
 reg_regions = reg_regions.sample(10000)
-    
+
+profile_pred, count_pred = [], []
+for c in all_c_type:
+
+    #Get and encode the test sequences
+    #---------------------------------
+    #Overlap peak and test set
+    with open('../results/peaks_seq.pkl', 'rb') as file:
+        peaks = pickle.load(file)
+
+    peaks = peaks[peaks.chr.isin(chr_test)]
+    seq = peaks.sequence
+
+    #Predict tn5 bias for each sequence
+    tn5_bias = seq.apply(lambda x: compute_tn5_bias(model_bias, x))
+
+    #On-hot encode the sequences
+    seq_enc = seq.apply(lambda x: one_hot_encode(x))
+
+    #Add cell type encoding
+    c_type = c; mapping = dict(zip(all_c_type, range(len(all_c_type)))); c_type = mapping[c_type]
+    c_type = torch.from_numpy(np.eye(len(all_c_type), dtype=np.float32)[c_type])
+    c_type = c_type.tile((seq_enc[0].shape[0],1))
+
+    seq_enc = [np.concatenate((s,c_type), axis=1) for s in seq_enc]
+    seq_enc = torch.tensor(seq_enc).permute(0,2,1)
+
+    #Predict
+    #---------------------------------
+    with torch.no_grad():
+        x, profile, count = model(seq_enc, torch.tensor(np.vstack(tn5_bias)))
+
+    profile_pred.append(profile)
+

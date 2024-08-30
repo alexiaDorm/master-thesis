@@ -48,7 +48,7 @@ model.load_state_dict(torch.load(path_model, map_location=torch.device(device)))
 path_model_bias = "../data/Tn5_NN_model.h5"
 model_bias = load_model(path_model_bias)
 
-#---------------------------------
+""" #---------------------------------
 
 #Predict and evaluate performance in peak test set
 
@@ -136,7 +136,7 @@ with open('../results/predictions/peak_corr.pkl', 'wb') as file:
 with open('../results/predictions/peak_jsd.pkl', 'wb') as file:
         pickle.dump(jsd_list, file)
 
-""" #---------------------------------
+#---------------------------------
 
 #Predict and evaluate performance in background test set
 
@@ -219,7 +219,7 @@ with open('../results/predictions/back_corr.pkl', 'wb') as file:
         pickle.dump(corr_list, file)
 
 with open('../results/predictions/back_jsd.pkl', 'wb') as file:
-        pickle.dump(jsd_list, file)
+        pickle.dump(jsd_list, file) """
 
 #---------------------------------
 
@@ -262,7 +262,7 @@ for c in all_c_type:
     #---------------------------------
     #Overlap background and test chromosomes
     with open('../results/reg_regions.pkl', 'rb') as file:
-        peaks = pickle.load(file)
+        peaks = pickle.load(file).sample(10000)
     seq = peaks.sequence
 
     #Predict tn5 bias for each sequence
@@ -333,4 +333,4 @@ with open('../results/predictions/reg_corr.pkl', 'wb') as file:
         pickle.dump(corr_list, file)
 
 with open('../results/predictions/reg_jsd.pkl', 'wb') as file:
-        pickle.dump(jsd_list, file) """
+        pickle.dump(jsd_list, file)
