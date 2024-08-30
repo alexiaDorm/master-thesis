@@ -262,7 +262,7 @@ for c in all_c_type:
     #---------------------------------
     #Overlap background and test chromosomes
     with open('../results/reg_regions.pkl', 'rb') as file:
-        peaks = pickle.load(file).sample(10000)
+        peaks = pickle.load(file).sample(5000)
     seq = peaks.sequence
 
     #Predict tn5 bias for each sequence
