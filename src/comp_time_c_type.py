@@ -70,20 +70,15 @@ cmd_bed = "bedtools intersect -a ../results/peaks_set.bed -b ../results/reg_regi
 subprocess.run(cmd_bed, shell=True)
 
 reg_regions = pd.read_csv("../results/accessible_reg_regions.bed", header=None, sep='\t', 
-                          names=['chr_peak','start_peak','end_peak', 'middle', 'sequence', 'GC_cont', 'chr_reg', 'start_reg', 'end_reg'])
-#reg_regions.index = reg_regions.chr.astype(str) + ":" + reg_regions.start.astype(str) + '-' + reg_regions.end.astype(str)
-print(reg_regions.head())
+                          names=['chr','start','end', 'middle', 'sequence', 'GC_cont', 'chr_reg', 'start_reg', 'end_reg'])
+reg_regions = reg_regions.iloc[:,:-4]
 
-reg_regions = peaks.loc[reg_regions.index]
 with open('../results/reg_regions.pkl', 'wb') as file:
     pickle.dump(reg_regions, file)
 
 print(reg_regions.shape)
 
-with open('../results/reg_regions.pkl', 'rb') as file:
-    reg_regions = pickle.load(file)
-
-reg_regions = reg_regions.sample(10000)
+""" reg_regions = reg_regions.sample(10000)
 
 profile_pred, count_pred = [], []
 for c in all_c_type:
@@ -91,7 +86,7 @@ for c in all_c_type:
     #Get and encode the test sequences
     #---------------------------------
     #Overlap peak and test set
-    with open('../results/peaks_seq.pkl', 'rb') as file:
+    with open('../results/reg_regions.pkl', 'rb') as file:
         peaks = pickle.load(file)
 
     peaks = peaks[peaks.chr.isin(chr_test)]
@@ -118,3 +113,4 @@ for c in all_c_type:
 
     profile_pred.append(profile)
 
+ """
