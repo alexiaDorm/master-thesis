@@ -76,11 +76,9 @@ reg_regions = reg_regions.iloc[:,:-4]
 with open('../results/reg_regions.pkl', 'wb') as file:
     pickle.dump(reg_regions, file)
 
-print(reg_regions.shape)
+print(reg_regions.head())
 
-""" reg_regions = reg_regions.sample(10000)
-
-profile_pred, count_pred = [], []
+""" profile_pred, count_pred = [], []
 for c in all_c_type:
 
     #Get and encode the test sequences
