@@ -32,7 +32,7 @@ all_c_type = ['Immature', 'Mesenchymal', 'Myoblast', 'Myogenic', 'Neuroblast',
        'Neuronal', 'Somite']
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
 
-first_kernel = 21
+""" first_kernel = 21
 nb_conv = 10
 size_final_conv = 4096 - (first_kernel - 1)
 cropped = [2**l for l in range(0,nb_conv-1)] * (2*(3-1))
@@ -46,10 +46,10 @@ model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=128, first_kernel=first_kernel,
 model.load_state_dict(torch.load(path_model, map_location=torch.device(device)))
 
 path_model_bias = "../data/Tn5_NN_model.h5"
-model_bias = load_model(path_model_bias)
+model_bias = load_model(path_model_bias) """
 
 
-#Create dataframe of regulatory regions
+""" #Create dataframe of regulatory regions
 #---------------------------------
 #Overlap between peak (accessible regions) and regulatory regions
 with open('../results/peaks_seq.pkl', 'rb') as file:
@@ -111,3 +111,31 @@ with open('../results/predictions/profile_pred.pkl', 'wb') as file:
         pickle.dump(profile_pred, file)
 with open('../results/predictions/count_pred.pkl', 'wb') as file:
         pickle.dump(count_pred, file)
+ """
+
+#Get actual ATAC signal
+#---------------------------------
+with open('../results/reg_regions.pkl', 'rb') as file:
+        peaks = pickle.load(file)
+
+ATAC_signal = []
+for c in all_c_type:
+    for t in TIME_POINT: 
+        
+        if t == "D8" and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
+            ATAC_tracks = torch.zeros_like((profile[:,:,0]))
+        
+        else:
+            bw_files = '../results/bam_cell_type/' + t +'/' + c + '_unstranded.bw'
+
+            bw = pyBigWig.open(bw_files)
+            ATAC_tracks = peaks.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
+            ATAC_tracks = np.stack(ATAC_tracks)
+            
+        all_ATAC.append(ATAC_tracks)
+
+    all_ATAC = torch.from_numpy(np.stack(all_ATAC, axis=2))
+    ATAC_signal.append(all_ATAC)
+
+with open('../results/predictions/ATAC_signal.pkl', 'wb') as file:
+    pickle.dump(ATAC_signal, file)
