@@ -124,7 +124,7 @@ for c in all_c_type:
     for t in TIME_POINT: 
         
         if t == "D8" and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
-            ATAC_tracks = torch.zeros((peaks.size(0), 1024))
+            ATAC_tracks = torch.zeros(peaks.shape[0], 1024)
         
         else:
             bw_files = '../results/bam_cell_type/' + t +'/' + c + '_unstranded.bw'
