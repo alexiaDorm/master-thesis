@@ -120,6 +120,7 @@ with open('../results/reg_regions.pkl', 'rb') as file:
 
 ATAC_signal = []
 for c in all_c_type:
+    all_ATAC = []
     for t in TIME_POINT: 
         
         if t == "D8" and (c == "Immature" or c == "Myoblast" or c == "Neuroblast"):
