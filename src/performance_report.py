@@ -48,7 +48,7 @@ model.load_state_dict(torch.load(path_model, map_location=torch.device(device)))
 path_model_bias = "../data/Tn5_NN_model.h5"
 model_bias = load_model(path_model_bias)
 
-""" #---------------------------------
+#---------------------------------
 
 #Predict and evaluate performance in peak test set
 
