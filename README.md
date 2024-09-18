@@ -6,6 +6,7 @@ Repository for data preprocessing and training of the cell type-aware chromatin 
 
 Python (v3.10.14), a programming language, some Bash scripting (v4.4.20), and awk (v4.2.1) were used throughout this work. Conda (v24.5.0) was used to manage all software packages. All computations were done on the HPC for Research cluster of the Berlin Institute of Health.
 
+Python packages
 
 |                 |           |                                        |
 |-----------------|-----------|----------------------------------------|
@@ -28,7 +29,8 @@ Python (v3.10.14), a programming language, some Bash scripting (v4.4.20), and aw
 | modisco-lite    | v2.2.1    | Identify TF motifs in deep learning    |
 
  
- 
+Software for high throughput sequencing data analysis
+
 |                        |         |                                   |
 |------------------------|---------|-----------------------------------|
 | samtools               | v1.18   | BAM files manipulations           |
