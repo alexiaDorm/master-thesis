@@ -2,7 +2,42 @@
 
 Repository for data preprocessing and training and interpretation of a cell type-aware chromatin accessibility model.
 
-## General organization of repository
+## General organization of src folder
+- archive: Old scripts
+- exploration: Initial exploration of Multiome data + Integration and cell type annotation
+- data_processing: all scripts used to generate the sequences/accessibility pairs
+- models: Files defining pytorch classes (dataset, models), losses, evaluation metrics, and training loop compatible with optuna hyperparameters tuning
+- interpretation: Definition of functions to compute attribution maps and generate synthetic sequences
+- .: Various scripts and notebooks for training model and interpretation
+
+For more details on the scripts/notebook refered to the README.md in each folder
+  
+## Step by step
+Describe all nessesary scripts and notebooks to run to train and use the model
+
+### Generation of accessibility training dataset
+1. Generate pseudobulk BigWig files per pseudo-bulk
+   - data_processing/create_bw_cell_type.py
+      Note that the cell type annotation needs to be a specific csv format and the paths to the data and cell type annotation may need to be changed. See file for more details.
+     
+2. Generate set of accessible regions and fetch accessibility for each pseudobulk
+   - data_processing/create_peak_set.py: Create the accessible regions set used for training.
+      Note that if another peak set is used, you can simply run the following two scripts if you save the genomic regions used for training in a bed file (chr, start, end) at ../results/common_peaks.bed
+   - data_processing/get_sequence_peaks.py: Fetch sequence in each peak region
+   - data_processing/ATAC_track_peaks.py: Get accessibility signal for each pseudo-bulk and peak regions
+     Note that all cell types need to be specified in the all_cell_types list. Important point is that all pseudobulk bigwig composed of an insufficient number of cells should be deleted from results/bam_cell_type or the pseudobulk signal with be added to training dataset.
+
+3. Add background regions to the dataset
+   - data_processing/GC_bins_genome.py: Create potential negative regions by binning genome of equal length
+   - data_processing/GC_match_background.py: GC match the genomic regions to peak regions
+   - data_processing/ATAC_track_background.py: Get accessibility signal for each pseudo-bulk and background regions (sample 10% to add to training example)
+
+ ### Training model using pytorch framework
+ 1.  Load the pytorch dataset with all the training examples
+    - load_pytorch_dataset.py
+      Note that if you are not interested in training a model without bias correction you could comment out the second part of the script
+ 2. 
+ 
 
 ## Programming language and software package
 
