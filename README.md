@@ -1,8 +1,10 @@
-Leveraging Deep Learning and Single-Cell Multiome Data to Identify Key Gene Regulatory Elements in Skeletal Muscle Differentiation
+# Leveraging Deep Learning and Single-Cell Multiome Data to Identify Key Gene Regulatory Elements in Skeletal Muscle Differentiation
 
-Repository for data preprocessing and training of the cell type-aware chromatin accessibility model.
+Repository for data preprocessing and training and interpretation of a cell type-aware chromatin accessibility model.
 
-# Programming language and software package
+## General organization of repository
+
+## Programming language and software package
 
 Python (v3.10.14), a programming language, some Bash scripting (v4.4.20), and awk (v4.2.1) were used throughout this work. Conda (v24.5.0) was used to manage all software packages. All computations were done on the HPC for Research cluster of the Berlin Institute of Health.
 
