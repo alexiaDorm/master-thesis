@@ -1,3 +1,5 @@
+#Paths assume run from src folder
+
 #Fetch the sequence for the derived peak set and compute their GC content
 #--------------------------------------------
 

@@ -1,3 +1,5 @@
+#Paths assume run from src folder
+
 #Create potential background regions by binning genome and computing the GC content of each sequence
 #--------------------------------------------
 
@@ -14,7 +16,7 @@ len_seq = 4096
 stride = 2000
 path_genome = '../data/hg38.fa' 
 
-chrom = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y']
+chrom = list(range(1, 23)) + ['X','Y']
 chrom = ['chr' + x for x in chrom]
 
 #Bin genome and compute GC content

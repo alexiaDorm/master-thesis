@@ -5,7 +5,6 @@ Description of notebooks
 
     - initial-exploration_ATAC.ipynb
     - initial-exploration_RNA.ipynb
-    - initial-clustering.ipynb:  Exploration of clustering in each dataset independently and gene markers
 
-2. Integration and clustering of the data:
-    - initial-exploration_scvi.ipynb: Integration using scvi of all datasets, cell types definition using scvi latent space 
+2. Integration and annotation of the data:
+    - initial-exploration_scvi.ipynb: Integration using scVI of all batches, cell types annotation using scVI latent space 

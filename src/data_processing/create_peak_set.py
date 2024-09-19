@@ -2,7 +2,10 @@
 
 #Create common peak set across time point and replicates:
 #    -  Only the peaks that are present in both replicates are kept
-#    - The intersection of peaks of each time point is taken as the final peak set
+#    - The union of peaks of each time point is taken as the final peak set
+
+#Note:
+#A bed file with genomic regions of the blacklisted regions of the genome should be present at the following path: ../data/hg38_blacklist.bed
 #--------------------------------------------
 import os
 import subprocess
@@ -10,13 +13,15 @@ import numpy as np
 import pandas as pd
 
 TIME_POINT = ["D8", "D12", "D20", "D22-15"]
-data_path = '../../../../../projects/schuelke-cubi-muscle-dev/work/BtE_P07_P08_analyses/MULTIOME/outputs/'
+
+#Change here the paths to MULTIOME data if needed
+data_path = '/data/cephfs-1/work/projects/schuelke-cubi-muscle-dev/BtE_P07_P08_analyses/MULTIOME/outputs/'
 
 #Load peaks per time point, only keep the one that were in both replicates
 peaks_per_rep = []
 for t in TIME_POINT:
     peaks_rep1, peaks_rep2 = data_path + t + "_REP1_run1/outs/atac_peaks.bed", data_path + t + "_REP2_run1/outs/atac_peaks.bed"
-    peaks_rep1, peaks_rep2 =  pd.read_csv(peaks_rep1 ,header=None, sep='\t', skiprows=range(0, 50)), pd.read_csv(peaks_rep2 ,header=None, sep='\t', skiprows=range(0, 50))
+    peaks_rep1, peaks_rep2 =  pd.read_csv(peaks_rep1 , header=None, sep='\t', skiprows=range(0, 50)), pd.read_csv(peaks_rep2 , header=None, sep='\t', skiprows=range(0, 50))
     
     #Remove scaffold chromosomes
     peaks_rep1 = peaks_rep1[np.logical_or(np.logical_or(peaks_rep1[0].str.isnumeric(), peaks_rep1[0] == 'X'), peaks_rep1[0] == 'Y')]

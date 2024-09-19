@@ -1,14 +1,24 @@
+#Definition of losses used for training and evaluation metric
+#----------------------------------------
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-
-
 from scipy.stats import spearmanr
 
 #Custom losses functions
 class ATACloss_MNLLL(nn.Module):
-    def __init__(self, weight_MSE=1, weight_NLL=1):
+    def __init__(self, weight_MSE=1, weight_NLL=10):
+        """ Total loss of the model using MNLLL for the profile task 
+        
+        Parameters
+        -----------
+        weight_MSE: float (default 1)
+            weight given to total count loss(MSE)
+
+        weight_NLL: float (default 10)
+            weight given to profile loss (MNLL)
+        """
         super().__init__()
         self.weight_NLL = weight_NLL
         self.weight_MSE = weight_MSE
@@ -22,11 +32,10 @@ class ATACloss_MNLLL(nn.Module):
         true_counts_prob = true_counts/ counts_per_example.unsqueeze(1)
         true_counts_prob[true_counts_prob != true_counts_prob] = 0 #set division by zero to 0 
 
-        MNLLL = self.NLL(logits, true_counts_prob) * 10
+        MNLLL = self.NLL(logits, true_counts_prob) * self.weight_NLL
         MSE = self.MSE(torch.log(counts_per_example + 1), tot_pred.squeeze())
 
         #Skip idx where track was not defined for loss computation
-
         MNLLL = (MNLLL* idx_skip).sum(dim=0)
         MSE = (MSE*idx_skip).sum(dim=0)
 
@@ -36,6 +45,16 @@ class ATACloss_MNLLL(nn.Module):
 
 class ATACloss_KLD(nn.Module):
     def __init__(self, weight_MSE=1, weight_KLD=1):
+        """ Total loss of the model using KLD loss for the profile task 
+        
+        Parameters
+        -----------
+        weight_MSE: float (default 1)
+            weight given to total count loss(MSE)
+
+        weight_KLD: float (default 1)
+            weight given to profile loss (KLD)
+        """
         super().__init__()
         self.weight_KLD = weight_KLD
         self.weight_MSE = weight_MSE
@@ -62,6 +81,18 @@ class ATACloss_KLD(nn.Module):
 
 #Compute spearmann correlations between observed total counts and predictions
 def counts_metrics(tracks, counts_pred, idx_skip):
+    """
+    Compute spearman correlation between observed and predicted total counts
+
+    tracks: 
+        Observed accessibility 
+    counts_pred:
+        total Tn5 insertion prediction
+    idx_skip:
+        idx of tracks to skip as the observed accessibility is not defined
+    
+    return:  spearman correlation
+    """ 
     
     counts_per_seq = torch.sum(tracks, dim=1)[idx_skip].cpu()
     counts_pred = counts_pred[idx_skip].cpu()
@@ -73,6 +104,18 @@ def counts_metrics(tracks, counts_pred, idx_skip):
 
 #Compute the Jensen-Shannon divergence between observed and predicted profiles
 def profile_metrics(tracks, profile_pred, idx_skip):
+    """
+    Compute JSD between observed and predicted profiles
+
+    tracks: 
+        Observed accessibility 
+    counts_pred:
+        total Tn5 insertion prediction
+    idx_skip:
+        idx of tracks to skip as the observed accessibility is not defined
+    
+    return:  jsd
+    """ 
 
     counts_per_example = torch.sum(tracks[idx_skip,:], dim=1)
     true_counts_prob = tracks[idx_skip,:]/ counts_per_example.unsqueeze(-1)

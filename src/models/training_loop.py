@@ -1,3 +1,6 @@
+#Definition of training loop to interface with optuna hyperparameters optimization
+#----------------------------------------
+
 import torch
 import random
 from torch.utils.data import DataLoader
@@ -14,6 +17,18 @@ from models.eval_metrics import ATACloss_MNLLL, counts_metrics, profile_metrics
 #Train model with bias
 #-------------------------------
 def train_w_bias(trial, save_prefix, device, save=True):
+    """
+    Training loop of model with bias correction. 
+
+    trial: 
+        optuna trial, to get hyperparameters
+    save: str
+        prefix of saved model, losses, and eval metrics
+    device:
+        define device used for training (cpu or gpu)
+    
+    return:  model, losses and evaluation metrics
+    """
 
     batch_size = 2**trial.suggest_int("batch_size", 6, 7)
 

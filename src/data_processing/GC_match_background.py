@@ -1,3 +1,5 @@
+#Paths assume run from src folder
+
 #GC match genomic regions to peaks
 #--------------------------------------------
 
