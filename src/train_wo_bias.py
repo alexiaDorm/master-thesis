@@ -1,3 +1,10 @@
+#Paths assume run from src folder
+
+#Train the model without the bias correction, the model and all performance metric are saved every 5 epochs
+
+#Note you may want to change the prefix appended to the saved results and any hyperparameters. Important to note that "KLD" is still used throught the code and saved loss even if MNLL is used.
+#--------------------------------------------
+
 import torch
 import random 
 from torch.utils.data import DataLoader

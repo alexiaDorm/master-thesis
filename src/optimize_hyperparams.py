@@ -1,3 +1,10 @@
+#Paths assume run from src folder
+
+#Optimize training hyperparameters of model with the bias correction using optuna
+
+#--------------------------------------------
+
+
 from models.training_loop import train_w_bias
 import torch
 import optuna

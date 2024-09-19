@@ -1,3 +1,10 @@
+#Paths assume run from src folder
+
+#Generate predictions for all sequences in the training data
+
+#Note you need to change the name of the file where models are stored
+#--------------------------------------------
+
 import numpy as np
 import pandas as pd
 import torch

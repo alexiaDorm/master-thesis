@@ -1,3 +1,9 @@
+#Paths assume run from src folder
+
+#Make predictions for accessible regions with and without the variants found in accessible regulatory regions. 
+#Identify the variants disturbing chromatin accessibility and compute attribution maps for them.
+#--------------------------------------------
+
 import numpy as np
 import pandas as pd
 import torch

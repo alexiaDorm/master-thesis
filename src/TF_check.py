@@ -1,3 +1,11 @@
+#Paths assume run from src folder
+
+#Generate syntetic sequences with provided PWMs of TF motifs and run DeepLift/TFmodisco to matche them to know TF motifs
+# 
+# Note that the frequency matrix for each TF should be provided in a excel file as found on the JASPAR website (e.g. https://jaspar.elixir.no/matrix/MA0499.2/) and placed in the data/TF_motif/ folder
+#--------------------------------------------
+
+
 import torch
 import numpy as np
 import pandas as pd

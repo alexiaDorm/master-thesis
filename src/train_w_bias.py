@@ -1,3 +1,11 @@
+#Paths assume run from src folder
+
+#Train the model with the bias correction, the model and all performance metric are saved every 5 epochs
+
+#Note you may want to change the prefix appended to the saved results and any hyperparameters. Important to note that "KLD" is still used throught the code and saved loss even if MNLL is used.
+#--------------------------------------------
+
+
 from tqdm import tqdm
 import torch
 import random 
@@ -23,7 +31,8 @@ torch.backends.cudnn.benchmark = True
 data_dir = "../results/"
 time_order = ['D8', 'D12', 'D20', 'D22-15']
 
-save_prefix = "128_10_3"
+#Change prefix here 
+save_prefix = "128_10"
 
 def train():
 
@@ -47,20 +56,22 @@ def train():
     nb_filters = 128
     nb_pred = len(time_order)
     first_kernel = 21
+    rest_kernel = 3
 
     size_final_conv = 4096 - (first_kernel - 1)
-    cropped = [2**l for l in range(0,nb_conv-1)] * (2*(3-1))
+    cropped = [2**l for l in range(0,nb_conv-1)] * (2*(rest_kernel-1))
 
     for c in cropped:
         size_final_conv -= c
     
     #Initialize model, loss, and optimizer
     model = CATAC_w_bias(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
-                      rest_kernel=3, out_pred_len=1024, 
+                      rest_kernel=rest_kernel, out_pred_len=1024, 
                       nb_pred=nb_pred, size_final_conv=size_final_conv)
     
+    #To train model with increasing number of filters used this definition of the model instead
     """ model = CATAC_w_bias_increase_filter(nb_conv=nb_conv, nb_filters=nb_filters, first_kernel=first_kernel, 
-                      rest_kernel=3, out_pred_len=1024, 
+                      rest_kernel=rest_kernel, out_pred_len=1024, 
                       nb_pred=nb_pred, size_final_conv=size_final_conv, mult_filter=2, max_filters=128)
      """
     model = model.to(device)
@@ -106,15 +117,6 @@ def train():
             running_KLD += KLD.detach()
             running_MSE += MSE.detach()
 
-                    
-            """ #print every 2000 batch the loss
-            epoch_steps += 1
-            if i % 2000 == 1999:  # print every 2000 mini-batches
-                print(
-                    "[%d, %5d] loss: %.3f"
-                    % (epoch + 1, i + 1, running_loss / epoch_steps)
-                    ) """
-        
         scheduler.step()
 
         epoch_loss = running_loss.cpu() / len(train_dataset)
@@ -124,8 +126,6 @@ def train():
         train_loss.append(epoch_loss)
         train_KLD.append(epoch_KLD)
         train_MSE.append(epoch_MSE)
-
-        #print(f'Epoch [{epoch + 1}/{nb_epoch}], Loss: {epoch_loss:.4f}, KLD: {torch.nansum(running_KLD)/len(train_dataloader):.4f}, MSE: {torch.nansum(running_MSE)/len(train_dataloader):.4f}')
 
         #Evaluate the model on test set after each epoch, save best performing model weights
         val_loss, spear_corr, jsd = torch.zeros((1), device=device), [], []
@@ -169,8 +169,6 @@ def train():
         test_MSE.append(running_MSE.cpu()/len(test_dataset))
         corr_test.append(spear_corr/len(test_dataloader))
         jsd_test.append(jsd/len(test_dataloader))
-
-        #print(f'Epoch [{epoch + 1}/{nb_epoch}], Test loss: {val_loss /len(test_dataloader):.4f}, KLD: {running_KLD.sum()/len(test_dataloader):.4f}, MSE: {running_MSE.sum()/len(test_dataloader):.4f}, Spear corr: {spear_corr.sum()/len(test_dataloader):.4f}, JSD: {jsd.sum()/len(test_dataloader):.4f}')
 
         #Save every three epoch
         if (epoch+1)%5 == 0:

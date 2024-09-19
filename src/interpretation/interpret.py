@@ -1,3 +1,8 @@
+#Paths assume run from src folder
+
+#Functions definition for interpretation of the model (compute shap's Deeplift implementation and attribution visualization)
+#--------------------------------------------
+
 from deeplift.dinuc_shuffle import dinuc_shuffle
 from deeplift.visualization import viz_sequence
 
@@ -254,45 +259,6 @@ def compute_importance_score_wobias(model, seq, device, c_type, all_c_type, idx_
     proj_score = (shap_scores[:,:4,:].sum(axis=1)[:,np.newaxis,:] * seq)
 
     return seq, shap_scores, proj_score
-
-#Integrated gradient 
-#--------------------------------------------
-def compute_integrated_gradient_wbias(model, model_bias_path, seq, device, c_type, all_c_type):
-    
-    #Load the model to device
-    model.to(device)
-
-    #Compute tn5 bias for seq
-    model_bias = load_model(model_bias_path)    
-    tn5_bias = seq.apply(lambda x: compute_tn5_bias(model_bias, x))
-
-    #On-hot encode the sequences
-    seq = seq.apply(lambda x: one_hot_encode(x))
-    
-    #Add cell type encoding
-    mapping = dict(zip(all_c_type, range(len(all_c_type))))    
-    c_type = mapping[c_type]
-    c_type = torch.from_numpy(np.eye(len(all_c_type), dtype=np.float32)[c_type])
-    c_type = c_type.tile((seq[0].shape[0],1))
-    seq = [np.concatenate((s,c_type), axis=1) for s in seq]
-
-    #Compute integrated gradient 
-    seq = torch.tensor(seq).permute(0,2,1); tn5_bias = torch.tensor(tn5_bias).squeeze()
-    out = model(seq, tn5_bias)[2][0]
-    integrated_gradients = IntegratedGradients(model)
-    attributions = integrated_gradients.attribute(inputs=(seq, tn5_bias))[0]
-    #Reshape the sequences and scores
-    seq = torch.from_numpy(np.stack(seq)).permute(0,2,1)
-    
-    #Correct integrated gradient
-    mean_att = attributions[:,:4,:].mean(axis=1)    
-    mean_att = mean_att.tile((4,1,1)).permute(1,0,2)
-    attributions = attributions[:,:4,:] - mean_att
-
-    #Project the scores on the sequence
-    proj_att = (attributions[:,:4,:].sum(axis=1)[:,np.newaxis,:] * seq.permute(0,2,1))
-
-    return seq, attributions, proj_att
 
 #Visualization
 #--------------------------------------------

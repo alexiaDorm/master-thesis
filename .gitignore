@@ -16,3 +16,5 @@ src/exploration/go-basic.obo
 src/genes_ncbi_proteincoding.py
 src/gene2go
 src/go-basic.obo
+data/hg38.fa
+data/hg38Tn5Bias.h5

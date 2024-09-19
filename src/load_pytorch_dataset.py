@@ -1,3 +1,8 @@
+#Paths assume run from src folder
+
+#Load the data into custom pytorch dataset for fast acess they are stored in pickle files.
+#--------------------------------------------
+
 from models.pytorch_datasets import PeaksDataset_w_bias, PeaksDataset_wo_bias
 import sys
 import pickle

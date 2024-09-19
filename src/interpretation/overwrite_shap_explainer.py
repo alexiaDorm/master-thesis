@@ -1,3 +1,9 @@
+#Paths assume run from src folder
+
+#Overwrite definition of shap's class: DeepExplainer to make it compatible with model outputs format
+#--------------------------------------------
+
+
 import shap
 from shap.explainers._explainer import Explainer
 
