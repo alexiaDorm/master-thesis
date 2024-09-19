@@ -1,7 +1,7 @@
-/data
+/data_
 .DS_Store
 /models
-/results
+/results_
 /notes
 notes/~$initial_exploration-25.03.pptx
 *.pyc
