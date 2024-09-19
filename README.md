@@ -15,8 +15,7 @@ For more details on the scripts/notebook refered to the README.md in each folder
 ## Step by step
 Describe all nessesary scripts and notebooks to run to train and use the model
 
-###
-0. Download reference genome and Tn5 bias model
+### Download reference genome and Tn5 bias model
    - The reference genome should be called "hg38.fa" and placed in data/.
    - The Tn5 bias model (Tn5_NN_model.h5) can be downloaded from: https://zenodo.org/records/7121027#.ZCbw4uzMI8N It should also be placed into the data folder.
 
