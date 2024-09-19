@@ -132,7 +132,7 @@ for h,r in enumerate(regions_type):
 
         #Get insertion count
         bw = pyBigWig.open(bw_files)
-        ATAC_tracks = tmp_reg.apply(lambda x: get_continuous_wh_window(bw, x, 0, seq_len=1024), axis=1)
+        ATAC_tracks = tmp_reg.apply(lambda x: get_continuous_wh_window(bw, x, seq_len=1024), axis=1)
         ATAC_tracks = np.stack(ATAC_tracks)
         
         all_ATAC.append(ATAC_tracks)
