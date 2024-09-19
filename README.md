@@ -15,6 +15,11 @@ For more details on the scripts/notebook refered to the README.md in each folder
 ## Step by step
 Describe all nessesary scripts and notebooks to run to train and use the model
 
+###
+0. Download reference genome and Tn5 bias model
+   - The reference genome should be called "hg38.fa" and placed in data/.
+   - The Tn5 bias model (Tn5_NN_model.h5) can be downloaded from: https://zenodo.org/records/7121027#.ZCbw4uzMI8N It should also be placed into the data folder.
+
 ### Generation of accessibility training dataset
 1. Generate pseudobulk BigWig files per pseudo-bulk
    - data_processing/create_bw_cell_type.py
@@ -33,10 +38,28 @@ Describe all nessesary scripts and notebooks to run to train and use the model
    - data_processing/ATAC_track_background.py: Get accessibility signal for each pseudo-bulk and background regions (sample 10% to add to training example)
 
  ### Training model using pytorch framework
- 1.  Load the pytorch dataset with all the training examples
+ 1.  Load the pytorch dataset with all the training examples and store them for fast access.
     - load_pytorch_dataset.py
       Note that if you are not interested in training a model without bias correction you could comment out the second part of the script
- 2. 
+     
+ 3. Train model
+    - train_w_bias.py: Training of model with bias correction.
+      Note that the prefix appended to the saved results and hyperparameters can be changed in the script.
+    - train_wo_bias.py: Training of model without bias correction
+    - compare_models.py: Visualise and compare performance of different models
+      
+ 4. Validation of learnt representation
+    - tn5_bias_check.py: Check if model recognized tn5 bias and considers it important for its predictions
+    - visu_first_filter.ipynb: Determine the consensus sequence activating each filter and matched them to know TF motifs. The results can be found in results/tomtom_out/
+    - TF_check.py: Check if model can recognize the provided TF motifs in syntetic sequences
+    - motif_discovery.ipynb: Find TF motifs in attribution maps of test sequences using DeepLift/TF-MOdisco 
+   
+    - predict.py: Generate predictions for each sequences from the training data
+    - inspect_pred.ipynb: Look at first layer cell type encoding weights and compare prediction to observe accessibility.
+      
+ 5. Estimation of variants effect on chromatin accessibility
+    - predict_reg_regions.py: Make predictions for accessible regions with and without the variants found in accessible regulatory regions. Identify the variants disturbing chromatin accessibility and compute attribution maps for them.
+    - estimate_var_effect.ipynb: Inspect predictions of reference and mutated alleles and prioritised variants. Inspect prioritized attributions maps around varaints
  
 
 ## Programming language and software package
