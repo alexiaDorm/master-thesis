@@ -113,3 +113,6 @@ Software for high throughput sequencing data analysis
 | meme                   | v5.5.3  | Compare motif to known TF         |
 |                        |         | motifs                            |
 | JASPAR TFBS extraction | v10     | Annotate motifs in DNA sequences  |
+
+## Architechture note
+In the end using a fully connected layer for profile prediction resulted in very large number of parameters (18 millions!). Should probably switch this fully connected layer to a convolution instead to reduce this number.
