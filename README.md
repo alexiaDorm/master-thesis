@@ -59,8 +59,21 @@ Describe all nessesary scripts and notebooks to run to train and use the model
  5. Estimation of variants effect on chromatin accessibility
     - predict_reg_regions.py: Make predictions for accessible regions with and without the variants found in accessible regulatory regions. Identify the variants disturbing chromatin accessibility and compute attribution maps for them.
     - estimate_var_effect.ipynb: Inspect predictions of reference and mutated alleles and prioritised variants. Inspect prioritized attributions maps around varaints
- 
+   
+## Description of data format for storage 
+- The genomic regions and sequences are stored in a pandas DataFrame with columns: chr, start, end, and sequence (peaks_seq.pkl, background_GC_matched.pkl)
 
+|  chr  |   start   |    end     | sequence (4096bp) |  
+|-------|-----------|------------|-------------------|
+|  1    |   14154   |    15100   | ..CAGGTGTGTGATG.. |
+|  1    |   14154   |    15100   | ..ATTAGGTCTCAGC.. |
+                     ....
+- ATAC tracks are stored in a tensor of shape: (# peaks * # c_type) x 1024 x # time point (ATAC_peaks_new.pkl, ATAC_new_back.pkl)
+- is_defined is a tensor of the size: (# peaks * # c_type) x # time point, defining which tracks are defined. For the first time point some c_type are not present, but to make it easier to store the data and manipulate these are defined as zero vector. But this means that the loss should not be optimized or model evaluated on these data points. So is_defined is used to remove this values from loss and evaluation. (is_defined.pkl, is_defined_back.pkl)
+- The name of the genomic region is stored in idx_seq.pkl and idx_seq_back.pkl matching the first dimension of the ATAC track. ((# peaks * # c_type) x # time point)
+- The chromosome from which track is from  is stored in chr_seq.pkl and chr_seq_back.pkl matching the first dimension of the ATAC track. ((# peaks * # c_type) x # time point)
+- The cell type linked to each track is stored in c_type_track.pkl and c_type_track_back.pkl matching to first dimension of the ATAC track. ((# peaks * # c_type) x # time point)
+                     
 ## Programming language and software package
 
 Python (v3.10.14), a programming language, some Bash scripting (v4.4.20), and awk (v4.2.1) were used throughout this work. Conda (v24.5.0) was used to manage all software packages. All computations were done on the HPC for Research cluster of the Berlin Institute of Health.
@@ -100,3 +113,6 @@ Software for high throughput sequencing data analysis
 | meme                   | v5.5.3  | Compare motif to known TF         |
 |                        |         | motifs                            |
 | JASPAR TFBS extraction | v10     | Annotate motifs in DNA sequences  |
+
+## Architechture note
+In the end using a fully connected layer for profile prediction resulted in very large number of parameters (18 millions!). Should probably switch this fully connected layer to a convolution instead to reduce this number.
